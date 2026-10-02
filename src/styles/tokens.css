@@ -1,79 +1,73 @@
 /*
- * Design tokens: "pastel party" palette.
- * Pastels are for backgrounds/fills only; every text colour is an "ink" shade.
- * Contrast ratios (WCAG 2.x) are listed in docs/HANDOFFS.md (UI/UX → Security).
+ * Design tokens: "Soft Premium" (docs/design/DESIGN.md), plum accent (DECISIONS #21).
+ * Warm porcelain neutrals, one accent used with intent. Contrast ratios are listed in docs/HANDOFFS.md
+ * ("UI/UX: soft premium port"). Swap the accent block to change the accent; nothing else needs to move.
  */
 :root {
-  --font-display: 'Fredoka', ui-rounded, system-ui, sans-serif;
-  --font-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* neutrals: one warm-rose grey family */
+  --bg: #faf7f5;            /* porcelain page */
+  --surface: #ffffff;       /* cards, search panel, popups */
+  --sunken: #f3eeeb;        /* tab track, segmented control, mono tiles, notices */
+  --line: #ece5e2;          /* hairline, decorative only */
+  --line-strong: #ddd3cf;   /* step rings and connectors, decorative only */
+  --line-control: #958a8f;  /* input + checkbox edges: 3.33:1 on surface, 3.12:1 on bg (WCAG 1.4.11) */
+  --ink: #221b1f;           /* 15.8:1 on bg */
+  --ink-2: #5e5459;         /* 6.8:1 on bg */
+  --ink-3: #71666b;         /* 5.2:1 on bg, 4.8:1 on sunken, 4.6:1 on accent-tint */
 
-  /* pastels (backgrounds, fills) */
-  --cream: #fff9f2;
-  --white: #ffffff;
-  --blush: #ffd9e6;
-  --blush-soft: #fff0f5;
-  --lavender: #e9e0ff;
-  --lavender-soft: #f5f0ff;
-  --mint: #d5f5e7;
-  --mint-soft: #eefbf4;
-  --butter: #fff1bf;
-  --butter-soft: #fff8dc;
-  --peach: #ffe1cc;
+  /* accent: plum */
+  --accent: #6b2d5e;        /* white on it 9.71:1; on surface 9.71:1 */
+  --accent-hover: #5a2450;  /* white on it 11.65:1 */
+  --accent-active: #4a1d42; /* pressed; white on it 13.59:1 */
+  --accent-ink: #5a2450;    /* accent text on tint: 9.69:1 */
+  --accent-tint: #f2e7f0;   /* "You get" panel, birthday pill, claimed card wash */
+  --accent-tint-2: #e6d2e2; /* active card ring, paper strip, empty-state flame */
+  --accent-glow: 107 45 94; /* rgb triplet for tinted shadows and halos */
+  --accent-soft-on-dark: #e3bfda; /* toast flame on ink: 10.2:1 (decorative) */
+  --on-accent: #ffffff;
+  --gold-paper: #e7c9a9;    /* confetti strip only, decorative */
 
-  /* inks (text, icons, buttons) */
-  --ink: #3b2440;          /* 13.3:1 on cream */
-  --ink-muted: #6a5470;    /* 6.4:1 on cream */
-  --ink-berry: #b02a63;    /* 6.0:1 on cream; white on it 6.3:1 */
-  --ink-berry-deep: #8f1f50;
-  --ink-lavender: #5a3ea6;
-  --ink-mint: #1d6647;
-  --ink-butter: #6e4c00;
-  --ink-error: #a3213a;
+  /* semantic (muted, badges and field errors only) */
+  --ok: #2e6a4c;
+  --ok-tint: #e8f1eb;
+  --warn: #82560f;
+  --warn-tint: #fbf0da;
 
-  /* semantic */
-  --color-bg: var(--cream);
-  --color-surface: var(--white);
-  --color-text: var(--ink);
-  --color-muted: var(--ink-muted);
-  --color-primary: var(--ink-berry);
-  --color-primary-hover: var(--ink-berry-deep);
-  --color-primary-text: var(--white);
-  --color-accent: var(--blush);
-  --color-border: #ad6b8e;        /* form controls: 3.8:1 on cream (UI ≥3:1) */
-  --color-border-soft: #f1d3e0;   /* decorative card borders only */
-  --color-success-bg: var(--mint);
-  --color-success-text: var(--ink-mint);
-  --color-warning-bg: var(--butter);
-  --color-warning-text: var(--ink-butter);
-  --color-stale-bg: var(--lavender);
-  --color-stale-text: var(--ink-lavender);
-  --color-error-text: var(--ink-error);
-  --color-focus: #7b4fe0;         /* 5.0:1 on cream, 5.2:1 on white */
+  /* map */
+  --map-land: #f1ece9;
 
-  /* shape */
-  --radius-s: 8px;
-  --radius-m: 14px;
-  --radius-l: 22px;
-  --radius-xl: 28px;
-  --radius-pill: 999px;
+  /* type */
+  --font-display: 'Bricolage Grotesque Variable', 'Avenir Next', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans Variable', 'Avenir Next', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
+  /* radius rule: pills for interactive controls, 24 for cards and the map, 14 for inner blocks */
+  --r-pill: 999px;
+  --r-card: 24px;
+  --r-inner: 14px;
+  --r-sm: 10px;
 
-  --shadow-soft: 0 1px 2px rgb(91 42 80 / 6%), 0 6px 18px rgb(176 42 99 / 8%);
-  --shadow-card: 0 1px 2px rgb(91 42 80 / 6%), 0 8px 24px rgb(176 42 99 / 9%);
-  --shadow-lift: 0 2px 4px rgb(91 42 80 / 8%), 0 14px 32px rgb(176 42 99 / 14%);
-  --shadow-button: 0 3px 0 var(--ink-berry-deep);
+  /* shadows: tinted plum-brown, diffuse, one light source above */
+  --shadow-1: 0 1px 2px rgb(60 30 40 / 4%), 0 2px 8px rgb(60 30 40 / 4%);
+  --shadow-2: 0 1px 2px rgb(60 30 40 / 4%), 0 8px 24px -6px rgb(60 30 40 / 8%), 0 24px 48px -16px rgb(60 30 40 / 8%);
+  --shadow-3: 0 2px 4px rgb(60 30 40 / 5%), 0 18px 40px -10px rgb(60 30 40 / 14%);
+  --shadow-accent: 0 1px 1px rgb(var(--accent-glow) / 20%), 0 6px 16px -4px rgb(var(--accent-glow) / 35%);
+
+  /* motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --t-fast: 140ms;
+  --t-base: 240ms;
+  --t-slow: 420ms;
+  --t-enter: 640ms;
+
+  /* focus: 2px page-coloured gap + 2px accent ring (9.1:1 on bg) */
+  --focus: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
 
   --map-height: 300px;
-  --content-max: 1200px;
+  --content-max: 1360px;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 720px) {
   :root { --map-height: 380px; }
 }

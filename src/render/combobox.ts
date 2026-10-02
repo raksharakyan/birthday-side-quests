@@ -1,5 +1,6 @@
 import { createSuggester, type Suggestion } from '../autocomplete';
 import { el } from './dom';
+import { icon } from './icons';
 
 /**
  * WAI-ARIA 1.2 combobox (list autocomplete, manual selection) for the city input.
@@ -81,14 +82,21 @@ export function createCombobox(opts: ComboboxOptions): Combobox {
     opts.onSelect(s);
   }
 
+  /** Bold the part of the name the user already typed (plain text nodes only). */
+  function matchParts(name: string): Array<HTMLElement | string> {
+    const q = input.value.replace(/\s+/g, ' ').trim();
+    if (q.length === 0 || !name.toLocaleLowerCase().startsWith(q.toLocaleLowerCase())) return [name];
+    return [el('b', {}, [name.slice(0, q.length)]), name.slice(q.length)];
+  }
+
   function optionNode(s: Suggestion, i: number): HTMLLIElement {
     const comma = s.label.indexOf(', ');
     const primary = comma > 0 ? s.label.slice(0, comma) : s.label;
     const secondary = comma > 0 ? s.label.slice(comma + 2) : '';
     const li = el('li', { id: optionId(i), class: 'ac-option', role: 'option', 'aria-selected': 'false' }, [
-      el('span', { class: 'ac-option__pin', 'aria-hidden': 'true' }, ['📍']),
+      icon('pin', 'ac-option__pin'),
       el('span', { class: 'ac-option__text' }, [
-        el('span', { class: 'ac-option__name' }, [primary]),
+        el('span', { class: 'ac-option__name' }, matchParts(primary)),
         secondary ? el('span', { class: 'ac-option__detail' }, [secondary]) : null,
       ]),
     ]);

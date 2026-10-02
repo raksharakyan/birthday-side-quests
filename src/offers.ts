@@ -268,9 +268,9 @@ export function monthInfo(birthMonth: number, now: Date = new Date()): MonthInfo
   const current = now.getMonth() + 1;
   const monthsAway = (birthMonth - current + 12) % 12;
   let label: string;
-  if (monthsAway === 0) label = "It's your birthday month, and your quests are live! 🎉";
-  else if (monthsAway === 1) label = 'Your quest window opens next month 🎀';
-  else label = `Your quest window opens in ${monthsAway} months 🎀`;
+  if (monthsAway === 0) label = "It's your birthday month";
+  else if (monthsAway === 1) label = 'Your birthday month starts next month';
+  else label = `Your birthday month starts in ${monthsAway} months`;
   return { isBirthdayMonth: monthsAway === 0, monthsAway, label };
 }
 

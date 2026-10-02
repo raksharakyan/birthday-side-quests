@@ -5,127 +5,153 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
     <meta name="description" content="Birthday Side Quests: find birthday freebies near you and online. Type your city and pick your birthday month. Nothing is stored on our servers." />
-    <meta name="theme-color" content="#ffd9e6" />
+    <meta name="theme-color" content="#faf7f5" />
     <title>Birthday Side Quests</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header">
-      <div class="site-header__inner">
-        <span class="site-header__deco site-header__deco--1" aria-hidden="true">✦</span>
-        <span class="site-header__deco site-header__deco--2" aria-hidden="true">✧</span>
-        <span class="site-header__deco site-header__deco--3" aria-hidden="true">♡</span>
-        <h1 class="site-title"><span class="site-title__cake" aria-hidden="true">🎂</span> Birthday Side Quests<span class="site-title__sparkle" aria-hidden="true">✨</span></h1>
-        <p class="site-tagline">Free birthday treats near you, turned into tiny adventures.</p>
-      </div>
-    </header>
+    <div class="page">
+      <header class="topbar">
+        <div class="brand">
+          <span class="mark-tile site-mark" id="site-mark"></span>
+          <h1 class="brand__name">Birthday Side Quests</h1>
+        </div>
+        <nav class="topnav" aria-label="About">
+          <a href="#how-it-works">How it works</a>
+          <a href="#privacy">Privacy</a>
+        </nav>
+      </header>
 
-    <main id="main" class="app" tabindex="-1">
-      <section class="search-panel" aria-labelledby="search-heading">
-        <h2 id="search-heading" class="visually-hidden">Find your birthday quests</h2>
-        <form id="search-form" class="search-form" novalidate>
-          <div class="field field--city">
-            <label for="city" class="field__label">Your city</label>
-            <div class="combo" id="city-combo">
-              <input id="city" name="city" class="field__input" type="text" inputmode="search" autocomplete="off"
-                autocapitalize="words" spellcheck="false" maxlength="200" placeholder="e.g. Bengaluru" enterkeyhint="search"
-                role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="city-suggestions" />
+      <main id="main" class="app" tabindex="-1">
+        <section class="search" aria-labelledby="search-heading">
+          <h2 id="search-heading" class="visually-hidden">Find your birthday quests</h2>
+          <form id="search-form" class="search__form" novalidate>
+            <div class="field field--city">
+              <label for="city" class="field__label">Your city</label>
+              <div class="field__control combo" id="city-combo" data-icon="pin">
+                <input id="city" name="city" class="field__input" type="text" inputmode="search" autocomplete="off"
+                  autocapitalize="words" spellcheck="false" maxlength="200" placeholder="e.g. Bengaluru" enterkeyhint="search"
+                  role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="city-suggestions" />
+              </div>
             </div>
-          </div>
-          <div class="field field--month">
-            <label for="month" class="field__label">Birthday month</label>
-            <select id="month" name="month" class="field__input" required>
-              <option value="" selected disabled>Choose a month</option>
-              <option value="1">January</option>
-              <option value="2">February</option>
-              <option value="3">March</option>
-              <option value="4">April</option>
-              <option value="5">May</option>
-              <option value="6">June</option>
-              <option value="7">July</option>
-              <option value="8">August</option>
-              <option value="9">September</option>
-              <option value="10">October</option>
-              <option value="11">November</option>
-              <option value="12">December</option>
-            </select>
-          </div>
-          <div class="field field--radius">
-            <label for="radius" class="field__label">Search radius</label>
-            <select id="radius" name="radius" class="field__input">
-              <option value="2000">2 km</option>
-              <option value="5000" selected>5 km</option>
-              <option value="10000">10 km</option>
-              <option value="20000">20 km</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn--primary search-form__submit">Find my quests <span class="btn__sparkle" aria-hidden="true">✨</span></button>
-        </form>
-        <div class="session-row">
-          <p class="privacy-note"><span class="privacy-note__icon" aria-hidden="true">🔒</span><span class="privacy-note__text">We don't store anything on our servers. Your search stays in this browser tab and clears when you close it.</span></p>
-          <button type="button" id="clear-search" class="btn btn--small session-row__clear">Clear search</button>
-        </div>
-        <p id="status" class="status" role="status" aria-live="polite"></p>
-        <p id="month-info" class="month-info" hidden></p>
-      </section>
-
-      <section class="map-section" aria-label="Map">
-        <div id="map" class="map" role="region" aria-label="Map of nearby birthday quests">
-          <div class="map__placeholder">
-            <span class="map__placeholder-art" aria-hidden="true">🗺️</span>
-            <p class="map__placeholder-text">Your quest map appears here after you search.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="results" aria-labelledby="results-heading">
-        <h2 id="results-heading" class="visually-hidden">Your quests</h2>
-        <div class="tabs" role="tablist" aria-label="Quest types">
-          <button type="button" class="tab" role="tab" id="tab-nearby" aria-controls="panel-nearby" aria-selected="true" tabindex="0"><span class="tab__icon" aria-hidden="true">📍</span>Nearby</button>
-          <button type="button" class="tab" role="tab" id="tab-online" aria-controls="panel-online" aria-selected="false" tabindex="-1"><span class="tab__icon" aria-hidden="true">💻</span>Online<span id="online-count" class="tab__count" hidden></span></button>
-          <button type="button" class="tab" role="tab" id="tab-found" aria-controls="panel-found" aria-selected="false" tabindex="-1" hidden><span class="tab__icon" aria-hidden="true">🔎</span>Found online</button>
-        </div>
-
-        <div class="tab-panel" role="tabpanel" id="panel-nearby" aria-labelledby="tab-nearby" tabindex="0">
-          <div id="nearby-list" class="panel-body">
-            <div class="empty-state" data-kind="empty">
-              <span class="empty-state__art" aria-hidden="true">🎈</span>
-              <p class="empty-state__text">Type your city and pick your birthday month to see quests near you.</p>
+            <div class="field field--month">
+              <label for="month" class="field__label">Birthday month</label>
+              <div class="field__control" data-icon="calendar" data-chevron="true">
+                <select id="month" name="month" class="field__input" required>
+                  <option value="" selected disabled>Choose a month</option>
+                  <option value="1">January</option>
+                  <option value="2">February</option>
+                  <option value="3">March</option>
+                  <option value="4">April</option>
+                  <option value="5">May</option>
+                  <option value="6">June</option>
+                  <option value="7">July</option>
+                  <option value="8">August</option>
+                  <option value="9">September</option>
+                  <option value="10">October</option>
+                  <option value="11">November</option>
+                  <option value="12">December</option>
+                </select>
+              </div>
             </div>
-          </div>
-        </div>
-
-        <div class="tab-panel" role="tabpanel" id="panel-online" aria-labelledby="tab-online" tabindex="0" hidden>
-          <div class="field field--country">
-            <label for="country" class="field__label">Country</label>
-            <select id="country" class="field__input">
-              <option value="">Pick your country…</option>
-            </select>
-          </div>
-          <div id="online-list" class="panel-body"></div>
-        </div>
-
-        <div class="tab-panel" role="tabpanel" id="panel-found" aria-labelledby="tab-found" tabindex="0" hidden>
-          <p class="disclaimer"><span class="disclaimer__icon" aria-hidden="true">🧭</span> Live web results for your birthday month and country. We haven't checked these, so always read the link before you go.</p>
-          <div id="found-list" class="panel-body">
-            <div class="empty-state" data-kind="empty">
-              <span class="empty-state__art" aria-hidden="true">🔭</span>
-              <p class="empty-state__text">Pick your birthday month and a country to see what's out there.</p>
+            <fieldset class="field field--radius">
+              <legend class="field__label">Search radius</legend>
+              <div class="seg seg--radius" id="radius">
+                <label class="seg__opt"><input type="radio" name="radius" id="radius-2000" value="2000" /><span>2 km</span></label>
+                <label class="seg__opt"><input type="radio" name="radius" id="radius-5000" value="5000" checked /><span>5 km</span></label>
+                <label class="seg__opt"><input type="radio" name="radius" id="radius-10000" value="10000" /><span>10 km</span></label>
+                <label class="seg__opt"><input type="radio" name="radius" id="radius-20000" value="20000" /><span>20 km</span></label>
+              </div>
+            </fieldset>
+            <div class="search__actions">
+              <button type="submit" class="btn btn--primary search-form__submit"><span>Find my quests</span><span class="btn__orb" id="submit-orb"></span></button>
+              <button type="button" id="clear-search" class="btn btn--quiet">Clear search</button>
             </div>
+          </form>
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+          <p class="privacy-note" id="privacy-note"><span class="privacy-note__text">We don't store anything on our servers. Your search stays in this browser tab and clears when you close it.</span></p>
+        </section>
+
+        <div class="results-layout">
+          <div class="results-col">
+            <div class="results-head">
+              <div class="results-head__text">
+                <p id="month-info" class="month-info" hidden></p>
+                <h2 id="results-heading" class="results__title">Your birthday quests</h2>
+                <p id="results-sub" class="results__sub">Search your city to see birthday offers near you, or open the Online tab.</p>
+              </div>
+              <div id="progress" class="progress" hidden>
+                <span class="progress__ring" id="progress-ring"></span>
+                <p class="progress__text"><strong class="progress__count" id="progress-count">0 of 0</strong><span>claimed</span></p>
+              </div>
+            </div>
+
+            <section class="results" aria-label="Quest lists">
+              <div class="tabs" role="tablist" aria-label="Quest types">
+                <button type="button" class="tab" role="tab" id="tab-nearby" aria-controls="panel-nearby" aria-selected="true" tabindex="0">Nearby<span id="nearby-count" class="tab__count" hidden></span></button>
+                <button type="button" class="tab" role="tab" id="tab-online" aria-controls="panel-online" aria-selected="false" tabindex="-1">Online<span id="online-count" class="tab__count" hidden></span></button>
+                <button type="button" class="tab" role="tab" id="tab-found" aria-controls="panel-found" aria-selected="false" tabindex="-1" hidden>Found online<span id="found-count" class="tab__count" hidden></span></button>
+                <span class="tabs__thumb" aria-hidden="true"></span>
+              </div>
+
+              <div class="tab-panel" role="tabpanel" id="panel-nearby" aria-labelledby="tab-nearby" tabindex="0">
+                <div id="nearby-list" class="panel-body"></div>
+              </div>
+
+              <div class="tab-panel" role="tabpanel" id="panel-online" aria-labelledby="tab-online" tabindex="0" hidden>
+                <div class="field field--country">
+                  <label for="country" class="field__label">Country</label>
+                  <div class="field__control" data-icon="globe" data-chevron="true">
+                    <select id="country" class="field__input">
+                      <option value="">Pick your country…</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="online-list" class="panel-body"></div>
+              </div>
+
+              <div class="tab-panel" role="tabpanel" id="panel-found" aria-labelledby="tab-found" tabindex="0" hidden>
+                <p class="disclaimer" id="found-disclaimer"><span>Live web results for your birthday month and country. We haven't checked these, so read the link before you go.</span></p>
+                <div id="found-list" class="panel-body"></div>
+              </div>
+            </section>
           </div>
+
+          <section class="map-section" aria-label="Map">
+            <div class="map-frame">
+              <div id="map" class="map" role="region" aria-label="Map of nearby birthday quests">
+                <div class="map__placeholder">
+                  <p class="map__placeholder-text">Your quest map appears here after you search.</p>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
-    </main>
+      </main>
+
+      <footer class="site-footer">
+        <section class="foot-block" id="how-it-works" aria-labelledby="how-heading" tabindex="-1">
+          <h2 id="how-heading" class="foot-block__title">How it works</h2>
+          <ol class="foot-steps">
+            <li>Type your city and pick your birthday month.</li>
+            <li>See birthday offers from brands with a shop near you, plus ones you can claim online.</li>
+            <li>Check the steps on each card, confirm the offer with the brand, then mark it claimed.</li>
+          </ol>
+        </section>
+        <section class="foot-block" id="privacy" aria-labelledby="privacy-heading" tabindex="-1">
+          <h2 id="privacy-heading" class="foot-block__title">Privacy</h2>
+          <p>No accounts, no cookies, no tracking. Your city goes only to the OpenStreetMap place search, and your search is kept in this browser tab until you close it.</p>
+        </section>
+        <div class="foot-fine">
+          <p>Offers change often. Always confirm with the brand before you go.</p>
+          <p>Map data &copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap contributors</a>. Search by <a href="https://nominatim.org/" rel="noopener noreferrer" target="_blank">Nominatim</a>, suggestions by <a href="https://photon.komoot.io/" rel="noopener noreferrer" target="_blank">Photon</a>.</p>
+        </div>
+      </footer>
+    </div>
 
     <p id="celebrate-live" class="visually-hidden" aria-live="polite"></p>
     <p id="suggest-live" class="visually-hidden" aria-live="polite"></p>
-
-    <footer class="site-footer">
-      <p>Map data &copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap contributors</a>. Search by <a href="https://nominatim.org/" rel="noopener noreferrer" target="_blank">Nominatim</a>, suggestions by <a href="https://photon.komoot.io/" rel="noopener noreferrer" target="_blank">Photon</a>.</p>
-      <p>Offers change, so always check with the brand before you go.</p>
-      <p class="site-footer__love">Made with <span aria-hidden="true">💖</span><span class="visually-hidden">love</span> for birthday people everywhere.</p>
-    </footer>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
