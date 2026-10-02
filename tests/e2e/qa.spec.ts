@@ -357,7 +357,7 @@ test('served HTML has a strict CSP meta and no inline script/style', async ({ pa
   expect(csp).toContain("style-src 'self'");
   expect(csp).toContain("object-src 'none'");
   expect(csp).toContain("base-uri 'none'");
-  expect(csp).toMatch(/connect-src 'self' https:\/\/nominatim\.openstreetmap\.org https:\/\/overpass-api\.de https:\/\/bsq-worker\.e2e\.example(;|$)/);
+  expect(csp).toMatch(/connect-src 'self' https:\/\/nominatim\.openstreetmap\.org https:\/\/overpass-api\.de https:\/\/photon\.komoot\.io https:\/\/bsq-worker\.e2e\.example(;|$)/);
   // The CSP meta must come first in <head> so it governs everything after it.
   expect(html.indexOf('Content-Security-Policy')).toBeLessThan(html.indexOf('<script'));
   expect(html).not.toMatch(/<script(?![^>]*\bsrc=)[^>]*>\s*\S/i);
@@ -395,6 +395,8 @@ test('keyboard-only flow: Tab/type/select/Enter, arrow keys across tabs, Space t
   expect(await focused()).toMatch(/^select#month/);
   await page.keyboard.type('Oct'); // type-ahead select on a closed <select>
   await expect(page.locator('#month')).toHaveValue('10');
+  await page.keyboard.press('Tab');
+  expect(await focused()).toMatch(/^select#radius/);
   await page.keyboard.press('Tab');
   expect(await focused()).toMatch(/^button#\|\|.*search-form__submit/);
   await page.keyboard.press('Enter');

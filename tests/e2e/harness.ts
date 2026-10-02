@@ -175,9 +175,13 @@ export async function expectNothingPersisted(page: Page, context: BrowserContext
   expect(await context.cookies()).toEqual([]);
 }
 
+/** Hosts allowed to receive typed location text: Nominatim (on submit) and Photon (autocomplete). */
+export const TEXT_HOSTS = new Set(['nominatim.openstreetmap.org', 'photon.komoot.io']);
+
 /**
- * The typed location may only ever be sent to Nominatim. Overpass gets coordinates only, the Worker
- * only month+country, tiles only z/x/y. Referer (if any) is origin-only.
+ * The typed location may only ever be sent to Nominatim or Photon. Overpass gets coordinates only,
+ * the Worker only month+country, tiles only z/x/y, Photon only q/limit/lang/layer (no coordinates).
+ * Referer (if any) is origin-only.
  */
 export async function expectLocationOnlyToNominatim(guard: Guard, locations: string[]): Promise<void> {
   const needles = locations.flatMap((l) => {
@@ -187,7 +191,7 @@ export async function expectLocationOnlyToNominatim(guard: Guard, locations: str
   for (const r of guard.externalRequests()) {
     const u = new URL(r.url);
     const hay = `${decodeSafe(r.url)} ${r.url} ${r.postData ?? ''} ${decodeSafe(r.postData ?? '')}`.toLowerCase();
-    if (u.hostname !== 'nominatim.openstreetmap.org') {
+    if (!TEXT_HOSTS.has(u.hostname)) {
       for (const n of needles) expect(hay, `location leaked to ${u.hostname}`).not.toContain(n);
     }
     if (u.hostname === 'overpass-api.de') {
@@ -196,6 +200,13 @@ export async function expectLocationOnlyToNominatim(guard: Guard, locations: str
       const q = decodeURIComponent((r.postData ?? '').replace(/^data=/, ''));
       // Every "around:" carries only radius + two numbers.
       for (const m of q.matchAll(/\(around:([^)]*)\)/g)) expect(m[1]).toMatch(/^\d+,-?\d+\.\d+,-?\d+\.\d+$/);
+    }
+    if (u.hostname === 'photon.komoot.io') {
+      expect(r.method).toBe('GET');
+      expect(u.pathname).toBe('/api/');
+      expect([...new Set(u.searchParams.keys())]).toEqual(['q', 'limit', 'lang', 'layer']);
+      expect((u.searchParams.get('q') ?? '').length).toBeGreaterThanOrEqual(3);
+      expect(r.postData).toBeNull();
     }
     if (u.hostname === 'bsq-worker.e2e.example') {
       expect(u.pathname).toBe('/search');

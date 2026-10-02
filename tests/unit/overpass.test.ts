@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { MAX_BRANCHES, buildOverpassQuery, escapeQlString, fetchBranches, nearestByOffer, parseOverpass } from '../../src/overpass';
+import { MAX_BRANCHES, MAX_BRANCHES_WIDE, buildOverpassQuery, clampRadius, maxBranchesFor, escapeQlString, fetchBranches, nearestByOffer, parseOverpass } from '../../src/overpass';
 import type { Offer } from '../../src/types';
 
 const offer = (id: string, osm?: Offer['osm']): Offer => ({
@@ -51,6 +51,27 @@ describe('buildOverpassQuery', () => {
     await expect(fetchBranches([offer('sb', { wikidata: 'Q37158' })], 1, 2, fetchImpl as unknown as typeof fetch)).rejects.toThrow('HTTP 400');
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
+  it('uses the requested radius (clamped to 100 m … 20 km) and a bigger cap for wide circles', () => {
+    const o = [offer('sb', { wikidata: 'Q37158' })];
+    const q10 = buildOverpassQuery(o, 12.97, 77.59, 10_000) ?? '';
+    expect(q10).toContain('nw["shop"](around:10000,12.970000,77.590000);');
+    expect(q10).toContain(`out center ${MAX_BRANCHES_WIDE};`);
+    expect(buildOverpassQuery(o, 1, 2, 2_000)).toContain('(around:2000,');
+    expect(buildOverpassQuery(o, 1, 2, 2_000)).toContain(`out center ${MAX_BRANCHES};`);
+    expect(buildOverpassQuery(o, 1, 2, 999_999)).toContain('(around:20000,');
+    expect(buildOverpassQuery(o, 1, 2, 5)).toContain('(around:100,');
+    expect(clampRadius(5000.4)).toBe(5000);
+    expect(maxBranchesFor(5_000)).toBe(MAX_BRANCHES);
+    expect(maxBranchesFor(20_000)).toBe(MAX_BRANCHES_WIDE);
+  });
+  it('fetchBranches sends the radius and applies the wide cap', async () => {
+    const elements = Array.from({ length: 200 }, (_, i) => ({ type: 'node', lat: i / 1000, lon: 0, tags: { 'brand:wikidata': 'Q37158' } }));
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ elements }) });
+    const out = await fetchBranches([offer('sb', { wikidata: 'Q37158' })], 1, 2, fetchImpl as unknown as typeof fetch, 20_000);
+    expect(out).toHaveLength(MAX_BRANCHES_WIDE);
+    const body = decodeURIComponent(String((fetchImpl.mock.calls[0] as [string, RequestInit])[1].body).replace(/^data=/, ''));
+    expect(body).toContain('(around:20000,1.000000,2.000000)');
+  });
   it('returns null when no offer has osm hints', () => {
     expect(buildOverpassQuery([offer('x')], 1, 1)).toBeNull();
   });
@@ -87,6 +108,8 @@ describe('parseOverpass', () => {
   it('caps results', () => {
     const elements = Array.from({ length: 100 }, (_, i) => ({ type: 'node', lat: i / 100, lon: 0, tags: { name: 'Chaayos' } }));
     expect(parseOverpass({ elements }, offers)).toHaveLength(MAX_BRANCHES);
+    expect(parseOverpass({ elements }, offers, 1_000)).toHaveLength(Math.min(100, MAX_BRANCHES_WIDE));
+    expect(parseOverpass({ elements }, offers, Number.NaN)).toHaveLength(MAX_BRANCHES);
   });
   it('handles garbage', () => {
     expect(parseOverpass(null, offers)).toEqual([]);

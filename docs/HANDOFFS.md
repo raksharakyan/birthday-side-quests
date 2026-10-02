@@ -391,3 +391,76 @@ These are outside QA's local scope:
 - Smoke-test the live Pages URL: console free of CSP errors while zooming the map.
 - Real Worker: `curl -H 'Origin: https://evil.example'` → 403.
 - First GitHub Actions run green, including the separate `lighthouse` job.
+
+---
+
+## Full-Stack: autocomplete + radius
+
+Branch `feat/autocomplete-more-offers`. Nothing committed. See DECISIONS #16 and #17.
+
+### What changed
+- **Location autocomplete (Photon).**
+  - `src/autocomplete.ts` holds the data side:
+    - `parsePhoton` is a strict parser. Coordinates must be finite and in range (GeoJSON `[lng,lat]`), the country must be ISO-2 (uppercased), and every string goes through `cleanDisplayText`. It caps at 5 and dedupes labels.
+    - `buildPhotonUrl` sends `q`, `limit=5`, `lang=en` and `layer=city|district|locality`, with no coordinates.
+    - `createSuggester` debounces for 300 ms, needs at least 3 characters and accepts at most 120. It aborts the previous request on each keystroke, keeps an in-memory cache of up to 100 entries and times out after 5 s. Errors mean no suggestions.
+  - `src/render/combobox.ts` is the UI, a WAI-ARIA 1.2 combobox with a listbox:
+    - The listbox is built with `el()` only.
+    - ArrowUp and ArrowDown wrap. Enter selects the active option; with none active, the form submits normally. Escape, Tab, blur and an outside pointerdown all close the list.
+    - A `mousedown` preventDefault avoids the blur race.
+    - `#suggest-live` gives polite announcements, deduplicated.
+    - The footer reads "Suggestions by Photon · © OpenStreetMap".
+  - `src/main.ts`:
+    - A picked suggestion goes straight to `runSearch(place)` and **skips Nominatim**.
+    - If no month is set yet, it asks for the month and keeps the picked place until the input text changes.
+    - Free text plus Enter or "Find my quests" uses the Nominatim path as before.
+  - CSS lives in `components.css` (`.combo`, `.ac-*`):
+    - absolute popup, so there is no layout shift; z-index 1100 keeps it above Leaflet;
+    - options at least 48 px tall, with an active option in lavender fill, a focus-coloured ring and ink text;
+    - the pop animation is turned off under reduced motion.
+- **Search radius.**
+  - `#radius` select: 2, 5 (default), 10 or 20 km.
+  - `overpass.ts` adds `clampRadius`, `maxBranchesFor` (60 up to 5 km, 150 above) and `MAX_BRANCHES_WIDE`. The parse cap follows `out center N`, and `fetchBranches(..., fetchImpl, radiusM)` passes the radius through.
+  - Changing the radius re-runs the lookup for the current place.
+  - The map draws a dashed radius circle (`.map-radius`) and fits to it, then to the pins.
+- **Nearby ordering.** `renderNearbyList` puts quests with a branch first, sorted by distance, each with "x km away" (`.quest-card__distance`). The rest go under `h3.quest-group__heading` "More quests in <Country> (no branch found within N km)". Nothing is hidden.
+- **Security and privacy.**
+  - `csp.config.ts` adds `https://photon.komoot.io` to connect-src only, and `public/_headers` is updated to match. A unit test asserts that the `_headers` CSP equals `buildCsp()` and that Photon appears only in connect-src.
+  - PRIVACY.md (table row, komoot privacy link), SECURITY.md (diagram, STRIDE S2/T1/I1/D2/D3, CSP, limitations) and the footer attribution are updated.
+
+### Tests
+- **Unit:** new `tests/unit/autocomplete.test.ts` covers:
+  - the parser: valid, malformed, XSS, bidi, range, country code, caps, dedupe;
+  - the URL;
+  - the suggester with fake timers: debounce, min length, abort and stale drop, cache, cancel, 500/bad JSON/network errors, timeout.
+  - `overpass.test.ts` adds radius, cap and request-body tests.
+- **E2E:** new `tests/e2e/autocomplete.spec.ts`. The fixtures mock `photon.komoot.io`. The harness privacy check now allows typed text only to Nominatim or Photon, and Photon may get only `q/limit/lang/layer` over GET. Tests:
+  - suggestions with axe on the open listbox;
+  - ArrowDown+Enter picks with no Nominatim call;
+  - click or tap, with tap targets of at least 44 px;
+  - picking before the month is set;
+  - Escape, Tab and outside click, then free text plus Enter uses Nominatim;
+  - XSS through Photon;
+  - Photon 500 falls back to Nominatim;
+  - radius `around:10000` / `around:20000` plus distance sorting and grouping, with axe.
+  - The keyboard test in `qa.spec.ts` now tabs month → radius → submit. The CSP e2e regex includes Photon.
+
+### Results
+- `npm run build`: OK.
+- `npm test`: 406 passed.
+- `npm run test:e2e`: 46 passed, 4 skipped (desktop-only keyboard tests on mobile). The autocomplete spec was also run with `--repeat-each 3` and was green.
+- `npm run lhci`: performance, a11y, best practices and SEO all 1.00 on all 3 runs.
+- `npm audit --audit-level=high`: 0 vulnerabilities.
+
+### Manual check against the real services (`npm run preview`, built-in browser)
+- **Typing "Koraman":** one Photon request (`…?q=Koraman&limit=5&lang=en&layer=city&layer=district&layer=locality`, 0.5 s), no CSP errors. It returned 5 options, including "Koramangala · Bangalore South, Karnataka, India", and the live region announced "5 suggestions available".
+- **Pick with 10 km radius:** ArrowDown×4 + Enter picked Koramangala. There was no Nominatim request. Overpass took 4.6 s. Result: 8 quests and 121 shop pins within 10 km. Cards were sorted from Tanishq at 170 m to The Body Shop at 4.2 km.
+- **Switch to 20 km:** 9.1 s, 146 pins.
+- **Console:** empty.
+- **375 px:** no horizontal overflow, the popup is full width, and options are 57–74 px tall.
+
+### For Security / QA
+- New origin `photon.komoot.io` (connect-src only). Please review `src/autocomplete.ts`, `src/render/combobox.ts` and the `I1`/`D2` rows.
+- **The branch cap is not distance-sorted.** At 20 km in central Bengaluru the 150 cap is nearly reached (146 pins), and Overpass output order is by OSM id. Far-off branches can therefore displace nearer ones, so "nearest" is nearest among those returned.
+- Photon results ignore `lang=en` for some local names (for example Japanese POIs). That is cosmetic.
+- `aria-controls="city-suggestions"` is in the static HTML. The listbox is created by JS at startup, and axe was clean.
