@@ -340,7 +340,7 @@ test('Overpass 504 once, then success on the automatic retry after ~2 s', async 
   await page.goto('./');
   await search(page, 'Bengaluru');
   await expect(page.getByRole('status')).toContainText('Looking for shops', { timeout: 5000 });
-  await expect(page.getByRole('status')).toContainText('4 shops on the map within 5 km', { timeout: 15_000 });
+  await expect(page.getByRole('status')).toContainText('4 places on the map within 5 km', { timeout: 15_000 });
   expect(hits).toHaveLength(2);
   expect((hits[1] ?? 0) - (hits[0] ?? 0)).toBeGreaterThanOrEqual(1900);
   await expect(page.locator('.map-marker--branch')).toHaveCount(4);

@@ -1,7 +1,7 @@
 import type { Category, Channel, ClaimWindow, Offer, OffersFile, OsmHint, Venue } from './types';
 import { distanceM } from './overpass';
 import { hasUnsafeText } from './text';
-import { safeHttpsUrl } from './urls';
+import { directionsUrlByName, safeHttpsUrl } from './urls';
 
 export const CATEGORIES: readonly Category[] = ['cafe', 'dessert', 'restaurant', 'beauty', 'fashion', 'retail', 'online'];
 export const CHANNELS: readonly Channel[] = ['in-store', 'online', 'both'];
@@ -117,6 +117,13 @@ function validateVenues(v: unknown): Venue[] | undefined | null {
     if (!isObj(item)) return null;
     const name = cleanText(item.name, LIMITS.venueName);
     if (!name) return null;
+    // The name may become a directions-by-name link (exact: false), so it must pass that builder too
+    // (no '<' '>', no lone surrogates); otherwise rendering the card would throw (security review PR #4).
+    try {
+      directionsUrlByName(name);
+    } catch {
+      return null;
+    }
     if (!isCoord(item.lat, 90) || !isCoord(item.lng, 180)) return null;
     if (item.exact !== undefined && typeof item.exact !== 'boolean') return null;
     out.push({ name, lat: item.lat, lng: item.lng, exact: item.exact !== false });

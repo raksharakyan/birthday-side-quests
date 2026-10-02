@@ -126,7 +126,14 @@ export function formatApproxDistance(m: number): string {
 
 /** Directions for a branch or venue: by coordinates, or by name when the location is approximate. */
 export function branchDirectionsUrl(branch: Branch): string {
-  return branch.approximate ? directionsUrlByName(branch.name) : directionsUrl(branch.lat, branch.lng);
+  if (branch.approximate) {
+    try {
+      return directionsUrlByName(branch.name);
+    } catch {
+      // Unusable name: fall back to the (approximate) coordinates rather than breaking the card.
+    }
+  }
+  return directionsUrl(branch.lat, branch.lng);
 }
 
 export interface ClaimChip {

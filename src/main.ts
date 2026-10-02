@@ -241,7 +241,7 @@ function updateHeader(): void {
   progressCount.textContent = `${claimed} of ${total}`;
   const ratio = total > 0 ? claimed / total : 0;
   progressEl.style.setProperty('--progress', ratio.toFixed(4));
-  setCandleLit(claimed > 0);
+  setCandleLit(doneIds().length > 0);
   mapView?.setClaimed(new Set(doneIds()));
 }
 
@@ -708,7 +708,7 @@ async function runSearch(where: string | Place): Promise<void> {
       renderNearby();
       setStatus(
         pinCount > 0
-          ? `Found ${quests} and ${pinCount} shop${pinCount === 1 ? '' : 's'} on the map within ${km(radiusM)} of ${place.label}.`
+          ? `Found ${quests} and ${pinCount} place${pinCount === 1 ? '' : 's'} on the map within ${km(radiusM)} of ${place.label}.`
           : `Found ${quests} for your city. We couldn't spot their shops within ${km(radiusM)} on the map. Try a bigger search radius.`,
         'success',
       );
