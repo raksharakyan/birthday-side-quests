@@ -137,7 +137,7 @@ function populateCountries(extra?: string): void {
   const current = countrySelect.value;
   const sorted = [...codes].sort((a, b) => countryName(a).localeCompare(countryName(b)));
   countrySelect.replaceChildren(
-    el('option', { value: '' }, ['Worldwide offers only']),
+    el('option', { value: '' }, ['Pick your country…']),
     ...sorted.map((c) => el('option', { value: c }, [countryName(c)])),
   );
   countrySelect.value = codes.has(current) ? current : '';
@@ -146,7 +146,13 @@ function populateCountries(extra?: string): void {
 function renderOnline(): void {
   const list = filterOffers({ offers: state.offers, country: state.onlineCountry, channel: 'online' });
   if (list.length === 0) {
-    renderEmpty(onlineList, 'No online birthday quests for this country yet — try "Worldwide offers only".', 'empty');
+    renderEmpty(
+      onlineList,
+      state.onlineCountry
+        ? 'No online birthday quests for this country yet — try "Pick your country…".'
+        : 'No worldwide online quests yet — pick your country above to see deals you can claim online 💻',
+      'empty',
+    );
   } else {
     renderQuestList(onlineList, list, { idPrefix: 'online' });
   }

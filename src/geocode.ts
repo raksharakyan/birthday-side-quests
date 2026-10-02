@@ -40,13 +40,20 @@ function isObj(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null;
 }
 
+/** Strict coordinate coercion: Number('') / Number(null) are 0, which must not become a real place. */
+function toCoord(v: unknown): number {
+  if (typeof v === 'number') return v;
+  if (typeof v === 'string' && v.trim() !== '') return Number(v);
+  return Number.NaN;
+}
+
 /** Pure parser for a Nominatim jsonv2 response (array). Returns the first usable hit or null. */
 export function parseNominatim(json: unknown): Place | null {
   if (!Array.isArray(json) || json.length === 0) return null;
   const hit: unknown = json[0];
   if (!isObj(hit)) return null;
-  const lat = Number(hit.lat);
-  const lng = Number(hit.lon);
+  const lat = toCoord(hit.lat);
+  const lng = toCoord(hit.lon);
   if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
   const address = isObj(hit.address) ? hit.address : {};
   const cc = typeof address.country_code === 'string' ? address.country_code.toUpperCase() : '';
@@ -141,8 +148,10 @@ export async function geocode(query: string, fetchImpl: typeof fetch = fetch): P
   } catch {
     throw new UpstreamError(res.status);
   }
-  const place = parseNominatim(json);
-  if (!place) throw new NotFoundError();
+  const parsed = parseNominatim(json);
+  if (!parsed) throw new NotFoundError();
+  // Never show an empty label ("near ."); fall back to what the user typed (stays in this tab).
+  const place = parsed.label ? parsed : { ...parsed, label: q };
   cache.set(key, place);
   return place;
 }

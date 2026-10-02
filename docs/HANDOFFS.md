@@ -4,13 +4,13 @@ Each agent appends: what was finished, what's next, and sign-offs. A feature is 
 
 | Feature | Full-Stack | UI/UX | Security | QA |
 |---|---|---|---|---|
-| Geocoding (Nominatim) | ✅ | ✅ | ✅ | |
-| Nearby branches (Overpass) + map | ✅ | ✅ | ✅ | |
-| Offers data + filtering | ✅ (placeholder data — research merge pending) | ✅ | ✅ | |
-| Quest list + done/confetti | ✅ (event only; confetti = UI) | ✅ | ✅ | |
-| Online tab | ✅ | ✅ | ✅ | |
-| Found online (Worker) | ✅ (not deployed) | ✅ | ✅ (code; re-check CORS origin + secret after deploy) | |
-| CI/CD + Pages deploy | ✅ (not yet run on GitHub) | ✅ (n/a — no UI) | ✅ | |
+| Geocoding (Nominatim) | ✅ | ✅ | ✅ | ✅ (QA-01/02 fixed) |
+| Nearby branches (Overpass) + map | ✅ | ✅ | ✅ | ✅ (QA-01 fixed) |
+| Offers data + filtering | ✅ (placeholder data — research merge pending) | ✅ | ✅ | ✅ |
+| Quest list + done/confetti | ✅ (event only; confetti = UI) | ✅ | ✅ | ✅ |
+| Online tab | ✅ | ✅ | ✅ | ✅ (QA-03 fixed) |
+| Found online (Worker) | ✅ (not deployed) | ✅ | ✅ (code; re-check CORS origin + secret after deploy) | ✅ (code + mocked e2e; live smoke after deploy) |
+| CI/CD + Pages deploy | ✅ (not yet run on GitHub) | ✅ (n/a — no UI) | ✅ | ✅ (all CI steps green locally; confirm first GitHub run) |
 
 ---
 
@@ -270,3 +270,124 @@ No Critical or High findings.
   - `curl -H 'Origin: https://evil.example'` should return 403.
 - **After the first Pages deploy:** load the live URL and check that the console shows no CSP violations, including while zooming the map (the tile-abort `data:` GIF).
 - **For QA:** `tests/unit/security.test.ts` already has XSS-sink and bidi cases. An e2e test with a bidi-laden Worker fixture would be a nice extra.
+
+---
+
+## QA report (2026-10-02)
+
+**Status: green. QA ✅ on every feature** (see the table at the top). Nothing was committed or pushed.
+
+### Results (all run locally, in this order)
+| Command | Result |
+|---|---|
+| `npm run build` (typecheck for app, node/e2e and worker, then vite build) | ✅ pass |
+| `npm test` (Vitest: `tests/unit` + `worker/test`) | ✅ **381/381** in 10 files (186 before QA, 195 new) |
+| `npm run test:e2e` (Playwright, desktop Chromium + Pixel 7) | ✅ **33 passed, 1 skipped** (34 = 17 tests × 2 projects; the keyboard-only test is desktop-only by design). Also ran `qa.spec.ts --repeat-each=3`: 81/81, no flakes. |
+| `npm run lhci` (3 runs, `dist-lhci`) | ✅ Performance **1.00**, Accessibility **1.00**, Best Practices **1.00**, SEO **1.00** in all 3 runs (thresholds 0.90 / 0.95 / 0.95) |
+| `npm audit --audit-level=high` | ✅ 0 vulnerabilities |
+
+No new dependencies were added. `@axe-core/playwright` was already a devDependency. CI already runs everything that was added: `npm test` picks up `tests/unit/**` and `worker/test/**`, `npm run test:e2e` picks up every `tests/e2e/*.spec.ts`, and `lint:typecheck` covers `tests/e2e` (via `tsconfig.node.json`) and `worker/test`.
+
+### Test inventory
+| File | Tests | New / changed by QA | What it covers |
+|---|---|---|---|
+| `tests/unit/geocode.test.ts` | 16 | — | existing |
+| `tests/unit/geocode.qa.test.ts` | 50 | **new** | Nominatim parsing edge cases: empty array, missing, null or 3-letter `country_code`, non-numeric, `''`, `null`, `NaN` or `Infinity` coordinates, out-of-range values, a 1 MB label (capped and fast), HTML labels kept as text. Label fallback. Throttle tested with fake timers: two rapid calls give exactly 1 request until 1000 ms have passed; three calls are spaced ≥1 s apart; a cached repeat (different case and whitespace) makes no fetch and doesn't wait; a failed task doesn't break the queue. Debounce at 600 ms. Error mapping: 429 → RateLimited (not cached), `navigator.onLine=false` → Offline with no fetch, fetch `TypeError` → Offline, 4xx/5xx → Upstream, invalid JSON → Upstream, NotFound not cached, invalid queries make no fetch. The query is sent only in `q=` with `credentials: 'omit'`. |
+| `tests/unit/qa-pure.test.ts` | 125 | **new** | `filterOffers`: `"*"` matches every country, `both` appears in both tabs, non-canonical codes (`in`, `IND`, `' IN'`, `*`…) are treated as no country, order is kept and input isn't mutated, empty cases. `monthInfo` across the year boundary (Dec birthday seen in Jan = 11 months; Jan seen in Dec = next month; 31 Dec 23:59:59 vs 1 Jan), all 144 (birth, current) pairs, invalid input. `isStale`: exactly 6 months vs +1 ms, crossing the year, future dates, invalid dates. `directionsUrl`: 6 dp rounding, `-0` → `0`, clamping (including `±1e9` and `MAX_VALUE`), rejects NaN, ±Infinity, string, null and undefined, strict output shape. `safeHttpsUrl`: 33 rejections (`javascript:` with leading whitespace, embedded tab or newline, or mixed case; `data:`, `vbscript:`, `file:`, `blob:`, `ws(s):`, `http:`; credentials incl. `user@`, `:pass@`, `a@evil`; protocol-relative `//`, ` //`, backslash forms, `about:`, `mailto:`, `tel:`), normalisation cases, and an invariant check (always https with no credentials). `displayHost`. `cleanDisplayText`. Hardening of `validateLiveResults` (junk-only titles, nested junk, `__proto__`). `workerBaseUrl` and `liveSearch` with no Worker configured. Overpass coordinate edge cases. Templates: FNV-1a reference values, `{brand}` exactly once per template, hash-selected line independent of call order, unknown category falls back to `retail`, brand inserted literally. |
+| `tests/unit/offers.test.ts` | 30 | — | existing |
+| `tests/unit/overpass.test.ts` | 9 | — | existing |
+| `tests/unit/render.test.ts` | 9 | — | existing |
+| `tests/unit/security.test.ts` | 78 | — | existing (Security) |
+| `tests/unit/urls.test.ts` | 17 | — | existing |
+| `worker/test/worker.test.ts` | 27 | — | existing |
+| `worker/test/worker.qa.test.ts` | 20 | **new** | OPTIONS preflight from 4 disallowed origins (incl. `…github.io.evil.example`, `null`, `http:`) → 403 with no ACAO/ACAM and no upstream call. POST, PUT, DELETE and PATCH → 405 with `Allow: GET, OPTIONS` and no upstream call, and a 405 from a foreign origin gets no CORS. 6 non-`/search` paths → 404 JSON with `nosniff`. Missing key → 503 with a generic body and no upstream call. Upstream network error, timeout, 401, 429 or non-JSON 200 → generic 502 that never echoes the key, stack, quota or status. Rate limit: 3rd call → 429 with `Retry-After: 60`, keyed by `CF-Connecting-IP`, no upstream call. An extra `city=` param → 400 before any upstream call. |
+| `tests/e2e/smoke.spec.ts` | 3 × 2 | — | existing; reviewed per the UI/UX request and OK |
+| `tests/e2e/harness.ts` | — | **new** | Auto fixture used by every QA e2e test. It fails the test on any unexpected external request (page-level mock list plus a context-level catch-all), any JS dialog, any `securitypolicyviolation` (captured by an init script), any `navigator.geolocation.getCurrentPosition/watchPosition` call (wrapped by an init script), any uncaught page error, and any console error. The only console exception is the browser's own "Failed to load resource" line, which a test must opt into explicitly for the 429, 504 or aborted response it mocks on purpose. Helpers: `axeViolations` (waits for CSS transitions to settle first), `expectNothingPersisted`, `expectLocationOnlyToNominatim`. **I checked that the harness actually fails** for an unknown host, an unmocked page, `alert()`, a geolocation call and an inline `<script>` (throwaway spec, deleted). |
+| `tests/e2e/qa.spec.ts` | 14 × 2 | **new** | See below. |
+
+**E2E scenarios in `qa.spec.ts`.** Every scenario runs on desktop Chromium and Pixel 7, except the keyboard test (desktop only).
+- **Happy path:**
+  - map + center star + 4 branch pins
+  - Nearby count derived from `offers.json`
+  - Tata Starbucks directions `href` is **exactly** `https://www.google.com/maps/dir/?api=1&destination=12.975,77.6`, with `target=_blank` and `rel` ⊇ {noopener, noreferrer}
+  - every directions link matches the strict format
+  - every Verify link is https, `_blank`, `noopener noreferrer`
+  - the popup directions link is identical
+  - checking a quest gives `.is-done`, `body > .confetti` with pieces, and the live-region text; the confetti is then removed
+  - after `reload()` and a new search, no card is done or checked
+  - axe on the initial page and on the results
+- **Reduced motion** (`reducedMotion: 'reduce'`): done state and announcement work, and **no** `.confetti` element appears.
+- **Errors:**
+  - place not found (with axe on the error state)
+  - Nominatim 429 → "a bit busy", and the button is re-enabled
+  - `context.setOffline(true)` → offline message, and **zero** external requests
+  - Nominatim `route.abort('internetdisconnected')` → offline message
+  - Overpass 504 → all quests listed, 0 branch pins, center star present, no directions buttons
+  - geocode to `fr` (no offers) → status and the Nearby empty state both point to the **Online tab**, Overpass is **never** called, and the Online tab preselects FR with a friendly empty state (axe run here)
+- **Online tab without a city:**
+  - The worldwide view is checked, then IN (Nykaa present, no directions), then US. Counts are derived from `offers.json`. axe runs here.
+  - Picking a month and opening Found online makes the only external request `https://bsq-worker.e2e.example/search?month=10&country=US`. axe runs here too.
+- **XSS, Found online:** the Worker fixture includes `<img src=x onerror=…>`, `<script>`, `<svg onload>`, an `<iframe src=javascript:>` snippet, `javascript:` and `data:` URLs, and U+202E/U+202C in the title and source.
+  - Only 3 cards render (javascript: and data: are dropped).
+  - The text shows literally, and the bidi characters are stripped ("Free cake moc.live").
+  - The page has 0 `img[src=x]`, 0 img/svg/iframe/script in the list, 0 `on*` attributes anywhere, and an unchanged `<script>` count. No dialog opens.
+- **XSS, location input:** I typed `"><img src=x onerror=alert(1)>`, `<svg onload=alert(1)>` and a `javascript:…<script>` polyglot.
+  - The mocked Nominatim echoes `q` into `display_name` and adds RLO + `<img…>`. The Overpass `name` is `<svg onload=alert(8)> Starbucks`.
+  - All of these render as text in the status, "Nearest: …", the directions `aria-label` and the map popup.
+  - No injected elements, no `on*` attributes, no dialogs.
+- **CSP:**
+  - The served HTML has the CSP `<meta>` before any `<script>`.
+  - It has no `unsafe-inline`, `unsafe-eval`, `unsafe-hashes`, `strict-dynamic` or `*`.
+  - `script-src`, `style-src`, `object-src` and `base-uri` are exact, and so is `connect-src` (self, Nominatim, Overpass, Worker).
+  - There is no inline script, `<style>`, `style=""` or `on*=`.
+  - The live DOM meta equals the served one.
+  - The harness records zero `securitypolicyviolation` events in every test.
+- **Privacy** (happy path, Online tab and every harness test):
+  - URL unchanged, with no query or hash.
+  - `localStorage`, `sessionStorage`, `document.cookie`, `context.cookies()`, `indexedDB.databases()` and `caches.keys()` are all empty.
+  - The location string (raw, URL-encoded and `+`-encoded) appears **only** in Nominatim requests.
+  - Overpass is a POST whose `around:` clauses contain only radius,lat,lng.
+  - The Worker gets only `?month=&country=` (with exact key order and patterns) and no body.
+  - Tiles are `/{z}/{x}/{y}.png` with no query.
+  - Any `Referer` on an external request is origin-only, and no request carries a `Cookie`.
+- **Geolocation:** zero calls, asserted in every test.
+- **Keyboard only:**
+  - Tab ×2 reaches the city input; type the city; Tab to the month; type-ahead "Oct" → October; Tab to the submit button; Enter.
+  - Tab to the tablist. ArrowRight goes to Online and then Found (panels switch), wraps back to Nearby, and End, ArrowLeft and Home also work.
+  - Tab into the panel to the first quest checkbox. Space checks it (`.is-done`), and Space again unchecks it.
+- **375 px:** no horizontal overflow (`scrollWidth − clientWidth ≤ 0` for both `documentElement` and `body`) on the initial page, the results, the Online tab and the Found online tab.
+
+**axe:** I ran it on the initial page, the results, the error state, the empty state, the Online tab and Found online. **0 violations total** (all impacts), on both projects.
+
+### Bugs found
+| ID | Severity | Owner | Repro | Status |
+|---|---|---|---|---|
+| QA-01 | Low | Full-Stack | `parseNominatim([{lat:'', lon:'2', address:{country_code:'in'}}])` (also `null`, `' '`, `true`, `['1']`) returned a place at lat **0**, because `Number('') === 0` ("Null Island"). The same happened in `parseOverpass` with `lat: null` (or `''`, `true`), which created a pin at 0,0 with a directions link there. | **Fixed** (`src/geocode.ts` `toCoord()`: number or non-blank string only; `src/overpass.ts`: Overpass coordinates must be JSON numbers). 11 new unit tests fail on the old code and pass now. |
+| QA-02 | Low | Full-Stack | Nominatim hit with an empty or missing `display_name` and `name` gave `label: ''`, so the status read "…shops on the map near ." | **Fixed** (`geocode()` falls back to the normalised query the user typed; it stays in the tab). Covered by a unit test. |
+| QA-03 | Low (UX copy) | UI/UX | Open the Online tab with "Worldwide offers only" selected. The shipped data has no `"*"` offers, so the empty state said *"No online birthday quests for this country yet — try 'Worldwide offers only'"*, pointing the user at the option they already had selected. | **Fixed** (`src/main.ts` `renderOnline()`: with no country it now says "No worldwide online quests yet — pick your country above to see deals you can claim online 💻"; the per-country copy is unchanged). Covered by e2e. **UI/UX: please review the wording.** |
+| QA-04 | Info | Orchestrator / research | `public/offers.json` has **no** `countries: ["*"]` entries, so "Worldwide offers only" is always empty. That is consistent with the research (all offers are country-specific), but the Online tab's default view is therefore always an empty state. | Open (data decision). Consider defaulting the country select to the geocoded country or the browser locale region (no network involved). |
+| QA-05 | Info | Full-Stack | `geocode()` maps only `TypeError` to Offline. Any other rejection (e.g. an `AbortError` if a timeout is added later) would surface as the generic "Something went wrong". This can't happen today because geocode has no abort signal. | Open (no action needed now). |
+| QA-06 | Info | — | `directionsUrl` rounds with `toFixed(6)`, so binary-float ties go down (`151.2092955` → `151.209295`). That's an 11 cm difference. | Accepted, not a bug. |
+
+**Notes:**
+- **Test artifact, not a product bug.** axe on Pixel 7 once flagged `color-contrast` on `#tab-online`/`#tab-found`. It sampled colours during the 150 ms tab `transition`. The harness now waits for running CSS animations before axe; steady-state contrast passes, matching the UI/UX table.
+- **Keyboard submit.** Enter on a focused `<select>` doesn't submit a form in browsers, which is standard. The keyboard test therefore tabs to "Find my quests" and presses Enter. Enter in the city input also submits.
+
+### Files changed by QA
+- **New:**
+  - `tests/unit/geocode.qa.test.ts`
+  - `tests/unit/qa-pure.test.ts`
+  - `worker/test/worker.qa.test.ts`
+  - `tests/e2e/harness.ts`
+  - `tests/e2e/qa.spec.ts`
+- **Edited (small fixes):**
+  - `src/geocode.ts` (QA-01, QA-02)
+  - `src/overpass.ts` (QA-01)
+  - `src/main.ts` (QA-03)
+- **No security controls were touched:** CSP, `dom.ts`, the sanitisers, the Worker and CI are unchanged.
+
+### Still to do after deploy
+These are outside QA's local scope:
+- Smoke-test the live Pages URL: console free of CSP errors while zooming the map.
+- Real Worker: `curl -H 'Origin: https://evil.example'` → 403.
+- First GitHub Actions run green, including the separate `lighthouse` job.

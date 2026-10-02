@@ -89,8 +89,9 @@ export function parseOverpass(json: unknown, offers: readonly Offer[]): Branch[]
     if (!isObj(el)) continue;
     const pos = el.type === 'node' ? el : isObj(el.center) ? el.center : null;
     if (!pos) continue;
-    const lat = Number(pos.lat);
-    const lng = Number(pos.lon);
+    // Overpass sends numbers; anything else (null, '', booleans) would coerce to 0 → "Null Island" pins.
+    const lat = typeof pos.lat === 'number' ? pos.lat : Number.NaN;
+    const lng = typeof pos.lon === 'number' ? pos.lon : Number.NaN;
     if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) continue;
     const tags = isObj(el.tags) ? el.tags : {};
     const wd = typeof tags['brand:wikidata'] === 'string' ? tags['brand:wikidata'] : '';
