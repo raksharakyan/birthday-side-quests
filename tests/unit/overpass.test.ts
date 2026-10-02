@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { MAX_BRANCHES, buildOverpassQuery, escapeQlString, nearestByOffer, parseOverpass } from '../../src/overpass';
+import { describe, expect, it, vi } from 'vitest';
+import { MAX_BRANCHES, buildOverpassQuery, escapeQlString, fetchBranches, nearestByOffer, parseOverpass } from '../../src/overpass';
 import type { Offer } from '../../src/types';
 
 const offer = (id: string, osm?: Offer['osm']): Offer => ({
@@ -21,9 +21,35 @@ describe('buildOverpassQuery', () => {
   it('builds one combined query with wikidata and name regex', () => {
     const q = buildOverpassQuery([offer('sb', { wikidata: 'Q37158' }), offer('ch', { nameRegex: 'Chaayos' })], 12.97, 77.59);
     expect(q).toContain('[out:json][timeout:25];');
-    expect(q).toContain('nwr["brand:wikidata"~"^(Q37158)$"](around:5000,12.970000,77.590000);');
-    expect(q).toContain('nwr["name"~"(Chaayos)",i](around:5000,12.970000,77.590000);');
+    // POIs are narrowed inside the circle first (fast on big cities), then filtered.
+    expect(q).toContain('nw["amenity"~"^(cafe|restaurant|fast_food|ice_cream|bar|pub|food_court)$"](around:5000,12.970000,77.590000);');
+    expect(q).toContain('nw["shop"](around:5000,12.970000,77.590000);');
+    expect(q).toContain(')->.p;');
+    expect(q).toContain('nw.p["brand:wikidata"~"^(Q37158)$"];');
+    expect(q).toContain('nw.p["name"~"(Chaayos)",i];');
+    expect(q).toContain('nw.p["brand"~"(Chaayos)",i];');
+    expect(q).not.toMatch(/nwr\[[^\]]*\]\(around/);
     expect(q).toContain('out center 60;');
+  });
+  it('matches a branch by its brand tag when the name differs', () => {
+    const offers = [offer('ww', { nameRegex: 'westside' })];
+    const json = { elements: [{ type: 'node', lat: 1, lon: 2, tags: { name: 'Trent Store', brand: 'Westside' } }] };
+    expect(parseOverpass(json, offers)).toEqual([{ offerId: 'ww', name: 'Trent Store', lat: 1, lng: 2 }]);
+  });
+  it('retries once on 504, then succeeds', async () => {
+    vi.useFakeTimers();
+    const ok = { ok: true, status: 200, json: async () => ({ elements: [] }) };
+    const fetchImpl = vi.fn().mockResolvedValueOnce({ ok: false, status: 504 }).mockResolvedValueOnce(ok);
+    const p = fetchBranches([offer('sb', { wikidata: 'Q37158' })], 1, 2, fetchImpl as unknown as typeof fetch);
+    await vi.advanceTimersByTimeAsync(2_000);
+    await expect(p).resolves.toEqual([]);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
+  it('does not retry on 400', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: false, status: 400 });
+    await expect(fetchBranches([offer('sb', { wikidata: 'Q37158' })], 1, 2, fetchImpl as unknown as typeof fetch)).rejects.toThrow('HTTP 400');
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
   it('returns null when no offer has osm hints', () => {
     expect(buildOverpassQuery([offer('x')], 1, 1)).toBeNull();
