@@ -10,9 +10,16 @@ export const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 export const OVERPASS_TIMEOUT_MS = 25_000;
 export const MAX_BRANCHES = 60;
 const WIKIDATA_RE = /^Q[1-9]\d{0,11}$/;
+const POI_AMENITIES = 'cafe|restaurant|fast_food|ice_cream|bar|pub|food_court';
+/** One retry for transient overload (504 gateway timeout / 429 too many requests). */
+const RETRY_STATUSES = new Set([429, 504]);
+const RETRY_DELAY_MS = 2_000;
 
 export class OverpassError extends Error {
-  constructor(message: string) {
+  constructor(
+    message: string,
+    readonly status?: number,
+  ) {
     super(message);
     this.name = 'OverpassError';
   }
@@ -46,16 +53,24 @@ export function buildOverpassQuery(offers: readonly Offer[], lat: number, lng: n
   }
   if (ids.size === 0 && regexes.size === 0) return null;
 
+  // Shape matters for speed: first narrow to POIs (amenity food places + shops) inside the
+  // circle, then filter that small set. A bare `nwr["name"~...,i](around)` scans every object
+  // in a big city and times out on the public server (observed live in Bengaluru, ~30s+).
   const around = `(around:${r},${la},${ln})`;
   const parts: string[] = [];
   if (ids.size > 0) {
-    parts.push(`  nwr["brand:wikidata"~"^(${escapeQlString([...ids].join('|'))})$"]${around};`);
+    parts.push(`  nw.p["brand:wikidata"~"^(${escapeQlString([...ids].join('|'))})$"];`);
   }
   if (regexes.size > 0) {
-    const alt = [...regexes].map((x) => `(${x})`).join('|');
-    parts.push(`  nwr["name"~"${escapeQlString(alt)}",i]${around};`);
+    const alt = escapeQlString([...regexes].map((x) => `(${x})`).join('|'));
+    parts.push(`  nw.p["name"~"${alt}",i];`);
+    parts.push(`  nw.p["brand"~"${alt}",i];`);
   }
-  return `[out:json][timeout:25];\n(\n${parts.join('\n')}\n);\nout center ${MAX_BRANCHES};`;
+  return (
+    `[out:json][timeout:25];\n` +
+    `(\n  nw["amenity"~"^(${POI_AMENITIES})$"]${around};\n  nw["shop"]${around};\n)->.p;\n` +
+    `(\n${parts.join('\n')}\n);\nout center ${MAX_BRANCHES};`
+  );
 }
 
 function isObj(v: unknown): v is Record<string, unknown> {
@@ -96,8 +111,10 @@ export function parseOverpass(json: unknown, offers: readonly Offer[]): Branch[]
     const tags = isObj(el.tags) ? el.tags : {};
     const wd = typeof tags['brand:wikidata'] === 'string' ? tags['brand:wikidata'] : '';
     const name = cleanName(tags.name);
+    const brand = cleanName(tags.brand);
     let offer = wd ? byWikidata.get(wd) : undefined;
     if (!offer && name) offer = byRegex.find((x) => x.re.test(name))?.offer;
+    if (!offer && brand) offer = byRegex.find((x) => x.re.test(brand))?.offer;
     if (!offer) continue;
     const key = `${offer.id}|${lat.toFixed(4)}|${lng.toFixed(4)}`;
     if (seen.has(key)) continue;
@@ -115,6 +132,16 @@ export async function fetchBranches(
 ): Promise<Branch[]> {
   const query = buildOverpassQuery(offers, lat, lng);
   if (!query) return [];
+  try {
+    return await requestOnce(query, offers, fetchImpl);
+  } catch (err) {
+    if (!(err instanceof OverpassError) || !err.status || !RETRY_STATUSES.has(err.status)) throw err;
+    await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+    return requestOnce(query, offers, fetchImpl);
+  }
+}
+
+async function requestOnce(query: string, offers: readonly Offer[], fetchImpl: typeof fetch): Promise<Branch[]> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), OVERPASS_TIMEOUT_MS);
   try {
@@ -127,7 +154,7 @@ export async function fetchBranches(
       mode: 'cors',
       signal: ctrl.signal,
     });
-    if (!res.ok) throw new OverpassError(`Overpass HTTP ${res.status}`);
+    if (!res.ok) throw new OverpassError(`Overpass HTTP ${res.status}`, res.status);
     return parseOverpass(await res.json(), offers);
   } catch (err) {
     if (err instanceof OverpassError) throw err;
