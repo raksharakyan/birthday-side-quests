@@ -15,7 +15,7 @@ export const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 export const TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 export interface MapView {
-  showPlace(place: Place): void;
+  showPlace(place: Place, radiusM?: number): void;
   showBranches(branches: readonly Branch[], offersById: ReadonlyMap<string, Offer>): void;
   clearBranches(): void;
   invalidateSize(): void;
@@ -70,10 +70,13 @@ export function createMap(container: HTMLElement): MapView {
 
   const branchLayer = L.layerGroup().addTo(map);
   let centerMarker: L.Marker | null = null;
+  let radiusRing: L.Circle | null = null;
 
   return {
-    showPlace(place) {
+    showPlace(place, radiusM) {
       if (centerMarker) centerMarker.remove();
+      if (radiusRing) radiusRing.remove();
+      radiusRing = null;
       centerMarker = L.marker([place.lat, place.lng], {
         icon: markerIcon('center'),
         title: 'Your searched area',
@@ -81,7 +84,23 @@ export function createMap(container: HTMLElement): MapView {
         keyboard: false,
         interactive: false,
       }).addTo(map);
-      map.setView([place.lat, place.lng], 13);
+      if (radiusM && Number.isFinite(radiusM) && radiusM > 0) {
+        // Decorative search-circle outline (SVG path attributes, no inline styles → CSP-safe).
+        radiusRing = L.circle([place.lat, place.lng], {
+          radius: radiusM,
+          interactive: false,
+          color: '#b02a63',
+          weight: 2,
+          opacity: 0.55,
+          dashArray: '6 8',
+          fillColor: '#ffd9e6',
+          fillOpacity: 0.12,
+          className: 'map-radius',
+        }).addTo(map);
+        map.fitBounds(radiusRing.getBounds(), { padding: [12, 12] });
+      } else {
+        map.setView([place.lat, place.lng], 13);
+      }
     },
     showBranches(branches, offersById) {
       branchLayer.clearLayers();

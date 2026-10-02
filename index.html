@@ -27,8 +27,11 @@
         <form id="search-form" class="search-form" novalidate>
           <div class="field field--city">
             <label for="city" class="field__label">Your city or area</label>
-            <input id="city" name="city" class="field__input" type="text" inputmode="search" autocomplete="off"
-              autocapitalize="words" spellcheck="false" maxlength="200" placeholder="e.g. Bengaluru, Indiranagar" enterkeyhint="search" />
+            <div class="combo" id="city-combo">
+              <input id="city" name="city" class="field__input" type="text" inputmode="search" autocomplete="off"
+                autocapitalize="words" spellcheck="false" maxlength="200" placeholder="e.g. Bengaluru, Indiranagar" enterkeyhint="search"
+                role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="city-suggestions" />
+            </div>
           </div>
           <div class="field field--month">
             <label for="month" class="field__label">Birthday month</label>
@@ -46,6 +49,15 @@
               <option value="10">October</option>
               <option value="11">November</option>
               <option value="12">December</option>
+            </select>
+          </div>
+          <div class="field field--radius">
+            <label for="radius" class="field__label">Search radius</label>
+            <select id="radius" name="radius" class="field__input">
+              <option value="2000">2 km</option>
+              <option value="5000" selected>5 km</option>
+              <option value="10000">10 km</option>
+              <option value="20000">20 km</option>
             </select>
           </div>
           <button type="submit" class="btn btn--primary search-form__submit">Find my quests <span class="btn__sparkle" aria-hidden="true">✨</span></button>
@@ -104,9 +116,10 @@
     </main>
 
     <p id="celebrate-live" class="visually-hidden" aria-live="polite"></p>
+    <p id="suggest-live" class="visually-hidden" aria-live="polite"></p>
 
     <footer class="site-footer">
-      <p>Map data &copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap contributors</a>. Search by <a href="https://nominatim.org/" rel="noopener noreferrer" target="_blank">Nominatim</a>.</p>
+      <p>Map data &copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap contributors</a>. Search by <a href="https://nominatim.org/" rel="noopener noreferrer" target="_blank">Nominatim</a>, suggestions by <a href="https://photon.komoot.io/" rel="noopener noreferrer" target="_blank">Photon</a>.</p>
       <p>Offers change — always check with the brand before you go.</p>
       <p class="site-footer__love">Made with <span aria-hidden="true">💖</span><span class="visually-hidden">love</span> for birthday people everywhere.</p>
     </footer>

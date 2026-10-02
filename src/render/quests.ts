@@ -64,7 +64,17 @@ function doneToggle(offer: Offer, idPrefix: string): HTMLElement {
   return el('div', { class: 'quest-card__done' }, [input, el('label', { for: id, class: 'quest-card__done-label' }, ['Quest complete!'])]);
 }
 
-export function questCard(offer: Offer, opts: { branch?: Branch | undefined; now: Date; idPrefix: string }): HTMLLIElement {
+/** "350 m away" / "1.2 km away" (finite, non-negative metres only). */
+export function formatDistance(m: number): string {
+  if (!Number.isFinite(m) || m < 0) return '';
+  if (m < 1000) return `${Math.max(10, Math.round(m / 10) * 10)} m away`;
+  return `${(m / 1000).toFixed(m < 10_000 ? 1 : 0)} km away`;
+}
+
+export function questCard(
+  offer: Offer,
+  opts: { branch?: Branch | undefined; distanceM?: number | undefined; now: Date; idPrefix: string },
+): HTMLLIElement {
   const headingId = `quest-${opts.idPrefix}-${offer.id}`;
   const actions = el('div', { class: 'quest-card__actions' }, [
     opts.branch
@@ -115,6 +125,12 @@ export function questCard(offer: Offer, opts: { branch?: Branch | undefined; now
                 `Nearest: ${opts.branch.name}`,
               ])
             : null,
+          opts.branch && opts.distanceM !== undefined && formatDistance(opts.distanceM)
+            ? el('span', { class: 'quest-card__distance' }, [
+                el('span', { class: 'quest-card__sep', 'aria-hidden': 'true' }, [' · ']),
+                formatDistance(opts.distanceM),
+              ])
+            : null,
         ]),
         actions,
         doneToggle(offer, opts.idPrefix),
@@ -132,6 +148,48 @@ export function renderQuestList(
   const list = el('ul', { class: 'quest-list', role: 'list' });
   for (const o of offers) list.appendChild(questCard(o, { branch: opts.branches?.get(o.id), now, idPrefix: opts.idPrefix }));
   container.replaceChildren(list);
+}
+
+/**
+ * Nearby tab: every country quest stays visible. Quests with a branch inside the circle come first,
+ * nearest first, with "x km away"; the rest follow under a secondary heading.
+ */
+export function renderNearbyList(
+  container: HTMLElement,
+  offers: readonly Offer[],
+  opts: {
+    branches: ReadonlyMap<string, Branch>;
+    distances: ReadonlyMap<string, number>;
+    /** Set once the branch lookup has finished; before that the list is flat. */
+    restHeading?: string | undefined;
+    now?: Date;
+    idPrefix: string;
+  },
+): void {
+  const now = opts.now ?? new Date();
+  const withBranch = offers
+    .filter((o) => opts.branches.has(o.id))
+    .sort((a, b) => (opts.distances.get(a.id) ?? Infinity) - (opts.distances.get(b.id) ?? Infinity));
+  const rest = offers.filter((o) => !opts.branches.has(o.id));
+  const card = (o: Offer) =>
+    questCard(o, { branch: opts.branches.get(o.id), distanceM: opts.distances.get(o.id), now, idPrefix: opts.idPrefix });
+  if (!opts.restHeading || withBranch.length === 0 || rest.length === 0) {
+    const list = el('ul', { class: 'quest-list', role: 'list' });
+    for (const o of [...withBranch, ...rest]) list.appendChild(card(o));
+    container.replaceChildren(list);
+    return;
+  }
+  const headingId = `${opts.idPrefix}-rest-heading`;
+  container.replaceChildren(
+    el('ul', { class: 'quest-list', role: 'list' }, withBranch.map(card)),
+    el('section', { class: 'quest-group', 'aria-labelledby': headingId }, [
+      el('h3', { class: 'quest-group__heading', id: headingId }, [
+        el('span', { class: 'quest-group__icon', 'aria-hidden': 'true' }, ['🧭']),
+        opts.restHeading,
+      ]),
+      el('ul', { class: 'quest-list', role: 'list' }, rest.map(card)),
+    ]),
+  );
 }
 
 export function liveCard(r: LiveResult): HTMLLIElement {

@@ -1,4 +1,5 @@
 import offersJson from '../../public/offers.json';
+import headersFile from '../../public/_headers?raw';
 import { describe, expect, it } from 'vitest';
 import { buildCsp, workerOrigin } from '../../csp.config';
 import { parseNominatim } from '../../src/geocode';
@@ -123,7 +124,7 @@ describe('CSP (csp.config.ts)', () => {
     expect(d.get('font-src')).toBe("'self'");
     // data: is needed only for Leaflet's 1x1 transparent GIF placeholder used when aborting tile loads.
     expect(d.get('img-src')).toBe("'self' data: https://tile.openstreetmap.org");
-    expect(d.get('connect-src')).toBe("'self' https://nominatim.openstreetmap.org https://overpass-api.de");
+    expect(d.get('connect-src')).toBe("'self' https://nominatim.openstreetmap.org https://overpass-api.de https://photon.komoot.io");
     expect(d.get('object-src')).toBe("'none'");
     expect(d.get('base-uri')).toBe("'none'");
     expect(d.get('form-action')).toBe("'none'");
@@ -133,7 +134,18 @@ describe('CSP (csp.config.ts)', () => {
   it('header policy adds frame-ancestors and the Worker origin only', () => {
     const d = directives(buildCsp({ workerOrigin: 'https://w.example.workers.dev', forHeader: true }));
     expect(d.get('frame-ancestors')).toBe("'none'");
-    expect(d.get('connect-src')).toBe("'self' https://nominatim.openstreetmap.org https://overpass-api.de https://w.example.workers.dev");
+    expect(d.get('connect-src')).toBe("'self' https://nominatim.openstreetmap.org https://overpass-api.de https://photon.komoot.io https://w.example.workers.dev");
+  });
+  it('photon.komoot.io is allowed in connect-src only', () => {
+    const csp = buildCsp({ workerOrigin: null, forHeader: true });
+    for (const [k, v] of directives(csp)) {
+      if (k === 'connect-src') expect(v.split(' ')).toContain('https://photon.komoot.io');
+      else expect(v).not.toContain('photon');
+    }
+  });
+  it('shipped public/_headers CSP matches buildCsp (header form, no Worker)', () => {
+    const line = /Content-Security-Policy: (.*)$/m.exec(headersFile)?.[1];
+    expect(line).toBe(buildCsp({ workerOrigin: null, forHeader: true }));
   });
   it('workerOrigin accepts only https without credentials and strips path/query', () => {
     expect(workerOrigin('https://w.example.workers.dev/search?x=1')).toBe('https://w.example.workers.dev');

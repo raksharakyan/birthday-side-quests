@@ -9,6 +9,11 @@ import type { Branch, Offer } from './types';
 export const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
 export const OVERPASS_TIMEOUT_MS = 25_000;
 export const MAX_BRANCHES = 60;
+/** Wider circles (10–20 km) cover far more shops, so allow more pins (DECISIONS #17). */
+export const MAX_BRANCHES_WIDE = 150;
+export const DEFAULT_RADIUS_M = 5_000;
+export const RADIUS_OPTIONS_M = [2_000, 5_000, 10_000, 20_000] as const;
+const MAX_RADIUS_M = 20_000;
 const WIKIDATA_RE = /^Q[1-9]\d{0,11}$/;
 const POI_AMENITIES = 'cafe|restaurant|fast_food|ice_cream|bar|pub|food_court';
 /** One retry for transient overload (504 gateway timeout / 429 too many requests). */
@@ -31,6 +36,17 @@ export function escapeQlString(s: string): string {
   return s.replace(/[\u0000-\u001f\u007f]/g, '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+/** Clamps a radius to 100 m … 20 km (rounded to whole metres). */
+export function clampRadius(radiusM: number): number {
+  if (!Number.isFinite(radiusM)) throw new RangeError('radius must be finite');
+  return Math.round(Math.min(MAX_RADIUS_M, Math.max(100, radiusM)));
+}
+
+/** Branch cap for a given search radius. */
+export function maxBranchesFor(radiusM: number): number {
+  return clampRadius(radiusM) > DEFAULT_RADIUS_M ? MAX_BRANCHES_WIDE : MAX_BRANCHES;
+}
+
 function coord(n: number, limit: number, name: string): string {
   if (!Number.isFinite(n) || Math.abs(n) > limit) throw new RangeError(`${name} must be a finite number within ±${limit}`);
   return n.toFixed(6);
@@ -39,11 +55,10 @@ function coord(n: number, limit: number, name: string): string {
 /**
  * Builds ONE Overpass QL query for all offers with osm hints, or null when there is nothing to look up.
  */
-export function buildOverpassQuery(offers: readonly Offer[], lat: number, lng: number, radiusM = 5000): string | null {
+export function buildOverpassQuery(offers: readonly Offer[], lat: number, lng: number, radiusM = DEFAULT_RADIUS_M): string | null {
   const la = coord(lat, 90, 'lat');
   const ln = coord(lng, 180, 'lng');
-  if (!Number.isFinite(radiusM)) throw new RangeError('radius must be finite');
-  const r = Math.round(Math.min(20_000, Math.max(100, radiusM)));
+  const r = clampRadius(radiusM);
 
   const ids = new Set<string>();
   const regexes = new Set<string>();
@@ -69,7 +84,7 @@ export function buildOverpassQuery(offers: readonly Offer[], lat: number, lng: n
   return (
     `[out:json][timeout:25];\n` +
     `(\n  nw["amenity"~"^(${POI_AMENITIES})$"]${around};\n  nw["shop"]${around};\n)->.p;\n` +
-    `(\n${parts.join('\n')}\n);\nout center ${MAX_BRANCHES};`
+    `(\n${parts.join('\n')}\n);\nout center ${maxBranchesFor(r)};`
   );
 }
 
@@ -82,7 +97,8 @@ function cleanName(s: unknown): string {
 }
 
 /** Pure parser: maps Overpass elements back to offers, de-duplicates and caps. */
-export function parseOverpass(json: unknown, offers: readonly Offer[]): Branch[] {
+export function parseOverpass(json: unknown, offers: readonly Offer[], cap: number = MAX_BRANCHES): Branch[] {
+  const limit = Math.max(0, Math.min(MAX_BRANCHES_WIDE, Math.floor(Number.isFinite(cap) ? cap : MAX_BRANCHES)));
   if (!isObj(json) || !Array.isArray(json.elements)) return [];
   const byWikidata = new Map<string, Offer>();
   const byRegex: Array<{ re: RegExp; offer: Offer }> = [];
@@ -100,7 +116,7 @@ export function parseOverpass(json: unknown, offers: readonly Offer[]): Branch[]
   const out: Branch[] = [];
   const seen = new Set<string>();
   for (const el of json.elements as unknown[]) {
-    if (out.length >= MAX_BRANCHES) break;
+    if (out.length >= limit) break;
     if (!isObj(el)) continue;
     const pos = el.type === 'node' ? el : isObj(el.center) ? el.center : null;
     if (!pos) continue;
@@ -129,19 +145,21 @@ export async function fetchBranches(
   lat: number,
   lng: number,
   fetchImpl: typeof fetch = fetch,
+  radiusM: number = DEFAULT_RADIUS_M,
 ): Promise<Branch[]> {
-  const query = buildOverpassQuery(offers, lat, lng);
+  const query = buildOverpassQuery(offers, lat, lng, radiusM);
   if (!query) return [];
+  const cap = maxBranchesFor(radiusM);
   try {
-    return await requestOnce(query, offers, fetchImpl);
+    return await requestOnce(query, offers, fetchImpl, cap);
   } catch (err) {
     if (!(err instanceof OverpassError) || !err.status || !RETRY_STATUSES.has(err.status)) throw err;
     await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
-    return requestOnce(query, offers, fetchImpl);
+    return requestOnce(query, offers, fetchImpl, cap);
   }
 }
 
-async function requestOnce(query: string, offers: readonly Offer[], fetchImpl: typeof fetch): Promise<Branch[]> {
+async function requestOnce(query: string, offers: readonly Offer[], fetchImpl: typeof fetch, cap: number): Promise<Branch[]> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), OVERPASS_TIMEOUT_MS);
   try {
@@ -155,7 +173,7 @@ async function requestOnce(query: string, offers: readonly Offer[], fetchImpl: t
       signal: ctrl.signal,
     });
     if (!res.ok) throw new OverpassError(`Overpass HTTP ${res.status}`, res.status);
-    return parseOverpass(await res.json(), offers);
+    return parseOverpass(await res.json(), offers, cap);
   } catch (err) {
     if (err instanceof OverpassError) throw err;
     throw new OverpassError(err instanceof Error ? err.message : 'Overpass request failed');

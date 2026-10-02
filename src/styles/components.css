@@ -13,6 +13,52 @@
 .search-form { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-4); align-items: flex-end; }
 .field { display: flex; flex-direction: column; gap: var(--space-1); flex: 1 1 14rem; min-width: 0; }
 .field--month { flex: 1 1 10rem; }
+.field--radius { flex: 1 1 8rem; }
+@media (max-width: 599px) { .field--month, .field--radius { flex: 1 1 calc(50% - var(--space-4)); } }
+
+/* ---------- city autocomplete (combobox) ----------
+ * The popup is absolutely positioned under the input so opening it never shifts layout. */
+.combo { position: relative; }
+.ac-popup {
+  position: absolute; z-index: 1100; /* above Leaflet panes/controls (≤1000) */
+  inset-inline: 0; top: calc(100% + 6px);
+  background: var(--color-surface);
+  border: 2px solid var(--blush); border-radius: var(--radius-l);
+  box-shadow: var(--shadow-lift);
+  overflow: hidden;
+  animation: ac-pop 0.14s ease-out;
+}
+.ac-popup[hidden] { display: none; }
+@keyframes ac-pop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.ac-list { list-style: none; margin: 0; padding: var(--space-1); max-height: min(22rem, 60vh); overflow-y: auto; }
+.ac-option {
+  display: flex; align-items: center; gap: var(--space-2);
+  min-height: 48px; padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-m); cursor: pointer; color: var(--ink);
+  border: 2px solid transparent;
+}
+.ac-option:hover { background: var(--blush-soft); }
+/* Active option: lavender fill + focus-coloured ring; ink text stays ≥ 10:1. */
+.ac-option[aria-selected='true'] { background: var(--lavender); border-color: var(--color-focus); }
+.ac-option__pin { flex: 0 0 auto; font-size: 1.05rem; line-height: 1; }
+.ac-option__text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.ac-option__name { font-weight: 700; overflow-wrap: anywhere; }
+.ac-option__detail { font-size: 0.85rem; color: var(--ink-muted); overflow-wrap: anywhere; }
+.ac-option[aria-selected='true'] .ac-option__detail { color: var(--ink); }
+.ac-footer {
+  margin: 0; padding: var(--space-1) var(--space-4) var(--space-2);
+  font-size: 0.75rem; color: var(--ink-muted); text-align: end;
+  border-top: 1px solid var(--color-border-soft);
+}
+@media (prefers-reduced-motion: reduce) { .ac-popup { animation: none; } }
+
+/* ---------- nearby: secondary group ---------- */
+.quest-group { margin-top: var(--space-6); }
+.quest-group__heading {
+  display: flex; align-items: center; gap: var(--space-2);
+  margin: 0 0 var(--space-3); font-family: var(--font-display); font-weight: 600; font-size: 1.05rem; color: var(--ink-lavender);
+}
+.quest-card__distance { font-weight: 700; color: var(--ink-mint); }
 .field__label { font-weight: 700; font-size: 0.95rem; color: var(--ink); }
 .field__input {
   font: inherit; width: 100%; min-height: 48px;
