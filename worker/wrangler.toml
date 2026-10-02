@@ -1,0 +1,25 @@
+name = "birthday-side-quests-search"
+main = "src/index.ts"
+compatibility_date = "2026-09-29"
+workers_dev = true
+
+# No request logs / traces are kept.
+[observability]
+enabled = false
+
+[vars]
+ALLOWED_ORIGIN = "https://raksharakyan.github.io"
+# Set to "true" only in a local .dev.vars to allow http://localhost:5173 and :4173.
+ALLOW_LOCALHOST = "false"
+
+# ~20 requests / minute / IP (Workers Rate Limiting binding). namespace_id is any
+# account-unique integer string you choose.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "2026100201"
+
+  [ratelimits.simple]
+  limit = 20
+  period = 60
+
+# Secret (never committed): wrangler secret put TAVILY_API_KEY
