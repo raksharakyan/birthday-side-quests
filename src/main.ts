@@ -7,7 +7,7 @@ import './styles/components.css';
 import { countryName, countryOptions } from './countries';
 import { GeocodeError, geocode } from './geocode';
 import { isLiveSearchEnabled, liveSearch } from './liveSearch';
-import { filterOffers, loadOffers, monthInfo, onlineCounts } from './offers';
+import { applyVerifiedFilter, filterOffers, loadOffers, monthInfo, nearbyOffers, onlineCounts, type VenueHit } from './offers';
 import type { Suggestion } from './autocomplete';
 import { DEFAULT_RADIUS_M, RADIUS_OPTIONS_M, distanceM, fetchBranches, nearestByOffer } from './overpass';
 import { createCombobox } from './render/combobox';
@@ -38,6 +38,12 @@ interface State {
   pinCount: number;
   /** The last branch lookup failed (Overpass down); quests are still listed. */
   pinsFailed: boolean;
+  /** Every branch Overpass returned (all pins, before the "Verified only" filter). */
+  pins: Branch[];
+  /** Radius of the circle drawn on the map for the current search. */
+  circleRadiusM: number;
+  /** "Verified only" switch (DECISIONS #25). */
+  verifiedOnly: boolean;
 }
 
 const state: State = {
@@ -50,7 +56,12 @@ const state: State = {
   searchedRadiusM: null,
   pinCount: 0,
   pinsFailed: false,
+  pins: [],
+  circleRadiusM: DEFAULT_RADIUS_M,
+  verifiedOnly: false,
 };
+/** Listed Nearby quests with a branch or venue inside the search circle (for the header summary). */
+let nearbyWithin = 0;
 /** True while the saved session is being applied, so intermediate states aren't written back. */
 let restoring = false;
 /** Place picked from the autocomplete list, valid while the input still shows its label. */
@@ -90,6 +101,8 @@ const resultsSub = $('results-sub');
 const progressEl = $('progress');
 const progressCount = $('progress-count');
 const tablist = document.querySelector<HTMLElement>('[role="tablist"]');
+const verifiedSwitch = $('verified-only') as HTMLButtonElement;
+const foundVerifiedNote = $('found-verified-note');
 
 // ---------- static decoration (icons are built with createElementNS, never innerHTML) ----------
 function decorate(): void {
@@ -218,7 +231,7 @@ function updateHeader(): void {
   } else if (state.pinsFailed) {
     sub = `${totalText} Shop pins for ${shortPlace()} didn’t load, so distances are missing.`;
   } else if (state.searchedRadiusM !== null) {
-    sub = `${totalText} ${state.branches.size} within ${km(state.searchedRadiusM)} of ${shortPlace()}.`;
+    sub = `${totalText} ${nearbyWithin} within ${km(state.searchedRadiusM)} of ${shortPlace()}.`;
   } else {
     sub = total > 0 ? `${totalText} Looking for shops near ${shortPlace()}.` : `No quests near ${shortPlace()} yet.`;
   }
@@ -228,7 +241,7 @@ function updateHeader(): void {
   progressCount.textContent = `${claimed} of ${total}`;
   const ratio = total > 0 ? claimed / total : 0;
   progressEl.style.setProperty('--progress', ratio.toFixed(4));
-  setCandleLit(claimed > 0);
+  setCandleLit(doneIds().length > 0);
   mapView?.setClaimed(new Set(doneIds()));
 }
 
@@ -282,10 +295,45 @@ function populateCountries(extra?: string | null): void {
   if (countrySelect.value !== wanted) countrySelect.value = '';
 }
 
+/** Online tab offers for the current country, before the "Verified only" filter. */
+function onlineAll(): Offer[] {
+  return filterOffers({ offers: state.offers, country: state.onlineCountry, channel: 'online' });
+}
+
+/** Nearby tab offers for the searched place (venue offers only when a venue is close), before the filter. */
+function nearbyAll(): { offers: Offer[]; venues: Map<string, VenueHit> } {
+  const place = state.place;
+  if (!place) return { offers: [], venues: new Map() };
+  return nearbyOffers({ offers: state.offers, country: place.countryCode, lat: place.lat, lng: place.lng });
+}
+
+/** A venue as a branch for cards and pins. Approximate venues get directions by name and no pin. */
+function venueBranch(offerId: string, hit: VenueHit): Branch {
+  const b: Branch = { offerId, name: hit.venue.name, lat: hit.venue.lat, lng: hit.venue.lng };
+  if (!hit.venue.exact) b.approximate = true;
+  return b;
+}
+
+/** Empty state when "Verified only" hides every quest in a list. */
+function renderVerifiedEmpty(container: HTMLElement): void {
+  renderEmpty(container, 'Every quest here is marked Check with store. Show all quests to see them, then confirm the offer with the shop.', 'empty', {
+    title: 'No verified quests here yet',
+    actions: [
+      ghostButton('Show all quests', () => {
+        setVerifiedOnly(false);
+        verifiedSwitch.focus();
+      }),
+    ],
+  });
+}
+
 function renderOnline(): void {
-  const list = filterOffers({ offers: state.offers, country: state.onlineCountry, channel: 'online' });
+  const all = onlineAll();
+  const list = applyVerifiedFilter(all, state.verifiedOnly);
   setCount(onlineCountEl, state.offers.length ? list.length : null);
-  if (list.length === 0) {
+  if (all.length > 0 && list.length === 0) {
+    renderVerifiedEmpty(onlineList);
+  } else if (list.length === 0) {
     renderEmpty(
       onlineList,
       state.onlineCountry
@@ -349,8 +397,15 @@ function widenNotice(): HTMLElement | null {
 
 function renderNearby(): void {
   if (!state.place) return;
-  const list = filterOffers({ offers: state.offers, country: state.place.countryCode, channel: 'nearby' });
+  const { offers: all, venues } = nearbyAll();
+  const list = applyVerifiedFilter(all, state.verifiedOnly);
   setCount(nearbyCountEl, list.length);
+  nearbyWithin = 0;
+  if (all.length > 0 && list.length === 0) {
+    renderVerifiedEmpty(nearbyList);
+    updateHeader();
+    return;
+  }
   if (list.length === 0) {
     renderEmpty(
       nearbyList,
@@ -362,16 +417,24 @@ function renderNearby(): void {
     return;
   }
   const { place } = state;
+  // Render-time merge: Overpass branches plus the nearest venue of each venue offer (state.branches
+  // itself only ever holds Overpass results).
+  const branches = new Map(state.branches);
   const distances = new Map<string, number>();
   for (const [id, b] of state.branches) distances.set(id, distanceM(place.lat, place.lng, b.lat, b.lng));
+  for (const [id, hit] of venues) {
+    branches.set(id, venueBranch(id, hit));
+    distances.set(id, hit.distanceM);
+  }
+  if (state.searchedRadiusM !== null) {
+    const r = state.searchedRadiusM;
+    nearbyWithin = list.filter((o) => (distances.get(o.id) ?? Infinity) <= r).length;
+  }
   const fresh = !hasCards(nearbyList);
   renderNearbyList(nearbyList, list, {
-    branches: state.branches,
+    branches,
     distances,
-    restHeading:
-      state.searchedRadiusM !== null
-        ? `More quests in ${countryName(place.countryCode)} (no branch found within ${km(state.searchedRadiusM)})`
-        : undefined,
+    restHeading: state.searchedRadiusM !== null ? `Also in ${countryName(place.countryCode)}: find your nearest branch` : undefined,
     notice: widenNotice(),
     idPrefix: 'nearby',
   });
@@ -387,6 +450,58 @@ function renderNearbyStart(): void {
 function km(radiusM: number): string {
   return `${Math.round(radiusM / 1000)} km`;
 }
+
+/**
+ * Map pins: every Overpass branch, plus the nearest venue of each venue offer when it is exact and
+ * inside the search circle. Venues further out keep their card distance and directions but get no
+ * pin, so the map never zooms out to a park 100 km away (DECISIONS #24). "Verified only" hides
+ * pins of unverified offers.
+ */
+function currentPins(): Branch[] {
+  if (!state.place) return [];
+  const pins = [...state.pins];
+  for (const [id, hit] of nearbyAll().venues) {
+    if (hit.venue.exact && hit.distanceM <= state.circleRadiusM) pins.push(venueBranch(id, hit));
+  }
+  if (!state.verifiedOnly) return pins;
+  const verified = new Set(state.offers.filter((o) => o.verified).map((o) => o.id));
+  return pins.filter((p) => verified.has(p.offerId));
+}
+
+function renderPins(fit: boolean): number {
+  const pins = currentPins();
+  if (!mapView || !state.place) return pins.length;
+  mapView.showBranches(pins, new Map(state.offers.map((o) => [o.id, o])), { fit });
+  mapView.setClaimed(new Set(doneIds()));
+  return pins.length;
+}
+
+function applyVerifiedUi(): void {
+  verifiedSwitch.setAttribute('aria-checked', String(state.verifiedOnly));
+  foundVerifiedNote.hidden = !state.verifiedOnly;
+}
+
+/** Unique offers across Nearby and Online (before the filter), and how many of them are verified. */
+function verifiedCounts(): { verified: number; total: number } {
+  const ids = new Map<string, boolean>();
+  for (const o of [...nearbyAll().offers, ...onlineAll()]) ids.set(o.id, o.verified);
+  let verified = 0;
+  for (const v of ids.values()) if (v) verified += 1;
+  return { verified, total: ids.size };
+}
+
+/** Turns "Verified only" on or off: re-renders both lists and the pins, saves and announces it. */
+function setVerifiedOnly(on: boolean): void {
+  state.verifiedOnly = on;
+  applyVerifiedUi();
+  renderOnline();
+  if (state.place) renderNearby();
+  renderPins(false);
+  persist();
+  const { verified, total } = verifiedCounts();
+  setStatus(on ? `Showing verified quests only, ${verified} of ${total}` : `Showing all quests, ${total} in total`, 'success');
+}
+verifiedSwitch.addEventListener('click', () => setVerifiedOnly(!state.verifiedOnly));
 
 // ---------- found online ----------
 async function refreshFoundOnline(): Promise<void> {
@@ -554,35 +669,46 @@ async function runSearch(where: string | Place): Promise<void> {
     state.branches = new Map();
     state.searchedRadiusM = null;
     state.pinsFailed = false;
+    state.pins = [];
+    state.circleRadiusM = radiusM;
     // Auto-sync: the Online tab (and Found online) follow the searched city's country.
     syncOnlineCountry(place.countryCode);
     renderNearby();
     persist();
 
-    const nearby = filterOffers({ offers: state.offers, country: place.countryCode, channel: 'nearby' });
+    const nearby = nearbyAll().offers;
     const map = await getMap();
     if (seq !== searchSeq) return;
     map.clearBranches();
     map.showPlace(place, radiusM);
+    renderPins(true);
 
     if (nearby.length === 0) {
       setStatus(`No in-store quests near ${place.label} yet. The Online tab has offers you can claim anywhere.`, 'info');
       return;
     }
-    const quests = `${nearby.length} quest${nearby.length === 1 ? '' : 's'}`;
+    const shown = applyVerifiedFilter(nearby, state.verifiedOnly).length;
+    const quests = `${shown} ${state.verifiedOnly ? 'verified ' : ''}quest${shown === 1 ? '' : 's'}`;
     setStatus(`Found ${quests}. Looking for shops within ${km(radiusM)}…`, 'loading');
     try {
-      const branches = await fetchBranches(nearby, place.lat, place.lng, fetch, radiusM);
+      // Venue offers (theme parks) have fixed coordinates, so only chains go to Overpass.
+      const branches = await fetchBranches(
+        nearby.filter((o) => !o.venues),
+        place.lat,
+        place.lng,
+        fetch,
+        radiusM,
+      );
       if (seq !== searchSeq) return;
       state.branches = nearestByOffer(branches, place.lat, place.lng);
       state.searchedRadiusM = radiusM;
-      state.pinCount = branches.length;
-      map.showBranches(branches, new Map(state.offers.map((o) => [o.id, o])));
-      map.setClaimed(new Set(doneIds()));
+      state.pins = branches;
+      const pinCount = renderPins(true);
+      state.pinCount = pinCount;
       renderNearby();
       setStatus(
-        branches.length > 0
-          ? `Found ${quests} and ${branches.length} shop${branches.length === 1 ? '' : 's'} on the map within ${km(radiusM)} of ${place.label}.`
+        pinCount > 0
+          ? `Found ${quests} and ${pinCount} place${pinCount === 1 ? '' : 's'} on the map within ${km(radiusM)} of ${place.label}.`
           : `Found ${quests} for your city. We couldn't spot their shops within ${km(radiusM)} on the map. Try a bigger search radius.`,
         'success',
       );
@@ -652,7 +778,7 @@ function persist(): void {
   if (restoring) return;
   const place = state.place;
   saveSession({
-    v: 1,
+    v: 2,
     city: place ? state.placeText : null,
     lat: place ? place.lat : null,
     lng: place ? place.lng : null,
@@ -661,6 +787,7 @@ function persist(): void {
     radius: readRadius(),
     tab: currentTab(),
     done: doneIds(),
+    verifiedOnly: state.verifiedOnly,
   });
 }
 onDoneChange(() => {
@@ -679,6 +806,8 @@ function restoreSession(): void {
     state.month = readMonth();
     showMonthInfo();
     setDoneIds(saved.done);
+    state.verifiedOnly = saved.verifiedOnly;
+    applyVerifiedUi();
     const tab = tabs.find((t) => t.id === `tab-${saved.tab}` && !t.hidden) ?? tabs[0];
     if (tab) selectTab(tab);
     if (saved.city !== null && saved.lat !== null && saved.lng !== null && saved.countryCode) {
@@ -707,7 +836,19 @@ function clearSearch(): void {
     form.reset();
     setRadius(DEFAULT_RADIUS_M);
     setCityError(false);
-    Object.assign(state, { place: null, placeText: '', month: null, branches: new Map(), searchedRadiusM: null, pinCount: 0, pinsFailed: false });
+    Object.assign(state, {
+      place: null,
+      placeText: '',
+      month: null,
+      branches: new Map(),
+      searchedRadiusM: null,
+      pinCount: 0,
+      pinsFailed: false,
+      pins: [],
+      circleRadiusM: DEFAULT_RADIUS_M,
+      verifiedOnly: false,
+    });
+    applyVerifiedUi();
     setDoneIds([]);
     liveCache.clear();
     if (tabs[0]) selectTab(tabs[0]);

@@ -88,6 +88,10 @@
             </div>
 
             <section class="results" aria-label="Quest lists">
+              <div class="results-tools">
+                <button type="button" class="switch" role="switch" id="verified-only" aria-checked="false" aria-describedby="verified-only-hint"><span class="switch__track" aria-hidden="true"><span class="switch__thumb"></span></span><span class="switch__label">Verified only</span></button>
+                <p id="verified-only-hint" class="visually-hidden">Hides quests marked Check with store.</p>
+              </div>
               <div class="tabs" role="tablist" aria-label="Quest types">
                 <button type="button" class="tab" role="tab" id="tab-nearby" aria-controls="panel-nearby" aria-selected="true" tabindex="0">Nearby<span id="nearby-count" class="tab__count" hidden></span></button>
                 <button type="button" class="tab" role="tab" id="tab-online" aria-controls="panel-online" aria-selected="false" tabindex="-1">Online<span id="online-count" class="tab__count" hidden></span></button>
@@ -113,6 +117,7 @@
 
               <div class="tab-panel" role="tabpanel" id="panel-found" aria-labelledby="tab-found" tabindex="0" hidden>
                 <p class="disclaimer" id="found-disclaimer"><span>Live web results for your birthday month and country. We haven't checked these, so read the link before you go.</span></p>
+                <p class="disclaimer disclaimer--note" id="found-verified-note" hidden><span>Verified only doesn't apply here: live web results are never verified.</span></p>
                 <div id="found-list" class="panel-body"></div>
               </div>
             </section>

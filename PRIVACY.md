@@ -10,7 +10,8 @@ So a refresh doesn't lose your search, the app keeps **one small record in your 
 - the city you searched, as shown in the box, and its map coordinates and country code;
 - your birthday month and search radius;
 - which tab is open (Nearby, Online or Found online);
-- which quests you ticked as complete.
+- which quests you ticked as complete;
+- whether the **Verified only** switch is on.
 
 Nothing else is saved, and nothing is saved until you search or change one of these. **Clear search** deletes the record straight away. On load the app checks the record strictly and throws it away if anything looks wrong. Session storage is separate for each tab, isn't shared with other sites, and is never sent to us or to anyone else.
 

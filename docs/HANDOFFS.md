@@ -743,3 +743,110 @@ I applied QA-PR3-01, -02, -03 and -04 (DECISIONS #22) and removed the two `test.
 
 - **Sign-offs:** Security ✅ (Security review: PR #3) and QA ✅ (all blocking items fixed). PR #3 is cleared to merge.
 - **Docs:** added `CLAUDE.md` and the root `DESIGN.md`, and updated the README.
+
+## Full-Stack: venues for single-location offers + "Verified only" (2026-10-02, branch `fix/venues-verified-filter`)
+User bug: searching Kolkata showed Imagicaa (one park near Mumbai) in Nearby. User request: a "Verified only" filter. DECISIONS #24 and #25.
+
+**Venues (#24)**
+- `Offer.venues` (1 to 20 `{name ≤80, lat, lng, exact? = true}`), strictly validated in `validateOffer` (bad name/coords/`exact` type rejects the whole offer).
+- `src/offers.ts`: `VENUE_MAX_M = 150_000`, `nearestVenue(offer, lat, lng)`, `nearbyOffers({offers, country, lat, lng})` (drops venue offers with no venue within 150 km; returns the kept venue hits).
+- `src/urls.ts`: `directionsUrlByName(name)` (1 to 120 clean chars, throws otherwise; `'()!*` percent-encoded as well).
+- Nearby: venue hits are merged into a render-time branch map (never into `state.branches`), sort with the shop branches by distance, show "Wonderla Bengaluru · 26 km away" (or "about N km away" for `exact: false`). Venue offers are not sent to Overpass. Venue pins only when exact and inside the search circle (see #24 for why). Rest heading: "Also in <Country>: find your nearest branch". Header "N within X km" counts listed offers within the circle.
+- `public/offers.json`: `wonderla-in` (5 parks), `imagicaa-in`, `water-kingdom-in`, `wetnjoy-lonavala-in` (`exact: false`) got venues, lost `osm`, channel `both` → `in-store`.
+- Other single-location destination offers in the file: **none found**. Scanned all 102 for parks, resorts, zoos, museums, aquariums and attractions. `club-itc-in` (ITC hotels) and `timezone-in` (arcade chain) are multi-site chains and keep `osm`.
+
+**Verified only (#25)**
+- `<button role="switch" id="verified-only">` above the tabs (`index.html`, `.switch` in `components.css`, documented in DESIGN.md). Filters Nearby and Online, counts, header summary and ring, and pins; Found online shows `#found-verified-note`. Empty state "No verified quests here yet" + "Show all quests". Announced via `#status`.
+- `src/session.ts` version 2 with `verifiedOnly`; exact version 1 records migrate to `verifiedOnly: false`. Clear search resets it. SECURITY.md I1 updated.
+
+**Tests**
+- Unit: new `tests/unit/venues.test.ts` (venue validation incl. 19 rejects, `nearestVenue`, `nearbyOffers` for Kolkata/Bengaluru/Mumbai on the shipped data, 150 km boundary, `applyVerifiedFilter`, `directionsUrlByName` encoding/XSS/length, approximate distance text). `session.test.ts` / `security-pr3.test.ts` moved to v2 (+ migration, `verifiedOnly` tampering).
+- E2E: new `tests/e2e/venues-verified.spec.ts` (Kolkata no parks; Bengaluru Wonderla name/km/href/no pin; Mumbai Wet'nJoy "about" + by-name href + no pin, Water Kingdom pin at 20 km; Verified only counts/cards/pins/announcement/Space/reload/Clear/axe; all-unverified empty state; v1 migration). Existing specs updated: `expectedNearbyCount` now takes the searched point, session records are v2, the Wonderla card joins the "with a branch" group in Bengaluru, Overpass 504 keeps the venue's directions, new rest heading.
+
+| Check | Result |
+|---|---|
+| `npm run build` | OK |
+| `npm test` | 686 passed |
+| `npm run test:e2e` | 86 passed, 8 skipped (by design) |
+| `npm run lhci` | 0.99 / 1.00 / 1.00 (perf / a11y / best practices) |
+| `npm audit --audit-level=high` | 0 vulnerabilities |
+| Manual, `npm run preview` + real services (built-in browser) | Kolkata: 27 Nearby quests, no park (Overpass was 504 at the time, quests still listed). Bengaluru: 28 quests, 60 pins, Wonderla Bengaluru 26 km last in the near group with directions to 12.8346,77.4; Verified only → 15 Nearby / 11 Online, 29 pins, "Showing verified quests only, 18 of 34", plum switch. |
+
+Needs: Security review (new `venues` input, `directionsUrlByName`, session v2) and QA sign-off. Not committed.
+
+## Security review: PR #4 (2026-10-02, branch `fix/venues-verified-filter`)
+Scope: `git diff origin/main...HEAD`. `venues` field and validation, `nearestVenue`/`nearbyOffers`, `directionsUrlByName`, session v2 and v1 migration, the "Verified only" switch, map pin changes, `offers.json` venue data, privacy model and docs.
+
+| # | Severity | Area | Finding | Resolution |
+|---|---|---|---|---|
+| 1 | Low | `src/offers.ts` `validateVenues` / `src/render/quests.ts` | Venue names were validated with `cleanText` only, which allows `<`, `>` and lone surrogates. `directionsUrlByName` rejects those (`RangeError`, or `URIError` from `encodeURIComponent`), so such a name on an `exact: false` venue would have made `questCard` throw and break the Nearby list (data-driven render DoS; not XSS, the name never reaches HTML). | Fixed. `validateVenues` now rejects any name `directionsUrlByName` would reject, and `branchDirectionsUrl` falls back to the coordinate link if the by-name build ever throws. |
+| 2 | Info | `SECURITY.md` | "Directions links are built only from finite, clamped numbers" was no longer true. | Fixed. Now documents by-name links (validated name, full percent-encoding, fixed https Google Maps prefix, `safeHttpsUrl` + `externalLink`, no user location). |
+| 3 | Info | `PRIVACY.md` | The session record list did not mention the new `verifiedOnly` flag. | Fixed. Added "whether the Verified only switch is on". |
+
+Checked and OK (no change needed):
+- `directionsUrlByName`: `encodeURIComponent` plus `!'()*` means no `&`, `#`, `?`, `/` or `:` survives into the URL, so the name cannot add parameters, a fragment or change scheme/host; output is always `https://www.google.com/...` and still goes through `externalLink` → `safeHttpsUrl` with `target=_blank rel="noopener noreferrer"`. A name like `javascript:alert(1)` is just an encoded destination value. Length capped (80 in data, 120 in the builder).
+- Venue coordinates: finite, `|lat| ≤ 90`, `|lng| ≤ 180`, `exact` strictly boolean, 1 to 20 venues. All 8 shipped venues lie in India and match the named places; Wet'nJoy is correctly `exact: false`. Venue offers are `in-store` with no `osm`, and are not sent to Overpass (no new data leaves the browser).
+- `nearestVenue` guards invalid points; `nearbyOffers` never mutates `state.branches`.
+- Session v2: exact key sets for v2 and v1 (a v1 tag with v2 keys, a v2 tag with v1 keys, extra keys, future versions all rejected), `verifiedOnly` must be a boolean, `__proto__`/`constructor` keys fail the exact-key check, `isPlainObject` checks the prototype, 16 KB cap before `JSON.parse`. Migrated records are re-saved as v2.
+- "Verified only" switch: static markup, `<button type="button" role="switch" aria-checked>` with a visible label and `aria-describedby`; state set with `setAttribute`, no `innerHTML`, no inline style. Map: only a `fit` option was added; pins still use DOM-built divIcons and popups, and approximate venues never get a pin.
+- Privacy model unchanged: no new storage key, origin, CSP entry or URL state. `verifiedOnly` lives in the existing `bsq-session` record. No `innerHTML`/`eval` added (existing source scan passes).
+
+Tests: new `tests/unit/security-pr4.test.ts` (26 tests: venue name and coordinate rejects, by-name URL stays inside the `destination` value for hostile inputs, fallback, rel/target, session v2 tampering and prototype keys, shipped venue sanity, switch markup). The 3 name-reject tests fail without fix #1.
+
+| Check | Result |
+|---|---|
+| `npm run build` | OK |
+| `npm test` | 734 passed (20 files) |
+| `npm audit --audit-level=high` | 0 vulnerabilities |
+| `npm run test:e2e` | 102 passed, 10 skipped (by design) |
+
+**Security ✅** for PR #4 with the fixes above (uncommitted on the branch: `src/offers.ts`, `src/render/quests.ts`, `SECURITY.md`, `PRIVACY.md`, `tests/unit/security-pr4.test.ts`).
+
+## QA: PR #4 (2026-10-02, branch `fix/venues-verified-filter`)
+
+Working tree including Security's PR #4 fixes (last `src/` change 20:46; every run below came after it). Nothing committed. QA only added `tests/e2e/qa-pr4.spec.ts` and `tests/unit/qa-pr4.test.ts`. No `src/` edits.
+
+### Results
+| Command | Result |
+|---|---|
+| `npm run build` | ✅ pass (typechecks both new test files) |
+| `npm test` | ✅ **734/734** in 20 files (22 new from QA) |
+| `npm run test:e2e` (2 full runs in a row) | ✅ **102 passed, 10 skipped** in both runs (112 = 56 tests × 2 projects; skips are desktop-only/mobile-only by design). New spec alone: 16 passed, 2 skipped. |
+| `npm run lhci` (3 runs) | ✅ Performance **0.99**, Accessibility **1.00**, Best Practices **1.00**, SEO **1.00** in all 3. LCP 1.8 to 2.0 s, CLS ≤ 0.01, TBT 0 ms |
+| `npm audit --audit-level=high` | ✅ 0 vulnerabilities |
+
+### New tests
+| File | Tests | Covers |
+|---|---|---|
+| `tests/unit/qa-pr4.test.ts` | 22 | Exactly 4 venue offers, all `in-store`, IN only, no `osm`; Wonderla has 5 venues; only Wet'nJoy is `exact: false`; every venue inside India's bounding box. Venue offers never reach Online (IN, US, GB, worldwide). **City matrix against an independent haversine oracle** (Pune, Chennai, Delhi, Hyderabad, Kochi, Mysuru, Bhubaneswar, Nashik, Thane, Kolkata, Jaipur): kept venue offers, chosen nearest venue and distance all match, chains unaffected. Pune: Imagicaa 67 km, **Water Kingdom 136 km (inside 150 km, so present)**, Wet'nJoy "about 48 km away", no Wonderla. Wonderla picks Chennai/Hyderabad/Kochi/Bhubaneswar parks per city and Wonderla Bengaluru for Mysuru (102 km). Non-IN country at the same point lists no parks. Directions: exact = coordinates, Wet'nJoy = by name. All parks are verified so Verified only keeps them; IN has both verified and unverified offers in each tab; the filter neither mutates nor reorders. |
+| `tests/e2e/qa-pr4.spec.ts` | 9 (× 2 projects; 2 are desktop-only) | **Pune picked from Photon** (no Nominatim): the 3 park cards are the near group in nearest-first order (Wet'nJoy, Imagicaa, Water Kingdom) with exact names, "about 48 km away" / "67 km away" / "136 km away", correct hrefs and `rel`; no Wonderla; no pins (all outside 5 km); header "0 within 5 km of Pune."; no park names in the Overpass query; Verified only keeps the parks; axe. **Chennai:** Wonderla Chennai with its coordinates; no other parks. **Hyderabad at 20 km:** Wonderla Hyderabad (~19 km) gets a pin, header "1 within 20 km", pin survives Verified only. **Delhi:** no parks in Nearby or Online, ring total matches. **Claimed x Verified only:** claim Starbucks (unverified) and The Body Shop (verified) → "2 of N"; switch on → Starbucks card and pin gone, ring "1 of V", `--progress` = 1/V, candle lit, Body Shop pin claimed; unclaim Body Shop → "0 of V", no crash; session keeps `done: ["starbucks-in"]`; reload with filter on keeps it; switch off → Starbucks card checked, `is-done`, claimed pin, "1 of N", candle lit; axe. **Switch before a search:** Online IN filtered; the search status reads "Found N verified quests and 1 shop on the map"; ring "0 of V". **Mobile widths 360/375/390** (off and on): no horizontal scroll, switch 44 px tall, one line, inside the viewport, above the tabs without overlap; axe at 390 with it on. **Keyboard:** Shift+Tab from the tablist lands on the switch, focus ring visible, Enter toggles and keeps focus, Tab returns to the tablist, accessible description "Hides quests marked Check with store.". **Reduced motion:** thumb transition ≤ 1 ms, no running animation on the switch, thumb at its end transform, axe. |
+
+### Bugs
+| ID | Severity | Owner | Repro | Expected | Actual | Exact fix | Status |
+|---|---|---|---|---|---|---|---|
+| QA-PR4-01 | Low (copy) | Full-Stack | Search Hyderabad at 20 km where Overpass returns no shops (or any city where the only pin is a park, e.g. the Mumbai 20 km e2e mock with Water Kingdom). | The status doesn't call a theme park a shop. | "Found N quests and 1 shop on the map within 20 km of Hyderabad." The 1 pin is Wonderla Hyderabad: `renderPins()` counts venue pins too. | `src/main.ts` `runSearch`, success branch: change `${pinCount} shop${pinCount === 1 ? '' : 's'} on the map` to `${pinCount} place${pinCount === 1 ? '' : 's'} on the map`, then update `tests/e2e/qa-pr3.spec.ts:343` (`'4 places on the map within 5 km'`) and `tests/e2e/qa-pr4.spec.ts` "Verified only before any search" (`... and 1 place on the map`). | Open (non-blocking) |
+| QA-PR4-02 | Info | Product | Claim only an unverified quest, then turn Verified only on. | n/a | Ring "0 of V" and the candle goes out, because the ring counts listed quests only. The claim is kept and comes back when the switch is turned off (tested). Consistent with the ring meaning "of the quests shown". | None needed. Optional: keep the candle lit when `doneIds().length > 0` (`updateHeader`: `setCandleLit(doneIds().length > 0)`). | Product call |
+| QA-PR4-03 | Info | none | Verified only on. | n/a | Verified but stale offers ("May be outdated" badge) still show. This matches the switch hint ("Hides quests marked Check with store") and DECISIONS #25. | None. | Accepted |
+
+### Live smoke test (built `dist/`, real Nominatim, Overpass, OSM tiles, built-in browser)
+Served with `vite preview` on **port 4174** instead of 4173, so a concurrent Playwright run (`reuseExistingServer`) couldn't attach to a non-e2e build. Same build and base path.
+- **Kolkata, October:** 27 Nearby quests, 17 shops on the map, Online 24, ring "0 of 33". **No Imagicaa** (or any park) anywhere on the page. The user's report is fixed.
+- **Pune:** 30 Nearby quests, 19 shops. Park cards: Wet'nJoy Water Park Lonavala "about 48 km away" (by-name link `destination=Wet%27nJoy%20Water%20Park%20Lonavala`), **Imagicaa, Khopoli "66 km away"** (`destination=18.7668,73.2805`), Water Kingdom, Gorai, Mumbai "136 km away". No park pins. Header "36 quests in total. 9 within 5 km of Pune."
+- **Verified only on:** Nearby 17, Online 11, ring "0 of 20", header "20 quests in total. 5 within 5 km of Pune.", 11 pins, 0 "Check with store" badges, all 3 parks kept, announced "Showing verified quests only, 20 of 36". Session record v2 with `verifiedOnly: true`.
+- **Refresh:** switch still on, city Pune, Nearby 17, ring "0 of 20", 11 pins, status "Found 17 verified quests and 11 shops on the map within 5 km of Pune."
+- **Clear search:** switch off, city empty, 0 pins, sessionStorage empty.
+- **Console:** no errors, no CSP violations.
+
+### Sign-off
+| Feature | QA |
+|---|---|
+| Venues: parks only within 150 km (Kolkata/Delhi none; Pune 3; Chennai, Hyderabad, Bengaluru Wonderla) | ✅ |
+| Venue name, distance, directions (exact by coordinates, Wet'nJoy "about" + by name, no pin) | ✅ |
+| Parks removed from Online | ✅ |
+| Verified only: lists, counts, header, ring, pins, announcement, session v2, Clear search, empty state | ✅ |
+| Claimed state x Verified only | ✅ (QA-PR4-02 info) |
+| Mobile 360/375/390, 44 px target, keyboard, reduced motion, axe | ✅ |
+| Status copy for park-only pins | ⚠️ QA-PR4-01 (Low, non-blocking) |
+| Performance (Lighthouse) | ✅ 0.99 / 1.00 / 1.00 |
+
+**QA ✅** for PR #4. QA-PR4-01 is a one-word copy fix that can land with or after the merge.

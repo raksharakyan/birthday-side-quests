@@ -100,7 +100,7 @@ describe('Photon request and response', () => {
 });
 
 describe('session record: hostile values never load', () => {
-  const good = { v: 1, city: 'Bengaluru', lat: 12.97, lng: 77.59, countryCode: 'IN', month: 3, radius: 5000, tab: 'nearby', done: [] };
+  const good = { v: 2, city: 'Bengaluru', lat: 12.97, lng: 77.59, countryCode: 'IN', month: 3, radius: 5000, tab: 'nearby', done: [], verifiedOnly: false };
   it('accepts a clean record', () => expect(parseSession(JSON.stringify(good))).not.toBeNull());
   it.each([
     ['markup in city', { ...good, city: '<img src=x onerror=alert(1)>' }],
@@ -112,14 +112,15 @@ describe('session record: hostile values never load', () => {
     ['lowercase country', { ...good, countryCode: 'in' }],
     ['bad done id', { ...good, done: ['"><svg>'] }],
     ['duplicate done ids', { ...good, done: ['a', 'a'] }],
-    ['version bump', { ...good, v: 2 }],
+    ['version bump', { ...good, v: 3 }],
+    ['verifiedOnly not boolean', { ...good, verifiedOnly: '<img src=x>' }],
   ])('rejects %s', (_name, rec) => {
     expect(parseSession(JSON.stringify(rec))).toBeNull();
   });
   it('rejects oversized and non-JSON input', () => {
     expect(parseSession('x'.repeat(20_000))).toBeNull();
     expect(parseSession('{')).toBeNull();
-    expect(SESSION_FIELDS).toHaveLength(9);
+    expect(SESSION_FIELDS).toHaveLength(10);
   });
 });
 

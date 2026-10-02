@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Page, Route } from '@playwright/test';
-import { expectedNearbyCount, OVERPASS_BENGALURU, PHOTON_FIRST_LABEL, PNG_1PX } from './fixtures';
+import { expectedNearbyCount, expectedNearbyOffers, OVERPASS_BENGALURU, PHOTON_FIRST_LABEL, PNG_1PX } from './fixtures';
 import {
   axeViolations, CORS, expect, expectLocationOnlyToNominatim, expectNothingPersisted, expectOnlySessionRecord, search, storageSnapshot,
   test, type Guard,
@@ -37,8 +37,15 @@ const byId = (id: string) => {
 };
 const inCountry = (o: SeedOffer, cc: string) => o.countries.includes('*') || o.countries.includes(cc);
 const onlineCount = (cc: string) => OFFERS.filter((o) => (o.channel === 'online' || o.channel === 'both') && inCountry(o, cc)).length;
-/** Progress-ring total: unique offers listed in Nearby + Online for a country (every channel). */
-const ringTotal = (cc: string) => OFFERS.filter((o) => inCountry(o, cc)).length;
+/**
+ * Progress-ring total: unique offers listed in Nearby + Online for a country. Venue offers (theme
+ * parks) count only when a venue is within 150 km of the searched point (default: Bengaluru).
+ */
+const ringTotal = (cc: string, at?: { lat: number; lng: number }) =>
+  new Set([
+    ...expectedNearbyOffers(cc, at).map((o) => o.id),
+    ...OFFERS.filter((o) => (o.channel === 'online' || o.channel === 'both') && inCountry(o, cc)).map((o) => o.id),
+  ]).size;
 
 /** Chip count the card should show (mirrors the rules in src/render/quests.ts claimChips). */
 function expectedChips(o: SeedOffer): number {
@@ -121,12 +128,12 @@ test('journey: pick city → sorted Nearby → 20 km re-sort → claim 2 → Onl
   await expect(page.locator('#nearby-list .quest-card')).toHaveCount(total);
   await expect(page.locator('#nearby-count')).toHaveText(`${total} quests`);
   const d5 = await nearDistances(page);
-  expect(d5.length).toBe(4);
+  expect(d5.length).toBe(5); // 4 Overpass branches + Wonderla Bengaluru (venue, ~26 km)
   expect(d5.every(Number.isFinite)).toBe(true);
   expect([...d5].sort((a, b) => a - b)).toEqual(d5);
-  expect(await nearIds(page)).toEqual(['starbucks-in', 'third-wave-coffee-in', 'the-body-shop-in', 'theobroma-in']);
+  expect(await nearIds(page)).toEqual(['starbucks-in', 'third-wave-coffee-in', 'the-body-shop-in', 'theobroma-in', 'wonderla-in']);
   await expect(page.locator('#nearby-list .quest-card[data-offer-id="starbucks-in"] .quest-card__distance')).toHaveText(/^\d+ m away$/);
-  await expect(page.getByRole('heading', { name: 'More quests in India (no branch found within 5 km)' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Also in India: find your nearest branch' })).toBeVisible();
   expect(overpassQueries(guard)[0]).toContain(`(around:5000,${PICK.lat.toFixed(6)},${PICK.lng.toFixed(6)})`);
 
   // 3. Radius 20 km → Overpass around:20000 for the same coordinates, no geocoding, list re-sorted.
@@ -136,11 +143,11 @@ test('journey: pick city → sorted Nearby → 20 km re-sort → claim 2 → Onl
   expect(overpassQueries(guard)[1]).toContain(`(around:20000,${PICK.lat.toFixed(6)},${PICK.lng.toFixed(6)})`);
   expect(overpassQueries(guard)[1]).toContain('out center 150;');
   expect(hostRequests(guard, 'nominatim.openstreetmap.org')).toEqual([]);
-  await expect.poll(() => nearIds(page)).toEqual(['third-wave-coffee-in', 'the-body-shop-in', 'theobroma-in', 'starbucks-in']);
+  await expect.poll(() => nearIds(page)).toEqual(['third-wave-coffee-in', 'the-body-shop-in', 'theobroma-in', 'starbucks-in', 'wonderla-in']);
   const d20 = await nearDistances(page);
   expect([...d20].sort((a, b) => a - b)).toEqual(d20);
   await expect(page.locator('#nearby-list .quest-card[data-offer-id="starbucks-in"] .quest-card__distance')).toHaveText(/^1\d km away$/);
-  await expect(page.getByRole('heading', { name: 'More quests in India (no branch found within 20 km)' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Also in India: find your nearest branch' })).toBeVisible();
   await expect(page.locator('#results-sub')).toHaveText(`${ringTotal('IN')} quests in total. 4 within 20 km of Bengaluru.`);
 
   // 4. Claim two quests: ring text, candle, toast, live region, claimed pins.
@@ -187,8 +194,8 @@ test('journey: pick city → sorted Nearby → 20 km re-sort → claim 2 → Onl
 
   const rec = await expectOnlySessionRecord(page, context, startUrl);
   expect(rec).toEqual({
-    v: 1, city: PHOTON_FIRST_LABEL, lat: PICK.lat, lng: PICK.lng, countryCode: 'IN', month: 10, radius: 20000, tab: 'online',
-    done: ['starbucks-in', 'the-body-shop-in'],
+    v: 2, city: PHOTON_FIRST_LABEL, lat: PICK.lat, lng: PICK.lng, countryCode: 'IN', month: 10, radius: 20000, tab: 'online',
+    done: ['starbucks-in', 'the-body-shop-in'], verifiedOnly: false,
   });
 
   // 6. Refresh → everything restored from sessionStorage; Overpass re-run at 20 km, no geocoder calls.
@@ -207,7 +214,7 @@ test('journey: pick city → sorted Nearby → 20 km re-sort → claim 2 → Onl
   await expect(page.locator('.map-marker--branch.is-claimed')).toHaveCount(2);
   await expect(page.locator('#online-list .quest-card[data-offer-id="the-body-shop-in"]')).toHaveClass(/\bis-done\b/);
   await expect(page.locator('#nearby-list .quest-card.is-done')).toHaveCount(2);
-  expect(await nearIds(page)).toEqual(['third-wave-coffee-in', 'the-body-shop-in', 'theobroma-in', 'starbucks-in']);
+  expect(await nearIds(page)).toEqual(['third-wave-coffee-in', 'the-body-shop-in', 'theobroma-in', 'starbucks-in', 'wonderla-in']);
   expect(overpassQueries(guard)).toHaveLength(3);
   expect(overpassQueries(guard)[2]).toContain(`(around:20000,${PICK.lat.toFixed(6)},${PICK.lng.toFixed(6)})`);
   expect(hostRequests(guard, 'nominatim.openstreetmap.org')).toEqual([]);
@@ -236,7 +243,7 @@ test('journey: pick city → sorted Nearby → 20 km re-sort → claim 2 → Onl
   await page.getByRole('tab', { name: /^Nearby/ }).click();
   expect((await storageSnapshot(page)).sessionKeys).toEqual(['bsq-session']); // tab change is a user action → saved again
   const after = await expectOnlySessionRecord(page, context, startUrl);
-  expect(after).toEqual({ v: 1, city: null, lat: null, lng: null, countryCode: null, month: null, radius: 5000, tab: 'nearby', done: [] });
+  expect(after).toEqual({ v: 2, city: null, lat: null, lng: null, countryCode: null, month: null, radius: 5000, tab: 'nearby', done: [], verifiedOnly: false });
   expect(await axeViolations(page), 'axe: after Clear search').toEqual([]);
 
   await expectLocationOnlyToNominatim(guard, ['Beng', 'Bengaluru']);
@@ -333,11 +340,11 @@ test('Overpass 504 once, then success on the automatic retry after ~2 s', async 
   await page.goto('./');
   await search(page, 'Bengaluru');
   await expect(page.getByRole('status')).toContainText('Looking for shops', { timeout: 5000 });
-  await expect(page.getByRole('status')).toContainText('4 shops on the map within 5 km', { timeout: 15_000 });
+  await expect(page.getByRole('status')).toContainText('4 places on the map within 5 km', { timeout: 15_000 });
   expect(hits).toHaveLength(2);
   expect((hits[1] ?? 0) - (hits[0] ?? 0)).toBeGreaterThanOrEqual(1900);
   await expect(page.locator('.map-marker--branch')).toHaveCount(4);
-  await expect(page.locator('#nearby-list .quest-card__distance')).toHaveCount(4);
+  await expect(page.locator('#nearby-list .quest-card__distance')).toHaveCount(5); // 4 shops + Wonderla Bengaluru
   await expect(page.locator('#results-sub')).not.toContainText('didn’t load');
   // Same query both times (retry, not a new search).
   const q = overpassQueries(guard);

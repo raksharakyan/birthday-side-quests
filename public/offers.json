@@ -1089,14 +1089,18 @@
       "countries": [
         "IN"
       ],
-      "channel": "both",
+      "channel": "in-store",
       "claimWindow": "varies",
       "sourceUrl": "https://www.imagicaaworld.com/tickets-and-offers/",
       "lastVerified": "2026-10-02",
       "verified": true,
-      "osm": {
-        "nameRegex": "imagicaa?|adlabs imagica"
-      },
+      "venues": [
+        {
+          "name": "Imagicaa, Khopoli",
+          "lat": 18.7668,
+          "lng": 73.2805
+        }
+      ],
       "rewardItem": "Free Express ticket (Theme or Water Park) plus a return gift",
       "steps": [
         "Have at least 4 friends or family pre-book Regular tickets online",
@@ -1607,14 +1611,18 @@
       "countries": [
         "IN"
       ],
-      "channel": "both",
+      "channel": "in-store",
       "claimWindow": "varies",
       "sourceUrl": "https://www.waterkingdom.in/offers/birthday-bash-offer.html",
       "lastVerified": "2026-10-02",
       "verified": true,
-      "osm": {
-        "nameRegex": "water kingdom"
-      },
+      "venues": [
+        {
+          "name": "Water Kingdom, Gorai, Mumbai",
+          "lat": 19.2326,
+          "lng": 72.8061
+        }
+      ],
       "rewardItem": "Free entry for the birthday person; 48% off for 3 or 4 companions",
       "steps": [
         "Book online with at least 3 companion tickets",
@@ -1655,14 +1663,19 @@
       "countries": [
         "IN"
       ],
-      "channel": "both",
+      "channel": "in-store",
       "claimWindow": "varies",
       "sourceUrl": "https://www.lonavala.wetnjoy.in/offers/birthday-bash/",
       "lastVerified": "2026-10-02",
       "verified": true,
-      "osm": {
-        "nameRegex": "wet.?n.?joy"
-      },
+      "venues": [
+        {
+          "name": "Wet'nJoy Water Park Lonavala",
+          "lat": 18.75,
+          "lng": 73.47,
+          "exact": false
+        }
+      ],
       "rewardItem": "Free entry for the birthday person; 10% off tickets for companions",
       "steps": [
         "Book online at least 24 hours before your visit",
@@ -1686,14 +1699,38 @@
       "countries": [
         "IN"
       ],
-      "channel": "both",
+      "channel": "in-store",
       "claimWindow": "month",
       "sourceUrl": "https://www.wonderla.com/offers/birthday-offer-wonderla",
       "lastVerified": "2026-10-02",
       "verified": true,
-      "osm": {
-        "nameRegex": "wonderla"
-      },
+      "venues": [
+        {
+          "name": "Wonderla Bengaluru",
+          "lat": 12.8346,
+          "lng": 77.4
+        },
+        {
+          "name": "Wonderla Kochi",
+          "lat": 10.0268,
+          "lng": 76.3918
+        },
+        {
+          "name": "Wonderla Hyderabad",
+          "lat": 17.2171,
+          "lng": 78.5289
+        },
+        {
+          "name": "Wonderla Bhubaneswar",
+          "lat": 20.2083,
+          "lng": 85.6438
+        },
+        {
+          "name": "Wonderla Chennai",
+          "lat": 12.7427,
+          "lng": 80.1742
+        }
+      ],
       "rewardItem": "Second park ticket free with one paid ticket (Buy 1 Get 1)",
       "steps": [
         "Open the birthday offer on wonderla.com and choose Avail this offer",

@@ -26,12 +26,12 @@ Before you call a change done, run `build`, `test` and `test:e2e`. For UI work, 
 - `src/geocode.ts`: Nominatim (submit only, `featureType=city`, 1 req/s throttle, in-memory cache).
 - `src/autocomplete.ts`: Photon city suggestions (`layer=city`, debounced, min 3 chars).
 - `src/overpass.ts`: one combined Overpass query. It narrows to food amenities and shops first (DECISIONS #15), then retries once on 429 or 504.
-- `src/offers.ts`: loads and strictly validates `public/offers.json`, filters by country and channel, and handles month logic.
-- `src/session.ts`: the **only** module allowed to touch storage. It keeps one `sessionStorage` record, `bsq-session`, which is strictly validated.
+- `src/offers.ts`: loads and strictly validates `public/offers.json`, filters by country and channel, resolves fixed venues (`nearestVenue`, `nearbyOffers`, `VENUE_MAX_M`), applies the "Verified only" filter, and handles month logic.
+- `src/session.ts`: the **only** module allowed to touch storage. It keeps one `sessionStorage` record, `bsq-session` (version 2, includes `verifiedOnly`; version 1 records are migrated), which is strictly validated.
 - `src/countries.ts`: all ISO countries via `Intl.DisplayNames`.
 - `src/liveSearch.ts`: the optional "Found online" tab via the Cloudflare Worker (hidden unless `VITE_WORKER_URL` is set).
 - `src/text.ts`: cleans external text (bidi and control characters).
-- `src/urls.ts`: `directionsUrl` and `safeHttpsUrl`.
+- `src/urls.ts`: `directionsUrl`, `directionsUrlByName` (approximate venues) and `safeHttpsUrl`.
 - `src/render/`: `dom.ts` (the `el()` and `svg()` allow-listed builders), `quests.ts` (cards), `map.ts` (Leaflet), `combobox.ts`, `confetti.ts` (celebration), `icons.ts` (SVG set).
 - `src/styles/`: `tokens.css` (design tokens), `fonts.css`, `base.css`, `components.css`.
 - `csp.config.ts`: the single source for the CSP. A Vite plugin injects it as a meta tag and writes `dist/_headers`.
@@ -61,6 +61,7 @@ Before you call a change done, run `build`, `test` and `test:e2e`. For UI work, 
 - Leave optional claim fields out when they're unknown. Never use placeholder text like "Not stated".
 - Write `offer`, `rewardItem` and `steps` as paraphrases; don't copy marketing text.
 - `osm.nameRegex` uses a restricted charset and a ReDoS branching cap (`validateOsm`).
+- **Single-location destinations** (theme parks, water parks, one-off attractions) get `venues` instead of `osm`, with `channel: "in-store"` (DECISIONS #24). Coordinates come from OpenStreetMap (Nominatim lookup by the orchestrator) or the brand's official address; never guess. If the place isn't in OSM, use approximate coordinates with `"exact": false` (distance check only: no pin, directions by name, "about N km"). Nearby lists a venue offer only when a venue is within `VENUE_MAX_M` (150 km) of the searched city. Chains keep `osm` hints.
 - The schema and the rules for contributors are in `README.md` and `CONTRIBUTING.md`. Research notes are in `docs/OFFER_RESEARCH.md` and `research/`.
 
 **Copy and design**

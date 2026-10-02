@@ -86,6 +86,7 @@ Copy `.env.example` to `.env.local` to set `VITE_BASE` or `VITE_WORKER_URL`.
    - `claimWindow`: `day | week | month | varies`
    - `countries`: ISO-2 codes, or `["*"]`
    - `osm` is optional. Use `wikidata` for the brand's `brand:wikidata` tag; `nameRegex` allows only letters, digits, spaces and `'’&.-|()?^$`.
+   - `venues` is optional and is for single-location destinations (theme parks, water parks): 1 to 20 `{ "name", "lat", "lng", "exact"? }`. The offer shows in Nearby only when a venue is within 150 km of the searched city. Use `"exact": false` for approximate coordinates (no map pin, directions by name). Use `venues` instead of `osm` and set `channel` to `in-store`.
 3. Run `npm test`. The schema test rejects non-https URLs, unknown categories, overlong text and hidden Unicode tricks.
 4. Open a PR. See [CONTRIBUTING.md](CONTRIBUTING.md).
 

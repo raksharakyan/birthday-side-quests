@@ -17,7 +17,8 @@ export const TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/c
 
 export interface MapView {
   showPlace(place: Place, radiusM?: number): void;
-  showBranches(branches: readonly Branch[], offersById: ReadonlyMap<string, Offer>): void;
+  /** Replaces the pins. `fit: false` keeps the current view (e.g. the "Verified only" switch). */
+  showBranches(branches: readonly Branch[], offersById: ReadonlyMap<string, Offer>, opts?: { fit?: boolean }): void;
   clearBranches(): void;
   /** Swaps pins to the claimed check (and back) for these offer ids. */
   setClaimed(ids: ReadonlySet<string>): void;
@@ -181,7 +182,7 @@ export function createMap(container: HTMLElement, opts: MapOptions = {}): MapVie
         map.setView([place.lat, place.lng], 13);
       }
     },
-    showBranches(branches, offersById) {
+    showBranches(branches, offersById, showOpts = {}) {
       branchLayer.clearLayers();
       markers.clear();
       active = null;
@@ -201,7 +202,7 @@ export function createMap(container: HTMLElement, opts: MapOptions = {}): MapVie
         pts.push([b.lat, b.lng]);
       }
       if (centerMarker) pts.push(centerMarker.getLatLng());
-      if (pts.length > 1) map.fitBounds(L.latLngBounds(pts), { padding: [32, 32], maxZoom: 15 });
+      if (showOpts.fit !== false && pts.length > 1) map.fitBounds(L.latLngBounds(pts), { padding: [32, 32], maxZoom: 15 });
     },
     clearBranches() {
       branchLayer.clearLayers();
