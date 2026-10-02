@@ -251,13 +251,16 @@ test('switch: no horizontal scroll at 360/375/390, one-line pill, 44px target, i
   expect(await axeViolations(page), 'axe: 390px, Verified only on').toEqual([]);
 });
 
-test('keyboard: Tab reaches the switch before the tablist, Enter toggles, focus ring visible', async ({ page, guard }, info) => {
+test('keyboard: Tab reaches the switch, then the Filter button, before the tablist; Enter toggles, focus ring visible', async ({ page, guard }, info) => {
   test.skip(info.project.name.startsWith('mobile'), 'keyboard flow is a desktop interaction');
   await guard.mock();
   await page.goto('./');
   await search(page, 'Bengaluru');
   await expect(page.getByRole('status')).toContainText('on the map', { timeout: 15_000 });
   await page.getByRole('tab', { name: /^Nearby/ }).focus();
+  // The Filter button (DECISIONS #27) sits right after the switch.
+  await page.keyboard.press('Shift+Tab');
+  await expect(page.getByRole('button', { name: /^Filter/ })).toBeFocused();
   await page.keyboard.press('Shift+Tab');
   await expect(sw(page)).toBeFocused();
   const ring = await sw(page).evaluate((e) => getComputedStyle(e).boxShadow);
@@ -267,6 +270,8 @@ test('keyboard: Tab reaches the switch before the tablist, Enter toggles, focus 
   await expect(sw(page)).toHaveAttribute('aria-checked', 'true');
   await expect(sw(page)).toBeFocused();
   expect(await sw(page).evaluate((e) => getComputedStyle(e).boxShadow)).not.toBe('none');
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: /^Filter/ })).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(page.getByRole('tab', { name: /^Nearby/ })).toBeFocused();
   // Accessible description present.

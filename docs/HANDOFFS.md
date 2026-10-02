@@ -850,3 +850,29 @@ Served with `vite preview` on **port 4174** instead of 4173, so a concurrent Pla
 | Performance (Lighthouse) | ✅ 0.99 / 1.00 / 1.00 |
 
 **QA ✅** for PR #4. QA-PR4-01 is a one-word copy fix that can land with or after the merge.
+
+## Full-Stack: free treats first, quest types and Filter box (DECISIONS #27), branch `feat/sort-free-first`
+
+**User requests:** "first the freebies should be listed and then discount items, and items where we get discount if we have made any spend in the past shall come up last", then "don't touch Verified only, make a filter box beside it where we can have check box for free, discount & past spend".
+
+### What changed
+- **Data:** all 102 offers in `public/offers.json` gained required `rewardType` (`free` | `discount`) and `needsPastSpend` (boolean), classified only from each entry's own fields and the research notes. Counts: **28 free (tier 0), 40 discount (tier 1), 34 needs past spend (tier 2)**. Full table with the deciding field per offer, plus 27 judgement calls: `docs/OFFER_CLASSIFICATION.md`.
+- **Schema:** `src/types.ts` (`RewardType`, both fields required); `validateOffer` rejects missing or invalid values. README "Adding a new offer" and CONTRIBUTING updated.
+- **Order:** `questTier`, `questType`, `compareQuests`, `sortQuests` in `src/offers.ts` (tier, then distance, then brand A to Z, then id). Used by `renderQuestList` (Online) and inside both Nearby groups in `renderNearbyList` (near group first, "Also in <Country>" second, unchanged).
+- **Type chip:** first badge on every card (Free / Discount / Needs past spend), `typeBadge` in `src/render/quests.ts`, new `tag`, `receipt` and `filter` icons. No per-type subheadings (reason in DECISIONS #27).
+- **Filter box:** "Filter" disclosure button right of the untouched "Verified only" switch; fieldset "Show" with three checkboxes (all on), hint line, Reset. Escape closes and refocuses the button; outside click or tabbing out closes it. Hidden-type count chip on the button. One pure pipeline `applyQuestFilters` for lists, tab counts, header, ring and pins; `typeFilterMessage` for the live region. Empty state "No quests match your filters" with "Show all quests" (resets checkboxes and Verified only); Verified only alone keeps its own copy.
+- **Session:** `bsq-session` v3 adds `types: {free, discount, past}` (exact keys, booleans); v2 and v1 records migrate with every type on. Clear search resets the filters. SECURITY.md, PRIVACY.md, CLAUDE.md, DESIGN.md updated.
+
+### Results
+| Check | Result |
+|---|---|
+| `npm run build` | ✅ |
+| `npm test` | ✅ 808 passed (21 files; new `tests/unit/quest-order.test.ts`, extended validator, session and security tests) |
+| `npm run test:e2e` | ✅ 114 passed, 12 skipped (new `tests/e2e/quest-types.spec.ts`; order-dependent expectations updated in `autocomplete`, `qa-pr3`, `qa-pr4`; session v3 everywhere) |
+| `npm run lhci` | ✅ 0.99 / 1.00 / 1.00 / 1.00 in all 3 runs |
+| `npm audit --audit-level=high` | ✅ 0 vulnerabilities |
+| Manual, `npm run preview` with real services (Bengaluru, October) | ✅ Nearby 28 quests, near group and rest group both in tier order, 60 places; unchecking Free gives Nearby 26, ring "0 of 32", announcement "Showing discount and past-spend quests, 32 of 34"; reload restores the filter (session v3); Clear search resets it and empties storage; box fits at 360px with no horizontal scroll. Only console errors were public Overpass 504s, retried successfully. |
+
+### For review
+- **Security:** new persisted field `types` (strict exact-key boolean validation, prototype-pollution case tested); new DOM built with `el()`/`svg()` only; no new origin, CSP unchanged. Security ✅ pending.
+- **QA:** please re-run the judgement calls in `docs/OFFER_CLASSIFICATION.md`, especially `starbucks-us`/`starbucks-ca` (`needsPastSpend: true` because the entry says "make 1 Star-earning purchase first") and `costa-gb` (`false`, no past-transaction rule stated for GB). QA ✅ pending.

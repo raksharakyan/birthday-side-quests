@@ -1,6 +1,8 @@
 export type Category = 'cafe' | 'dessert' | 'restaurant' | 'beauty' | 'fashion' | 'retail' | 'online';
 export type Channel = 'in-store' | 'online' | 'both';
 export type ClaimWindow = 'day' | 'week' | 'month' | 'varies';
+/** "free": a free item, gift or entry with nothing to buy beyond joining a free programme. "discount": everything else (DECISIONS #27). */
+export type RewardType = 'free' | 'discount';
 
 export interface OsmHint {
   wikidata?: string;
@@ -31,6 +33,10 @@ export interface Offer {
   sourceUrl: string;
   lastVerified: string;
   verified: boolean;
+  /** Required. Free treat or a discount (money off, voucher, BOGO, points, free item with a purchase). */
+  rewardType: RewardType;
+  /** Required. true when you only qualify after spending before (tier, past purchase, paid membership, yearly spend). */
+  needsPastSpend: boolean;
   osm?: OsmHint;
   /** Fixed venues (1 to 20). When present, Nearby uses them instead of an Overpass lookup. */
   venues?: Venue[];

@@ -25,7 +25,7 @@ Nothing else is saved, and nothing is saved until you search or change one of th
 | Birthday **month** + **country code** only | **Our Cloudflare Worker** → Tavily search (only if "Found online" is enabled) | To find birthday deals online. Your city and coordinates are never sent |
 
 - Map and search results are cached **in memory** only. After a refresh the app reruns your saved search (Overpass again, no geocoding).
-- Quest "done" checkmarks are kept in the session record above, so they survive a refresh but not closing the tab.
+- Quest "done" checkmarks and your list filters ("Verified only" and the Free / Discount / Needs past spend checkboxes) are kept in the session record above, so they survive a refresh but not closing the tab.
 - Your location is never put in this app's URL, so it doesn't end up in your history or in shared links.
 - We never ask for your full date of birth, name, email or phone number.
 - The site sends `Referrer-Policy: no-referrer`. Requests to OpenStreetMap services and Photon send only the site's origin (`https://raksharakyan.github.io`), because their usage policy asks apps to identify themselves. No path and no user data is included.

@@ -51,8 +51,11 @@ export const PHOTON_BENG = {
 export const PHOTON_FIRST_LABEL = 'Bengaluru, Bangalore North, Karnataka, India';
 export const PHOTON_PUNE_LABEL = 'Pune, Pune City, Maharashtra, India';
 
-interface SeedOffer {
+export interface SeedOffer {
   id: string;
+  brand: string;
+  rewardType: 'free' | 'discount';
+  needsPastSpend: boolean;
   channel: string;
   countries: string[];
   verified?: boolean;
@@ -91,6 +94,27 @@ export function expectedNearbyOffers(country: string, at: { lat: number; lng: nu
 /** Expected Nearby card count (see expectedNearbyOffers). Defaults to the mocked Bengaluru point. */
 export function expectedNearbyCount(country: string, at: { lat: number; lng: number } = BENGALURU): number {
   return expectedNearbyOffers(country, at).length;
+}
+
+/** Quest tier per DECISIONS #27: 0 free, 1 discount, 2 needs past spend. */
+export const TYPE_TIER: Record<string, number> = { free: 0, discount: 1, past: 2 };
+
+/** Quest types (data-quest-type of each card's type chip) in DOM order for a card locator. */
+export async function cardTypes(page: Page, selector: string): Promise<string[]> {
+  return page
+    .locator(selector)
+    .evaluateAll((cs) => cs.map((c) => c.querySelector('.badge--type')?.getAttribute('data-quest-type') ?? ''));
+}
+
+/** True when tiers never go backwards, and distances (if given) ascend within each tier. */
+export function isTierThenDistanceOrder(types: string[], metres?: number[]): boolean {
+  for (let i = 1; i < types.length; i++) {
+    const a = TYPE_TIER[types[i - 1] ?? ''] ?? NaN;
+    const b = TYPE_TIER[types[i] ?? ''] ?? NaN;
+    if (!(a <= b)) return false;
+    if (metres && a === b && (metres[i - 1] ?? NaN) > (metres[i] ?? NaN)) return false;
+  }
+  return true;
 }
 
 export const WORKER_RESULTS = [

@@ -1,4 +1,4 @@
-import type { Category, Channel, ClaimWindow, Offer, OffersFile, OsmHint, Venue } from './types';
+import type { Category, Channel, ClaimWindow, Offer, OffersFile, OsmHint, RewardType, Venue } from './types';
 import { distanceM } from './overpass';
 import { hasUnsafeText } from './text';
 import { directionsUrlByName, safeHttpsUrl } from './urls';
@@ -6,6 +6,7 @@ import { directionsUrlByName, safeHttpsUrl } from './urls';
 export const CATEGORIES: readonly Category[] = ['cafe', 'dessert', 'restaurant', 'beauty', 'fashion', 'retail', 'online'];
 export const CHANNELS: readonly Channel[] = ['in-store', 'online', 'both'];
 export const CLAIM_WINDOWS: readonly ClaimWindow[] = ['day', 'week', 'month', 'varies'];
+export const REWARD_TYPES: readonly RewardType[] = ['free', 'discount'];
 
 export const LIMITS = {
   id: 64,
@@ -219,6 +220,9 @@ export function validateOffer(raw: unknown): ValidationResult {
   if (!sourceUrl) return fail(`${id}: sourceUrl must be https`);
   if (!isValidIsoDate(raw.lastVerified)) return fail(`${id}: bad lastVerified`);
   if (raw.verified !== undefined && typeof raw.verified !== 'boolean') return fail(`${id}: verified must be boolean`);
+  // Required since DECISIONS #27: they set the list order and the type chip.
+  if (typeof raw.rewardType !== 'string' || !REWARD_TYPES.includes(raw.rewardType as RewardType)) return fail(`${id}: bad rewardType`);
+  if (typeof raw.needsPastSpend !== 'boolean') return fail(`${id}: needsPastSpend must be boolean`);
 
   const osm = validateOsm(raw.osm);
   if (osm === null) return fail(`${id}: bad osm hint`);
@@ -239,6 +243,8 @@ export function validateOffer(raw: unknown): ValidationResult {
     sourceUrl,
     lastVerified: raw.lastVerified,
     verified: raw.verified === true,
+    rewardType: raw.rewardType as RewardType,
+    needsPastSpend: raw.needsPastSpend,
   };
   if (osm) result.osm = osm;
   if (venues) result.venues = venues;
@@ -331,6 +337,94 @@ export function nearbyOffers(args: { offers: readonly Offer[]; country: string |
 /** "Verified only" filter (DECISIONS #25): unverified offers are dropped when `verifiedOnly` is on. */
 export function applyVerifiedFilter<T extends Pick<Offer, 'verified'>>(offers: readonly T[], verifiedOnly: boolean): T[] {
   return verifiedOnly ? offers.filter((o) => o.verified) : [...offers];
+}
+
+/**
+ * Quest order (DECISIONS #27): 0 = free with no past spend, 1 = discount with no past spend,
+ * 2 = needs past spend (free or discount). Lower tiers are listed first.
+ */
+export type QuestTier = 0 | 1 | 2;
+export function questTier(offer: Pick<Offer, 'rewardType' | 'needsPastSpend'>): QuestTier {
+  if (offer.needsPastSpend) return 2;
+  return offer.rewardType === 'free' ? 0 : 1;
+}
+
+/** The three quest types the Filter box toggles, one per tier. */
+export const QUEST_TYPES = ['free', 'discount', 'past'] as const;
+export type QuestType = (typeof QUEST_TYPES)[number];
+export const QUEST_TYPE_LABELS: Record<QuestType, string> = { free: 'Free', discount: 'Discount', past: 'Needs past spend' };
+
+export function questType(offer: Pick<Offer, 'rewardType' | 'needsPastSpend'>): QuestType {
+  return QUEST_TYPES[questTier(offer)];
+}
+
+const BRAND_COLLATOR = new Intl.Collator('en', { sensitivity: 'base', numeric: true });
+
+/**
+ * Sort comparator: tier, then distance in metres ascending (when `distances` is given; offers without
+ * one go after those with one), then brand A to Z, then id so the order is fully deterministic.
+ */
+export function compareQuests(
+  a: Pick<Offer, 'id' | 'brand' | 'rewardType' | 'needsPastSpend'>,
+  b: Pick<Offer, 'id' | 'brand' | 'rewardType' | 'needsPastSpend'>,
+  distances?: ReadonlyMap<string, number>,
+): number {
+  const t = questTier(a) - questTier(b);
+  if (t !== 0) return t;
+  if (distances) {
+    const da = distances.get(a.id);
+    const db = distances.get(b.id);
+    const fa = da !== undefined && Number.isFinite(da) ? da : Infinity;
+    const fb = db !== undefined && Number.isFinite(db) ? db : Infinity;
+    if (fa !== fb) return fa < fb ? -1 : 1;
+  }
+  const n = BRAND_COLLATOR.compare(a.brand, b.brand);
+  if (n !== 0) return n;
+  return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+}
+
+/** A sorted copy (see compareQuests); the input is not changed. */
+export function sortQuests<T extends Pick<Offer, 'id' | 'brand' | 'rewardType' | 'needsPastSpend'>>(
+  offers: readonly T[],
+  distances?: ReadonlyMap<string, number>,
+): T[] {
+  return [...offers].sort((a, b) => compareQuests(a, b, distances));
+}
+
+/** Which quest types are shown (Filter box). All on by default. */
+export type QuestTypeFilter = Record<QuestType, boolean>;
+export const ALL_QUEST_TYPES: Readonly<QuestTypeFilter> = Object.freeze({ free: true, discount: true, past: true });
+
+export interface QuestFilters {
+  verifiedOnly: boolean;
+  types: QuestTypeFilter;
+}
+
+export function allTypesOn(types: QuestTypeFilter): boolean {
+  return QUEST_TYPES.every((t) => types[t]);
+}
+
+/** Number of quest types switched off (the Filter button's badge). */
+export function hiddenTypeCount(types: QuestTypeFilter): number {
+  return QUEST_TYPES.filter((t) => !types[t]).length;
+}
+
+/** Every list filter in one place: "Verified only" (DECISIONS #25) plus the quest-type Filter (#27). */
+export function applyQuestFilters<T extends Pick<Offer, 'verified' | 'rewardType' | 'needsPastSpend'>>(
+  offers: readonly T[],
+  filters: QuestFilters,
+): T[] {
+  return applyVerifiedFilter(offers, filters.verifiedOnly).filter((o) => filters.types[questType(o)]);
+}
+
+/** Live-region line after a Filter change, e.g. "Showing free quests only, 12 of 31". */
+export function typeFilterMessage(types: QuestTypeFilter, shown: number, total: number): string {
+  const on = QUEST_TYPES.filter((t) => types[t]);
+  if (on.length === QUEST_TYPES.length) return `Showing all quest types, ${shown} of ${total}`;
+  if (on.length === 0) return `No quest types selected, 0 of ${total}`;
+  const names = on.map((t) => (t === 'past' ? 'past-spend' : t));
+  if (names.length === 1) return `Showing ${names[0]} quests only, ${shown} of ${total}`;
+  return `Showing ${names.join(' and ')} quests, ${shown} of ${total}`;
 }
 
 /**

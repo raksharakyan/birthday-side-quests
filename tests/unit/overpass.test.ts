@@ -14,6 +14,8 @@ const offer = (id: string, osm?: Offer['osm']): Offer => ({
   sourceUrl: 'https://example.com',
   lastVerified: '2026-10-02',
   verified: true,
+  rewardType: 'free',
+  needsPastSpend: false,
   ...(osm ? { osm } : {}),
 });
 

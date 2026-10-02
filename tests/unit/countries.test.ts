@@ -6,6 +6,7 @@ import type { Offer } from '../../src/types';
 const base: Offer = {
   id: 'x', brand: 'B', category: 'online', offer: 'o', howToClaim: 'h', countries: ['IN'], channel: 'online',
   claimWindow: 'day', sourceUrl: 'https://example.com', lastVerified: '2026-10-02', verified: true,
+  rewardType: 'free', needsPastSpend: false,
 };
 
 describe('ISO_COUNTRIES', () => {

@@ -4,7 +4,7 @@ import {
 } from '../../src/session';
 
 const good: SessionData = {
-  v: 2,
+  v: 3,
   city: 'Pune',
   lat: 18.5204,
   lng: 73.8567,
@@ -14,9 +14,13 @@ const good: SessionData = {
   tab: 'online',
   done: ['starbucks-in', 'nykaa-in'],
   verifiedOnly: true,
+  types: { free: true, discount: false, past: true },
 };
-const { verifiedOnly: _vo, ...v1Shape } = good;
+const ALL_ON = { free: true, discount: true, past: true };
+const { verifiedOnly: _vo, types: _t1, ...v1Shape } = good;
 const goodV1 = { ...v1Shape, v: 1 };
+const { types: _t2, ...v2Shape } = good;
+const goodV2 = { ...v2Shape, v: 2 };
 
 /** Minimal in-memory Storage. */
 function memStore(): Storage & { data: Map<string, string> } {
@@ -41,20 +45,39 @@ describe('validateSession (strict schema)', () => {
     expect(validateSession({ ...good, city: null, lat: null, lng: null, countryCode: 'JP' })?.countryCode).toBe('JP');
   });
   it('has exactly the documented fields', () => {
-    expect([...SESSION_FIELDS].sort()).toEqual(['city', 'countryCode', 'done', 'lat', 'lng', 'month', 'radius', 'tab', 'v', 'verifiedOnly']);
+    expect([...SESSION_FIELDS].sort()).toEqual(['city', 'countryCode', 'done', 'lat', 'lng', 'month', 'radius', 'tab', 'types', 'v', 'verifiedOnly']);
   });
   it('keeps verifiedOnly on and off', () => {
     expect(validateSession({ ...good, verifiedOnly: false })?.verifiedOnly).toBe(false);
     expect(validateSession({ ...good, verifiedOnly: true })?.verifiedOnly).toBe(true);
   });
-  it('migrates an exact version 1 record to version 2 with verifiedOnly off', () => {
-    expect(validateSession(goodV1)).toEqual({ ...good, verifiedOnly: false });
+  it('migrates an exact version 1 record to version 3 with verifiedOnly off and every type on', () => {
+    expect(validateSession(goodV1)).toEqual({ ...good, verifiedOnly: false, types: ALL_ON });
+  });
+  it('migrates an exact version 2 record to version 3 with every type on (verifiedOnly kept)', () => {
+    expect(validateSession(goodV2)).toEqual({ ...good, types: ALL_ON });
+    expect(validateSession({ ...goodV2, verifiedOnly: false })?.verifiedOnly).toBe(false);
+  });
+  it('keeps each quest type on and off', () => {
+    expect(validateSession({ ...good, types: { free: false, discount: false, past: false } })?.types).toEqual({ free: false, discount: false, past: false });
+    expect(validateSession({ ...good, types: ALL_ON })?.types).toEqual(ALL_ON);
   });
   it.each([
     ['extra field', { ...good, email: 'a@b.c' }],
     ['missing field', (({ done: _d, ...rest }) => rest)(good)],
-    ['wrong version', { ...good, v: 3 }],
-    ['version as string', { ...good, v: '2' }],
+    ['wrong version', { ...good, v: 4 }],
+    ['version as string', { ...good, v: '3' }],
+    ['types missing (v3)', (({ types: _x, ...rest }) => rest)(good)],
+    ['types null', { ...good, types: null }],
+    ['types as array', { ...good, types: [true, true, true] }],
+    ['types with an extra key', { ...good, types: { ...ALL_ON, admin: true } }],
+    ['types missing a key', { ...good, types: { free: true, discount: true } }],
+    ['types value as string', { ...good, types: { ...ALL_ON, free: 'true' } }],
+    ['types value as number', { ...good, types: { ...ALL_ON, past: 1 } }],
+    ['types prototype-polluting', { ...good, types: JSON.parse('{"__proto__":{"x":1},"free":true,"discount":true,"past":true}') }],
+    ['v2 record with types', { ...goodV2, types: ALL_ON }],
+    ['v2 record without verifiedOnly', (({ verifiedOnly: _x, ...rest }) => rest)(goodV2)],
+    ['v2 record with bad verifiedOnly', { ...goodV2, verifiedOnly: 'no' }],
     ['version 0', { ...good, v: 0 }],
     ['verifiedOnly missing (v2)', (({ verifiedOnly: _x, ...rest }) => rest)(good)],
     ['verifiedOnly as string', { ...good, verifiedOnly: 'true' }],
@@ -120,10 +143,21 @@ describe('load / save / clear', () => {
     expect(saveSession({ ...good, city: '<b>x</b>' }, store)).toBe(false);
     expect(store.length).toBe(0);
   });
-  it('loads a version 1 record as version 2 (verifiedOnly off)', () => {
+  it('loads a version 1 record as version 3 (verifiedOnly off, every type on)', () => {
     const store = memStore();
     store.setItem(SESSION_KEY, JSON.stringify(goodV1));
-    expect(loadSession(store)).toEqual({ ...good, verifiedOnly: false });
+    expect(loadSession(store)).toEqual({ ...good, verifiedOnly: false, types: ALL_ON });
+  });
+  it('loads a version 2 record as version 3 (every type on)', () => {
+    const store = memStore();
+    store.setItem(SESSION_KEY, JSON.stringify(goodV2));
+    expect(loadSession(store)).toEqual({ ...good, types: ALL_ON });
+  });
+  it('removes a record whose types were tampered with', () => {
+    const store = memStore();
+    store.setItem(SESSION_KEY, JSON.stringify({ ...good, types: { ...ALL_ON, extra: false } }));
+    expect(loadSession(store)).toBeNull();
+    expect(store.getItem(SESSION_KEY)).toBeNull();
   });
   it('removes a record whose verifiedOnly was tampered with', () => {
     const store = memStore();

@@ -192,7 +192,7 @@ test('Verified only: empty state "No verified quests here yet" with "Show all qu
   await expect(page.locator('#nearby-list .quest-card')).toHaveCount(expectedNearbyCount('IN'));
 });
 
-test('a version 1 session record is migrated (Verified only off) and re-saved as version 2', async ({ page, context, guard }) => {
+test('a version 1 session record is migrated (Verified only off, every type on) and re-saved as version 3', async ({ page, context, guard }) => {
   await guard.mock();
   await page.goto('./');
   const startUrl = page.url();
@@ -207,5 +207,5 @@ test('a version 1 session record is migrated (Verified only off) and re-saved as
   await expect(verifiedSwitch(page)).toHaveAttribute('aria-checked', 'false');
   await verifiedSwitch(page).click();
   const rec = await expectOnlySessionRecord(page, context, startUrl);
-  expect(rec).toMatchObject({ v: 2, countryCode: 'IN', month: 10, tab: 'online', verifiedOnly: true });
+  expect(rec).toMatchObject({ v: 3, countryCode: 'IN', month: 10, tab: 'online', verifiedOnly: true, types: { free: true, discount: true, past: true } });
 });

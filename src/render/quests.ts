@@ -1,5 +1,5 @@
 import type { Branch, ClaimWindow, LiveResult, Offer } from '../types';
-import { isStale } from '../offers';
+import { compareQuests, isStale, questType, type QuestType } from '../offers';
 import { questLine } from '../templates';
 import { directionsUrl, directionsUrlByName, displayHost } from '../urls';
 import { el, externalLink } from './dom';
@@ -54,8 +54,26 @@ function badge(kind: BadgeKind, text: string): HTMLSpanElement {
   return el('span', { class: `badge badge--${kind}` }, [icon(BADGE_ICON[kind]), text]);
 }
 
+const TYPE_BADGE: Record<QuestType, { icon: IconName; text: string }> = {
+  free: { icon: 'gift', text: 'Free' },
+  discount: { icon: 'tag', text: 'Discount' },
+  past: { icon: 'receipt', text: 'Needs past spend' },
+};
+
+/** Quest type chip (DECISIONS #27): Free, Discount or Needs past spend. Pure, exported for tests. */
+export function typeBadge(offer: Pick<Offer, 'rewardType' | 'needsPastSpend'>): HTMLSpanElement {
+  const type = questType(offer);
+  const { icon: ic, text } = TYPE_BADGE[type];
+  return el('span', { class: `badge badge--type badge--${type}`, 'data-quest-type': type }, [
+    icon(ic),
+    el('span', { class: 'visually-hidden' }, ['Quest type: ']),
+    text,
+  ]);
+}
+
 function badges(offer: Offer, now: Date): HTMLElement {
   const list = el('div', { class: 'badges' });
+  list.appendChild(typeBadge(offer));
   list.appendChild(offer.verified ? badge('verified', 'Verified') : badge('check', 'Check with store'));
   if (isStale(offer.lastVerified, now)) list.appendChild(badge('stale', 'May be outdated'));
   return list;
@@ -293,13 +311,16 @@ export function renderQuestList(
 ): void {
   const now = opts.now ?? new Date();
   const list = el('ul', { class: 'quest-list', role: 'list' });
-  for (const o of offers) list.appendChild(questCard(o, { branch: opts.branches?.get(o.id), now, idPrefix: opts.idPrefix }));
+  // Free first, then discounts, then quests that need past spend; brand A to Z within each (DECISIONS #27).
+  const sorted = [...offers].sort((a, b) => compareQuests(a, b));
+  for (const o of sorted) list.appendChild(questCard(o, { branch: opts.branches?.get(o.id), now, idPrefix: opts.idPrefix }));
   container.replaceChildren(list);
 }
 
 /**
  * Nearby tab: every country quest stays visible. Quests with a branch inside the circle come first,
- * nearest first, with "x km away"; the rest follow under a secondary heading.
+ * with "x km away"; the rest follow under a secondary heading. Inside each group: free first, then
+ * discounts, then quests that need past spend, each by distance and then brand (DECISIONS #27).
  */
 export function renderNearbyList(
   container: HTMLElement,
@@ -316,10 +337,8 @@ export function renderNearbyList(
   },
 ): void {
   const now = opts.now ?? new Date();
-  const withBranch = offers
-    .filter((o) => opts.branches.has(o.id))
-    .sort((a, b) => (opts.distances.get(a.id) ?? Infinity) - (opts.distances.get(b.id) ?? Infinity));
-  const rest = offers.filter((o) => !opts.branches.has(o.id));
+  const withBranch = offers.filter((o) => opts.branches.has(o.id)).sort((a, b) => compareQuests(a, b, opts.distances));
+  const rest = offers.filter((o) => !opts.branches.has(o.id)).sort((a, b) => compareQuests(a, b, opts.distances));
   const card = (o: Offer) =>
     questCard(o, { branch: opts.branches.get(o.id), distanceM: opts.distances.get(o.id), now, idPrefix: opts.idPrefix });
   const notice = opts.notice ?? null;

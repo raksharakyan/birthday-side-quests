@@ -95,8 +95,8 @@ test.describe('happy path', () => {
     // Session record: exactly the allowed fields, nothing else anywhere.
     const doneId = (await card.getAttribute('data-offer-id')) ?? '';
     expect(await expectOnlySessionRecord(page, context, startUrl)).toEqual({
-      v: 2, city: 'Bengaluru', lat: 12.9767936, lng: 77.590082, countryCode: 'IN', month: 10, radius: 5000, tab: 'nearby', done: [doneId],
-      verifiedOnly: false,
+      v: 3, city: 'Bengaluru', lat: 12.9767936, lng: 77.590082, countryCode: 'IN', month: 10, radius: 5000, tab: 'nearby', done: [doneId],
+      verifiedOnly: false, types: { free: true, discount: true, past: true },
     });
 
     // Refresh → the search is restored from sessionStorage (inputs, results, done state), no new geocoding.
@@ -278,7 +278,8 @@ test('Online tab works without a city (country select) and Found online sends on
   expect(ext[0]?.url).toBe('https://bsq-worker.e2e.example/search?month=10&country=US');
   // No city searched: the session record holds no location at all, only month/country/tab.
   expect(await expectOnlySessionRecord(page, context, startUrl)).toEqual({
-    v: 2, city: null, lat: null, lng: null, countryCode: 'US', month: 10, radius: 5000, tab: 'found', done: [], verifiedOnly: false,
+    v: 3, city: null, lat: null, lng: null, countryCode: 'US', month: 10, radius: 5000, tab: 'found', done: [], verifiedOnly: false,
+    types: { free: true, discount: true, past: true },
   });
   await expectLocationOnlyToNominatim(guard, []);
 });

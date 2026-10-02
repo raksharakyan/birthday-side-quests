@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Page, Route } from '@playwright/test';
-import { expectedNearbyCount, expectedNearbyOffers, OVERPASS_BENGALURU, PHOTON_FIRST_LABEL, PNG_1PX } from './fixtures';
+import { cardTypes, expectedNearbyCount, expectedNearbyOffers, isTierThenDistanceOrder, OVERPASS_BENGALURU, PHOTON_FIRST_LABEL, PNG_1PX } from './fixtures';
 import {
   axeViolations, CORS, expect, expectLocationOnlyToNominatim, expectNothingPersisted, expectOnlySessionRecord, search, storageSnapshot,
   test, type Guard,
@@ -123,15 +123,17 @@ test('journey: pick city → sorted Nearby → 20 km re-sort → claim 2 → Onl
   await expect(page.getByRole('status')).toContainText('on the map within 5 km', { timeout: 15_000 });
   expect(hostRequests(guard, 'nominatim.openstreetmap.org')).toEqual([]); // picked place skips Nominatim
 
-  // 2. Nearby: branch cards first, nearest first, each with "x m/km away"; total = every IN in-store/both offer.
+  // 2. Nearby: branch cards first, each with "x m/km away", free before discount and nearest first within
+  //    each type (DECISIONS #27); total = every IN in-store/both offer.
   const total = expectedNearbyCount('IN');
   await expect(page.locator('#nearby-list .quest-card')).toHaveCount(total);
   await expect(page.locator('#nearby-count')).toHaveText(`${total} quests`);
   const d5 = await nearDistances(page);
   expect(d5.length).toBe(5); // 4 Overpass branches + Wonderla Bengaluru (venue, ~26 km)
   expect(d5.every(Number.isFinite)).toBe(true);
-  expect([...d5].sort((a, b) => a - b)).toEqual(d5);
-  expect(await nearIds(page)).toEqual(['starbucks-in', 'third-wave-coffee-in', 'the-body-shop-in', 'theobroma-in', 'wonderla-in']);
+  expect(isTierThenDistanceOrder(await cardTypes(page, '#nearby-list > .quest-list .quest-card'), d5)).toBe(true);
+  // Theobroma is the only free quest with a branch, so it leads; the discounts follow by distance.
+  expect(await nearIds(page)).toEqual(['theobroma-in', 'starbucks-in', 'third-wave-coffee-in', 'the-body-shop-in', 'wonderla-in']);
   await expect(page.locator('#nearby-list .quest-card[data-offer-id="starbucks-in"] .quest-card__distance')).toHaveText(/^\d+ m away$/);
   await expect(page.getByRole('heading', { name: 'Also in India: find your nearest branch' })).toBeVisible();
   expect(overpassQueries(guard)[0]).toContain(`(around:5000,${PICK.lat.toFixed(6)},${PICK.lng.toFixed(6)})`);
@@ -143,9 +145,9 @@ test('journey: pick city → sorted Nearby → 20 km re-sort → claim 2 → Onl
   expect(overpassQueries(guard)[1]).toContain(`(around:20000,${PICK.lat.toFixed(6)},${PICK.lng.toFixed(6)})`);
   expect(overpassQueries(guard)[1]).toContain('out center 150;');
   expect(hostRequests(guard, 'nominatim.openstreetmap.org')).toEqual([]);
-  await expect.poll(() => nearIds(page)).toEqual(['third-wave-coffee-in', 'the-body-shop-in', 'theobroma-in', 'starbucks-in', 'wonderla-in']);
+  await expect.poll(() => nearIds(page)).toEqual(['theobroma-in', 'third-wave-coffee-in', 'the-body-shop-in', 'starbucks-in', 'wonderla-in']);
   const d20 = await nearDistances(page);
-  expect([...d20].sort((a, b) => a - b)).toEqual(d20);
+  expect(isTierThenDistanceOrder(await cardTypes(page, '#nearby-list > .quest-list .quest-card'), d20)).toBe(true);
   await expect(page.locator('#nearby-list .quest-card[data-offer-id="starbucks-in"] .quest-card__distance')).toHaveText(/^1\d km away$/);
   await expect(page.getByRole('heading', { name: 'Also in India: find your nearest branch' })).toBeVisible();
   await expect(page.locator('#results-sub')).toHaveText(`${ringTotal('IN')} quests in total. 4 within 20 km of Bengaluru.`);
@@ -194,8 +196,8 @@ test('journey: pick city → sorted Nearby → 20 km re-sort → claim 2 → Onl
 
   const rec = await expectOnlySessionRecord(page, context, startUrl);
   expect(rec).toEqual({
-    v: 2, city: PHOTON_FIRST_LABEL, lat: PICK.lat, lng: PICK.lng, countryCode: 'IN', month: 10, radius: 20000, tab: 'online',
-    done: ['starbucks-in', 'the-body-shop-in'], verifiedOnly: false,
+    v: 3, city: PHOTON_FIRST_LABEL, lat: PICK.lat, lng: PICK.lng, countryCode: 'IN', month: 10, radius: 20000, tab: 'online',
+    done: ['starbucks-in', 'the-body-shop-in'], verifiedOnly: false, types: { free: true, discount: true, past: true },
   });
 
   // 6. Refresh → everything restored from sessionStorage; Overpass re-run at 20 km, no geocoder calls.
@@ -214,7 +216,7 @@ test('journey: pick city → sorted Nearby → 20 km re-sort → claim 2 → Onl
   await expect(page.locator('.map-marker--branch.is-claimed')).toHaveCount(2);
   await expect(page.locator('#online-list .quest-card[data-offer-id="the-body-shop-in"]')).toHaveClass(/\bis-done\b/);
   await expect(page.locator('#nearby-list .quest-card.is-done')).toHaveCount(2);
-  expect(await nearIds(page)).toEqual(['third-wave-coffee-in', 'the-body-shop-in', 'theobroma-in', 'starbucks-in', 'wonderla-in']);
+  expect(await nearIds(page)).toEqual(['theobroma-in', 'third-wave-coffee-in', 'the-body-shop-in', 'starbucks-in', 'wonderla-in']);
   expect(overpassQueries(guard)).toHaveLength(3);
   expect(overpassQueries(guard)[2]).toContain(`(around:20000,${PICK.lat.toFixed(6)},${PICK.lng.toFixed(6)})`);
   expect(hostRequests(guard, 'nominatim.openstreetmap.org')).toEqual([]);
@@ -243,7 +245,8 @@ test('journey: pick city → sorted Nearby → 20 km re-sort → claim 2 → Onl
   await page.getByRole('tab', { name: /^Nearby/ }).click();
   expect((await storageSnapshot(page)).sessionKeys).toEqual(['bsq-session']); // tab change is a user action → saved again
   const after = await expectOnlySessionRecord(page, context, startUrl);
-  expect(after).toEqual({ v: 2, city: null, lat: null, lng: null, countryCode: null, month: null, radius: 5000, tab: 'nearby', done: [], verifiedOnly: false });
+  expect(after).toEqual({ v: 3, city: null, lat: null, lng: null, countryCode: null, month: null, radius: 5000, tab: 'nearby', done: [], verifiedOnly: false,
+    types: { free: true, discount: true, past: true } });
   expect(await axeViolations(page), 'axe: after Clear search').toEqual([]);
 
   await expectLocationOnlyToNominatim(guard, ['Beng', 'Bengaluru']);

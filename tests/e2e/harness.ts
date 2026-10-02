@@ -160,7 +160,7 @@ export async function axeViolations(page: Page): Promise<string[]> {
 
 /** The one sessionStorage key the app may use (src/session.ts, DECISIONS #18) and its exact fields. */
 export const SESSION_KEY = 'bsq-session';
-export const SESSION_FIELDS = ['city', 'countryCode', 'done', 'lat', 'lng', 'month', 'radius', 'tab', 'v', 'verifiedOnly'];
+export const SESSION_FIELDS = ['city', 'countryCode', 'done', 'lat', 'lng', 'month', 'radius', 'tab', 'types', 'v', 'verifiedOnly'];
 
 export interface SavedSession {
   v: number;
@@ -173,6 +173,7 @@ export interface SavedSession {
   tab: string;
   done: string[];
   verifiedOnly: boolean;
+  types: { free: boolean; discount: boolean; past: boolean };
 }
 
 /** Raw web-storage snapshot of the page. */
@@ -206,8 +207,10 @@ export async function expectOnlySessionRecord(page: Page, context: BrowserContex
   expect(s.sessionKeys).toEqual([SESSION_KEY]);
   const rec = JSON.parse(s.session ?? 'null') as SavedSession;
   expect(Object.keys(rec).sort()).toEqual(SESSION_FIELDS);
-  expect(rec.v).toBe(2);
+  expect(rec.v).toBe(3);
   expect(typeof rec.verifiedOnly).toBe('boolean');
+  expect(Object.keys(rec.types).sort()).toEqual(['discount', 'free', 'past']);
+  for (const v of Object.values(rec.types)) expect(typeof v).toBe('boolean');
   if (rec.city !== null) expect(rec.city).not.toMatch(/[<>]/);
   return rec;
 }

@@ -31,6 +31,7 @@ This describes the live design system as shipped. Tokens live in [`src/styles/to
 | `--accent-tint` | `#F2E7F0` | "You get" panel, birthday pill, claimed wash | |
 | `--accent-tint-2` | `#E6D2E2` | Active card ring, paper strips | |
 | `--ok` / `--ok-tint` | `#2E6A4C` / `#E8F1EB` | Verified badge | 5.55:1 |
+| type chips | tint / sunken / surface | Free (`--accent-ink` on tint), Discount (`--ink` on sunken), Needs past spend (`--ink-2` on surface) | 9.69 / 14.7 / 7.27:1 |
 | `--warn` / `--warn-tint` | `#82560F` / `#FBF0DA` | Check with store badge, field errors | 5.65:1 |
 | `--gold-paper` | `#E7C9A9` | Confetti strips only | decorative |
 
@@ -93,9 +94,17 @@ Both fonts are self-hosted through Fontsource and pinned to exactly `5.3.0`. Onl
   - On: plum pill (`--accent`, hover `--accent-hover`), white text (9.71:1), white track, plum thumb slid right with `--ease-spring`. No accent shadow (that stays on the primary button).
   - Focus: the standard `--focus` ring. Space and Enter toggle it (native button). Changes are announced in the status live region ("Showing verified quests only, 18 of 34").
   - When it hides every quest in a list: empty state "No verified quests here yet" with a "Show all quests" action. Found online shows a note instead, because live results are never verified.
+- **Filter box (DECISIONS #27):** a "Filter" pill right of the "Verified only" switch, in the same row (it wraps on narrow screens with no horizontal scroll at 360px).
+  - Button: same resting look as the switch when off (white pill, 1px `--line-control` edge, `--ink-2` text, 44px tall) with the filter icon. Hover or open: `--ink` text and `--ink-3` edge. When types are hidden, a plum count chip (white on `--accent`, 9.71:1) shows how many; screen readers hear "Filter, 2 types hidden".
+  - Disclosure pattern: `aria-expanded` and `aria-controls`. Escape closes and returns focus to the button; a click outside or tabbing out closes it.
+  - Box: `--surface`, 16px radius, `--shadow-3` plus a `--line` hairline, right-aligned under the button, `min(300px, 100vw - 32px)` wide, fades in over `--t-fast` (none with reduced motion).
+  - Inside: a fieldset with legend "Show" and three real checkboxes (Free, Discount, Needs past spend), all checked by default, rows at least 46px tall with a `--sunken` hover; native checkboxes with `accent-color: var(--accent)`. A fine-print line explains "Needs past spend", and a "Reset" link turns every type back on.
+  - Changes re-render both lists, counts, header, ring and pins, and are announced ("Showing free quests only, 12 of 31"). If nothing matches, the empty state reads "No quests match your filters" with "Show all quests", which resets the checkboxes and Verified only.
 - **Tabs:** Nearby, Online and Found online, as a segmented track with a white sliding thumb and count chips (the selected chip turns plum). It's an ARIA tablist with arrow-key support.
 - **Quest card:**
-  - Header: brand initials tile, brand name, branch (or venue, e.g. "Wonderla Bengaluru") and distance ("about 47 km away" for approximate venues), and a status badge (Verified / Check with store / May be outdated / Claimed).
+  - Header: brand initials tile, brand name, branch (or venue, e.g. "Wonderla Bengaluru") and distance ("about 47 km away" for approximate venues), a type chip, then a status badge (Verified / Check with store / May be outdated / Claimed).
+  - Type chip (DECISIONS #27), first in the badge row, same badge shape: **Free** (`--accent-tint` with `--accent-ink`, 9.69:1, gift icon), **Discount** (`--sunken` with `--ink`, 14.7:1, tag icon), **Needs past spend** (`--surface` with a 1px `--line-control` edge and `--ink-2`, 7.27:1, receipt icon). Words always carry the meaning; screen readers hear "Quest type: Free".
+  - Order in every list: Free, then Discount, then Needs past spend. In Nearby this applies inside both groups (near branches first, by distance within a type; the "Also in <Country>" group by brand). No per-type subheadings.
   - "You get" tint panel (shown only when `rewardItem` is known).
   - Condition chips: No purchase needed, Purchase needed (min X), Join N+ days before, Valid: X, Bring: X.
   - Numbered steps joined by a connector line.

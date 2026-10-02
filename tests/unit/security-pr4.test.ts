@@ -22,6 +22,8 @@ const base = {
   sourceUrl: 'https://example.com/birthday',
   lastVerified: '2026-09-01',
   verified: true,
+  rewardType: 'free',
+  needsPastSpend: false,
 };
 const withVenue = (venue: Record<string, unknown>) => ({ ...base, venues: [{ name: 'Park One', lat: 18.7, lng: 73.4, exact: false, ...venue }] });
 

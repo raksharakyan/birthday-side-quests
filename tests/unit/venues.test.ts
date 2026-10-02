@@ -19,6 +19,8 @@ const base = {
   sourceUrl: 'https://example.com/birthday',
   lastVerified: '2026-10-02',
   verified: true,
+  rewardType: 'free',
+  needsPastSpend: false,
 };
 
 const KOLKATA = { lat: 22.5726, lng: 88.3639 };

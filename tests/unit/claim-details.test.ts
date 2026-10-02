@@ -6,6 +6,7 @@ import type { Offer } from '../../src/types';
 const raw = {
   id: 'cafe-in', brand: 'Cafe', category: 'cafe', offer: 'Free drink', howToClaim: 'Show the app', countries: ['IN'],
   channel: 'in-store', sourceUrl: 'https://example.com', lastVerified: '2026-10-02', verified: true,
+  rewardType: 'free', needsPastSpend: false,
 };
 const full = {
   ...raw,

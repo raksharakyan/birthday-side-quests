@@ -20,6 +20,8 @@ const offer: Offer = {
   sourceUrl: 'https://example.com/r',
   lastVerified: '2026-10-02',
   verified: false,
+  rewardType: 'free',
+  needsPastSpend: false,
 };
 
 beforeEach(() => _resetDone());
