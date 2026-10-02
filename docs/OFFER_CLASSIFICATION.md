@@ -11,8 +11,8 @@ Rules used: classified only from what each entry states (`offer`, `rewardItem`, 
 
 | Tier | Meaning | Offers |
 |---|---|---|
-| 0 | Free, no past spend | 28 |
-| 1 | Discount, no past spend | 40 |
+| 0 | Free, no past spend | 25 |
+| 1 | Discount, no past spend | 43 |
 | 2 | Needs past spend (free or discount) | 34 |
 | | Total | 102 |
 
@@ -67,7 +67,7 @@ Rules used: classified only from what each entry states (`offer`, `rewardItem`, 
 | `club-itc-in` | ITC Hotels (Club ITC) | discount | true | offer: "Gold and higher members earn double Green Points" |
 | `kiehls-in` | Kiehl's | discount | true | offer: "Silver, Gold and Black members get birthday gifts and discounts" |
 | `loccitane-in` | L'Occitane | discount | true | offer: "Club and Gold members get a one-time birthday voucher"; research: Club and Gold are tiers |
-| `la-pinoz-in` | La Pino'z Pizza | free | false | offer: "unlocks birthday and anniversary treats"; join and add DOB |
+| `la-pinoz-in` | La Pino'z Pizza | discount | false | offer: "unlocks birthday and anniversary treats; details not published" (unverified, not stated as free); join and add DOB |
 | `lakme-salon-in` | Lakmé Salon | discount | true | offer: "15% off salon services"; howToClaim: "(₹1,000+ spend in 12 months)" |
 | `marks-and-spencer-in` | Marks & Spencer | discount | false | offer: "10% (Club) ..."; "Join M&S Sparks" (Club is the base tier) |
 | `metro-shoes-in` | Metro Shoes | discount | false | offer: "birthday offer; details not published"; join ClubMetro |
@@ -82,7 +82,7 @@ Rules used: classified only from what each entry states (`offer`, `rewardItem`, 
 | `starbucks-in` | Tata Starbucks | discount | false | offer: "Birthday reward ... details shown in app"; join and add birthday |
 | `the-body-shop-in` | The Body Shop | discount | false | offer: "5% off or free product (Friend)"; "free Friend tier" |
 | `the-face-shop-in` | The Face Shop | discount | false | rewardItem: "20 bonus Glow Points"; join only |
-| `theobroma-in` | Theobroma | free | false | offer: "Birthday treat for registered customers"; add DOB |
+| `theobroma-in` | Theobroma | discount | false | offer: "Birthday treat for registered customers, details not published" (unverified, not stated as free); add DOB |
 | `third-wave-coffee-in` | Third Wave Coffee | discount | false | offer: "Birthday reward reported ..."; "eligibility conditions may apply" (none stated) |
 | `timezone-in` | Timezone | discount | true | offer: "200 tickets (Blue Elite) ..."; research: "Welcome-card tier gets no birthday treat" |
 | `us-polo-assn-in` | U.S. Polo Assn. | discount | true | offer: "10% (Silver) ..."; howToClaim: "Enrol in USPA Rewards with a ₹5,000+ purchase" |
@@ -95,7 +95,7 @@ Rules used: classified only from what each entry states (`offer`, `rewardItem`, 
 | `nandos-nz` | Nando's | discount | true | rewardItem: "NZ$15 voucher"; howToClaim: "buy within 6 months before your birthday month" |
 | `starbucks-nz` | Starbucks | discount | false | rewardItem: "Green: free drink size upgrade" (base tier, needs a drink purchase) |
 | `tank-nz` | TANK | free | false | offer: "Free Full Classic Smoothie"; register only |
-| `starbucks-sg` | Starbucks | free | false | offer: "Birthday treats and bonus Stars"; join and add birthday |
+| `starbucks-sg` | Starbucks | discount | false | offer: "Birthday treats and bonus Stars" (bonus Stars are points; no item stated); join and add birthday |
 | `swensens-sg` | Swensen's | free | false | offer: "Free Firehouse Happy Birthday Sundae"; join Cool Rewards only |
 | `baskin-robbins-us` | Baskin-Robbins | discount | false | offer: "Birthday coupon"; create account only |
 | `bath-and-body-works-us` | Bath & Body Works | free | false | offer: "One free item (original price up to $9.95)"; add birthday to profile |
@@ -135,23 +135,27 @@ Rules used: classified only from what each entry states (`offer`, `rewardItem`, 
 - `zizzi-gb` (Zizzi): "Birthday Perk" is not stated as free, so discount (conservative).
 - `kiehls-in` (Kiehl's): Mixed "gifts and discounts" with no detail, so discount; Silver+ tier so needsPastSpend true.
 - `loccitane-in` (L'Occitane): Voucher value not stated (discount); Club/Gold read as earned tiers (conservative).
-- `la-pinoz-in` (La Pino'z Pizza): Unverified, but wording says "treats", so free per the rule.
+- `la-pinoz-in` (La Pino'z Pizza): Unverified "treats" with details not published, so discount (conservative; changed from free after QA review, QA-PR5-01).
 - `nykaa-in` (Nykaa): Base tier gets only a points multiplier on a birthday-month purchase (discount, no past spend); the free gift needs Privé Gold/Platinum.
 - `shoppers-stop-in` (Shoppers Stop): First Citizen Club entry terms are not stated, so no past-spend rule recorded.
 - `starbucks-in` (Tata Starbucks): Unverified "birthday reward" is not stated as free, so discount (conservative).
 - `the-body-shop-in` (The Body Shop): Base tier is "5% off or free product", mixed, so discount (conservative).
-- `theobroma-in` (Theobroma): Unverified, but wording says "treat", so free per the rule.
+- `theobroma-in` (Theobroma): Unverified "treat" with details not published, so discount (conservative; changed from free after QA review, QA-PR5-01).
 - `third-wave-coffee-in` (Third Wave Coffee): Unverified "reward" not stated as free; unstated "conditions may apply" not treated as past spend.
 - `tealive-my` (Tealive): "Complimentary voucher" does not say what it is for, so discount (conservative).
 - `burgerfuel-nz` (BurgerFuel): "Birthday reward" is not stated as free, so discount (conservative).
 - `starbucks-nz` (Starbucks): Base Green tier gets a size upgrade on a paid drink (discount); the free drink is Gold only.
-- `starbucks-sg` (Starbucks): Wording says "treats", so free; tier details are not on the page.
+- `starbucks-sg` (Starbucks): "Treats and bonus Stars" names no free item and bonus Stars are points, so discount (conservative; changed from free after QA review, QA-PR5-01).
 - `dairy-queen-us` (Dairy Queen): "Birthday surprise" is not stated as free, so discount (conservative).
 - `duck-donuts-us` (Duck Donuts): "Active in the past 365 days" read as a past transaction (conservative).
 - `krispy-kreme-us` (Krispy Kreme): "Birthday reward" is not stated as free, so discount (conservative).
 - `ritas-us` (Rita's Italian Ice): "Reward" is not stated as free, so discount (conservative).
 - `sephora-us-ca` (Sephora): Free in store; online needs a $25 purchase. Classed by the in-store route.
 - `starbucks-us` (Starbucks): Brief expected false, but the entry requires a prior Star-earning purchase ("any spend in the past"), so true.
+
+## Revision 2026-10-02 (QA review, PR #5)
+
+QA-PR5-01: an unpublished or unverified "treat" is as unclear as "surprise" or "reward", so the conservative rule applies. `la-pinoz-in`, `theobroma-in` and `starbucks-sg` moved from free to discount (tier 0 to tier 1). Counts went from 28 / 40 / 34 to 25 / 43 / 34. India now has no tier 0 offer; `costa-coffee-in` is its only free reward, and it needs past spend.
 
 ## Changing a classification
 

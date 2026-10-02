@@ -82,8 +82,12 @@ export function seedOffers(): SeedOffer[] {
  * Nearby offers for a country at a searched point, from the shipped public/offers.json: in-store or
  * both, minus venue offers whose nearest venue is further than VENUE_MAX_M.
  */
-export function expectedNearbyOffers(country: string, at: { lat: number; lng: number } = BENGALURU): SeedOffer[] {
-  return seedOffers().filter((o) => {
+export function expectedNearbyOffers(
+  country: string,
+  at: { lat: number; lng: number } = BENGALURU,
+  offers: SeedOffer[] = seedOffers(),
+): SeedOffer[] {
+  return offers.filter((o) => {
     if (!(o.channel === 'in-store' || o.channel === 'both')) return false;
     if (!(o.countries.includes('*') || o.countries.includes(country))) return false;
     if (!o.venues) return true;
@@ -94,6 +98,27 @@ export function expectedNearbyOffers(country: string, at: { lat: number; lng: nu
 /** Expected Nearby card count (see expectedNearbyOffers). Defaults to the mocked Bengaluru point. */
 export function expectedNearbyCount(country: string, at: { lat: number; lng: number } = BENGALURU): number {
   return expectedNearbyOffers(country, at).length;
+}
+
+/**
+ * Test-only data (DECISIONS #28): since QA-PR5-01 India has no tier 0 (free, no past spend) offer, so specs
+ * that exercise the Free type with a mocked Bengaluru shop serve a copy of public/offers.json in which
+ * `theobroma-in` (mocked branch "Theobroma Indiranagar") is free. The shipped file is never changed.
+ */
+export const FREE_FIXTURE_ID = 'theobroma-in';
+export function freeFixtureFile(): { offers: SeedOffer[] } {
+  const file = JSON.parse(readFileSync(resolve(process.cwd(), 'public/offers.json'), 'utf8')) as { offers: SeedOffer[] };
+  for (const o of file.offers) if (o.id === FREE_FIXTURE_ID) o.rewardType = 'free';
+  return file;
+}
+/** Offers as the app sees them under `routeFreeFixture`. */
+export function freeFixtureOffers(): SeedOffer[] {
+  return freeFixtureFile().offers;
+}
+/** Serve the free-fixture copy of offers.json to the page (register before `page.goto`). */
+export async function routeFreeFixture(page: Page): Promise<void> {
+  const json = freeFixtureFile();
+  await page.route('**/offers.json', (route) => route.fulfill({ json }));
 }
 
 /** Quest tier per DECISIONS #27: 0 free, 1 discount, 2 needs past spend. */

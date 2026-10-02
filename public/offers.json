@@ -302,6 +302,7 @@
       },
       "steps": [
         "Join Muffin Break rewards with your birthday",
+        "Make a purchase in the 12 months before your birthday",
         "Check the app in your birthday month"
       ],
       "purchaseRequired": null
@@ -1296,7 +1297,7 @@
       "sourceUrl": "https://lapinozpizza.in/wallet",
       "lastVerified": "2026-10-02",
       "verified": false,
-      "rewardType": "free",
+      "rewardType": "discount",
       "needsPastSpend": false,
       "osm": {
         "nameRegex": "la pino('|’)?z"
@@ -1453,7 +1454,8 @@
       "lastVerified": "2026-10-02",
       "verified": true,
       "rewardType": "discount",
-      "needsPastSpend": false
+      "needsPastSpend": false,
+      "purchaseRequired": true
     },
     {
       "id": "plum-in",
@@ -1648,7 +1650,7 @@
       "sourceUrl": "https://theobroma.in/",
       "lastVerified": "2026-10-02",
       "verified": false,
-      "rewardType": "free",
+      "rewardType": "discount",
       "needsPastSpend": false,
       "osm": {
         "nameRegex": "theobroma"
@@ -1696,6 +1698,7 @@
       "rewardItem": "Blue Elite 200 tickets; Gold 500 bonus + 200 tickets; Platinum 1,000 bonus + 1,000 tickets",
       "steps": [
         "Register your Powercard in the Timezone Fun App or Member Portal",
+        "Reach Blue Elite tier or above (the Welcome card tier gets no birthday treat)",
         "Add your DOB at least 7 days before the 1st of your birthday month",
         "Find the voucher in the app's Vouchers section",
         "Show the voucher at a Timezone venue"
@@ -2052,7 +2055,7 @@
       "sourceUrl": "https://www.starbucks.com.sg/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
-      "rewardType": "free",
+      "rewardType": "discount",
       "needsPastSpend": false,
       "osm": {
         "wikidata": "Q37158",

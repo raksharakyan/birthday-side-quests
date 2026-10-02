@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Locator, Page } from '@playwright/test';
-import { expectedNearbyOffers, seedOffers, type SeedOffer, TYPE_TIER } from './fixtures';
+import { BENGALURU, expectedNearbyOffers, freeFixtureOffers, routeFreeFixture, type SeedOffer, TYPE_TIER } from './fixtures';
 import { axeViolations, expect, expectOnlySessionRecord, search, storageSnapshot, test } from './harness';
 
 /*
@@ -15,8 +15,10 @@ const typeOf = (o: SeedOffer): QType => (o.needsPastSpend ? 'past' : o.rewardTyp
 const LABEL: Record<QType, string> = { free: 'Free', discount: 'Discount', past: 'Needs past spend' };
 const brandCmp = new Intl.Collator('en', { sensitivity: 'base', numeric: true });
 
-const nearbyAll = () => expectedNearbyOffers('IN');
-const onlineAll = () => seedOffers().filter((o) => (o.channel === 'online' || o.channel === 'both') && o.countries.includes('IN'));
+// India has no free (tier 0) offer since QA-PR5-01, so these tests run on the free fixture (DECISIONS #28):
+// a copy of offers.json where theobroma-in, which has a mocked Bengaluru branch, is free.
+const nearbyAll = () => expectedNearbyOffers('IN', BENGALURU, freeFixtureOffers());
+const onlineAll = () => freeFixtureOffers().filter((o) => (o.channel === 'online' || o.channel === 'both') && o.countries.includes('IN'));
 /** Unique offers across Nearby + Online that pass the filters (what the ring and the header count). */
 function uniqueShown(types: Record<QType, boolean>, verifiedOnly = false): { shown: number; total: number } {
   const all = new Map([...nearbyAll(), ...onlineAll()].map((o) => [o.id, o]));
@@ -50,6 +52,7 @@ async function searchBengaluru(page: Page): Promise<void> {
 
 test('Nearby and Online list free first, then discount, then needs past spend; every card has a type chip', async ({ page, guard }) => {
   await guard.mock();
+  await routeFreeFixture(page);
   await searchBengaluru(page);
 
   // Nearby: both groups kept (near group first), each in tier order.
@@ -62,11 +65,11 @@ test('Nearby and Online list free first, then discount, then needs past spend; e
   expect(restTypes.length).toBeGreaterThan(0);
   expect(tiersAscend(nearTypes), `near group ${nearTypes.join(',')}`).toBe(true);
   expect(tiersAscend(restTypes), `rest group ${restTypes.join(',')}`).toBe(true);
-  // Theobroma is the only free quest with a mocked branch, so it leads the near group.
+  // Theobroma (free in the fixture) is the only free quest with a mocked branch, so it leads the near group.
   expect((await idsIn(near))[0]).toBe('theobroma-in');
   // Rest group: within each tier, brand A to Z.
   const restIds = await idsIn(rest);
-  const byId = new Map(seedOffers().map((o) => [o.id, o]));
+  const byId = new Map(freeFixtureOffers().map((o) => [o.id, o]));
   const restSorted = [...restIds].sort((a, b) => {
     const oa = byId.get(a) as SeedOffer;
     const ob = byId.get(b) as SeedOffer;
@@ -113,6 +116,7 @@ test('Nearby and Online list free first, then discount, then needs past spend; e
 
 test('Filter box: disclosure, each checkbox, counts, ring, pins, announcement, Escape and outside click', async ({ page, guard }) => {
   await guard.mock();
+  await routeFreeFixture(page);
   await searchBengaluru(page);
   const btn = filterBtn(page);
   await expect(btn).toHaveAttribute('aria-expanded', 'false');
@@ -150,7 +154,7 @@ test('Filter box: disclosure, each checkbox, counts, ring, pins, announcement, E
   await expect(page.getByRole('status')).toHaveText(`Showing discount and past-spend quests, ${u.shown} of ${u.total}`);
   await expect(page.locator('#filter-count')).toHaveText(', 1 type hidden');
   await expect(btn).toHaveAccessibleName(/^Filter\s*, 1 type hidden$/);
-  // Theobroma (free) loses its pin; the 3 discount shops keep theirs.
+  // Theobroma (free in the fixture) loses its pin; the 3 discount shops keep theirs.
   await expect(page.locator('.map-marker--branch')).toHaveCount(3);
   await expect(page.locator('.map-marker--branch[data-offer-id="theobroma-in"]')).toHaveCount(0);
   await expect(box(page)).toBeVisible(); // stays open while choosing
@@ -212,6 +216,7 @@ test('Filter box: disclosure, each checkbox, counts, ring, pins, announcement, E
 test('Filter box: keyboard (Tab into the box, Space toggles, Escape returns focus) and focus ring', async ({ page, guard }, info) => {
   test.skip(info.project.name.startsWith('mobile'), 'keyboard flow is a desktop interaction');
   await guard.mock();
+  await routeFreeFixture(page);
   await searchBengaluru(page);
   const btn = filterBtn(page);
   await btn.focus();
@@ -241,6 +246,7 @@ test('Filter box: keyboard (Tab into the box, Space toggles, Escape returns focu
 
 test('Filter: persists across a reload, Clear search resets it, and a v2 record migrates with every type on', async ({ page, context, guard }) => {
   await guard.mock();
+  await routeFreeFixture(page);
   await page.goto('./');
   const startUrl = page.url();
   await search(page, 'Bengaluru');
@@ -286,6 +292,7 @@ test('Filter: persists across a reload, Clear search resets it, and a v2 record 
 
 test('Filter: every type off shows "No quests match your filters"; "Show all quests" resets every filter', async ({ page, guard }) => {
   await guard.mock();
+  await routeFreeFixture(page);
   await searchBengaluru(page);
   await verifiedSwitch(page).click();
   await filterBtn(page).click();
@@ -322,6 +329,7 @@ test('Filter: Verified only alone keeps its own empty state copy', async ({ page
 test('Filter box: no horizontal scroll at 360/375/390 with the box open, and the box stays on screen', async ({ page, guard }, info) => {
   test.skip(info.project.name.startsWith('mobile'), 'widths are set explicitly; one project is enough');
   await guard.mock();
+  await routeFreeFixture(page);
   for (const width of [360, 375, 390]) {
     await page.setViewportSize({ width, height: 800 });
     await searchBengaluru(page);

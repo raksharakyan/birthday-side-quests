@@ -132,8 +132,8 @@ test('journey: pick city → sorted Nearby → 20 km re-sort → claim 2 → Onl
   expect(d5.length).toBe(5); // 4 Overpass branches + Wonderla Bengaluru (venue, ~26 km)
   expect(d5.every(Number.isFinite)).toBe(true);
   expect(isTierThenDistanceOrder(await cardTypes(page, '#nearby-list > .quest-list .quest-card'), d5)).toBe(true);
-  // Theobroma is the only free quest with a branch, so it leads; the discounts follow by distance.
-  expect(await nearIds(page)).toEqual(['theobroma-in', 'starbucks-in', 'third-wave-coffee-in', 'the-body-shop-in', 'wonderla-in']);
+  // India has no free quest since QA-PR5-01 (DECISIONS #28), so the branch cards are all discounts, nearest first.
+  expect(await nearIds(page)).toEqual(['starbucks-in', 'third-wave-coffee-in', 'the-body-shop-in', 'theobroma-in', 'wonderla-in']);
   await expect(page.locator('#nearby-list .quest-card[data-offer-id="starbucks-in"] .quest-card__distance')).toHaveText(/^\d+ m away$/);
   await expect(page.getByRole('heading', { name: 'Also in India: find your nearest branch' })).toBeVisible();
   expect(overpassQueries(guard)[0]).toContain(`(around:5000,${PICK.lat.toFixed(6)},${PICK.lng.toFixed(6)})`);
@@ -145,7 +145,7 @@ test('journey: pick city → sorted Nearby → 20 km re-sort → claim 2 → Onl
   expect(overpassQueries(guard)[1]).toContain(`(around:20000,${PICK.lat.toFixed(6)},${PICK.lng.toFixed(6)})`);
   expect(overpassQueries(guard)[1]).toContain('out center 150;');
   expect(hostRequests(guard, 'nominatim.openstreetmap.org')).toEqual([]);
-  await expect.poll(() => nearIds(page)).toEqual(['theobroma-in', 'third-wave-coffee-in', 'the-body-shop-in', 'starbucks-in', 'wonderla-in']);
+  await expect.poll(() => nearIds(page)).toEqual(['third-wave-coffee-in', 'the-body-shop-in', 'theobroma-in', 'starbucks-in', 'wonderla-in']);
   const d20 = await nearDistances(page);
   expect(isTierThenDistanceOrder(await cardTypes(page, '#nearby-list > .quest-list .quest-card'), d20)).toBe(true);
   await expect(page.locator('#nearby-list .quest-card[data-offer-id="starbucks-in"] .quest-card__distance')).toHaveText(/^1\d km away$/);
@@ -216,7 +216,7 @@ test('journey: pick city → sorted Nearby → 20 km re-sort → claim 2 → Onl
   await expect(page.locator('.map-marker--branch.is-claimed')).toHaveCount(2);
   await expect(page.locator('#online-list .quest-card[data-offer-id="the-body-shop-in"]')).toHaveClass(/\bis-done\b/);
   await expect(page.locator('#nearby-list .quest-card.is-done')).toHaveCount(2);
-  expect(await nearIds(page)).toEqual(['theobroma-in', 'third-wave-coffee-in', 'the-body-shop-in', 'starbucks-in', 'wonderla-in']);
+  expect(await nearIds(page)).toEqual(['third-wave-coffee-in', 'the-body-shop-in', 'theobroma-in', 'starbucks-in', 'wonderla-in']);
   expect(overpassQueries(guard)).toHaveLength(3);
   expect(overpassQueries(guard)[2]).toContain(`(around:20000,${PICK.lat.toFixed(6)},${PICK.lng.toFixed(6)})`);
   expect(hostRequests(guard, 'nominatim.openstreetmap.org')).toEqual([]);
