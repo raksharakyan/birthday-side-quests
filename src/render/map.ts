@@ -3,7 +3,7 @@ import 'leaflet/dist/leaflet.css';
 import type { Branch, Offer, Place } from '../types';
 import { directionsUrl } from '../urls';
 import { el, externalLink } from './dom';
-import { centerIcon, heartIcon } from './icons';
+import { CATEGORY_EMOJI, iconForCategory, starIcon } from './icons';
 
 /**
  * Leaflet map. No default Leaflet marker images are used (avoids the bundler icon-path issue);
@@ -21,24 +21,35 @@ export interface MapView {
   invalidateSize(): void;
 }
 
-function markerIcon(kind: 'branch' | 'center', category?: string): L.DivIcon {
+function markerIcon(kind: 'branch' | 'center', category?: Offer['category']): L.DivIcon {
   const wrap = el('span', { class: `map-marker map-marker--${kind}`, 'data-category': category ?? null });
-  wrap.appendChild(kind === 'branch' ? heartIcon() : centerIcon());
+  wrap.appendChild(kind === 'branch' ? iconForCategory(category) : starIcon());
   return L.divIcon({
     html: wrap,
     className: 'map-marker-host',
-    iconSize: kind === 'branch' ? [28, 28] : [22, 22],
-    iconAnchor: kind === 'branch' ? [14, 26] : [11, 11],
-    popupAnchor: [0, -24],
+    iconSize: kind === 'branch' ? [36, 48] : [40, 40],
+    iconAnchor: kind === 'branch' ? [18, 46] : [20, 20],
+    popupAnchor: kind === 'branch' ? [0, -42] : [0, -18],
   });
 }
 
+function directionsLabel(brand: string, branchName: string): string {
+  return branchName && branchName !== brand ? `Get directions to ${brand}, ${branchName}` : `Get directions to ${brand}`;
+}
+
 function popupContent(branch: Branch, offer: Offer | undefined): HTMLElement {
-  return el('div', { class: 'map-popup' }, [
-    el('strong', { class: 'map-popup__brand' }, [offer?.brand ?? branch.name]),
+  const brand = offer?.brand ?? branch.name;
+  return el('div', { class: 'map-popup', 'data-category': offer?.category ?? null }, [
+    el('strong', { class: 'map-popup__brand' }, [
+      offer ? el('span', { class: 'map-popup__emoji', 'aria-hidden': 'true' }, [CATEGORY_EMOJI[offer.category]]) : null,
+      brand,
+    ]),
     branch.name && offer && branch.name !== offer.brand ? el('span', { class: 'map-popup__name' }, [branch.name]) : null,
     offer ? el('p', { class: 'map-popup__offer' }, [offer.offer]) : null,
-    externalLink(directionsUrl(branch.lat, branch.lng), 'Get directions', { class: 'map-popup__directions' }),
+    externalLink(directionsUrl(branch.lat, branch.lng), 'Get directions ↗', {
+      class: 'map-popup__directions',
+      'aria-label': `${directionsLabel(brand, branch.name)} (opens in a new tab)`,
+    }),
   ]);
 }
 
@@ -79,7 +90,7 @@ export function createMap(container: HTMLElement): MapView {
         const offer = offersById.get(b.offerId);
         const label = offer ? `${offer.brand}: ${b.name}` : b.name;
         L.marker([b.lat, b.lng], { icon: markerIcon('branch', offer?.category), title: label, alt: label, keyboard: true })
-          .bindPopup(popupContent(b, offer))
+          .bindPopup(popupContent(b, offer), { className: 'bsq-popup', maxWidth: 260, minWidth: 180 })
           .addTo(branchLayer);
         pts.push([b.lat, b.lng]);
       }

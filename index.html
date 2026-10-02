@@ -5,15 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
     <meta name="description" content="Birthday Side Quests: find birthday freebies near you and online. Type a city, pick your birthday month — nothing is stored." />
-    <meta name="theme-color" content="#fde2ec" />
+    <meta name="theme-color" content="#ffd9e6" />
     <title>Birthday Side Quests</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
-      <h1 class="site-title">Birthday Side Quests</h1>
-      <p class="site-tagline">Free birthday treats near you, turned into tiny adventures.</p>
+      <div class="site-header__inner">
+        <span class="site-header__deco site-header__deco--1" aria-hidden="true">✦</span>
+        <span class="site-header__deco site-header__deco--2" aria-hidden="true">✧</span>
+        <span class="site-header__deco site-header__deco--3" aria-hidden="true">♡</span>
+        <h1 class="site-title"><span class="site-title__cake" aria-hidden="true">🎂</span> Birthday Side Quests<span class="site-title__sparkle" aria-hidden="true">✨</span></h1>
+        <p class="site-tagline">Free birthday treats near you, turned into tiny adventures.</p>
+      </div>
     </header>
 
     <main id="main" class="app" tabindex="-1">
@@ -43,30 +48,36 @@
               <option value="12">December</option>
             </select>
           </div>
-          <button type="submit" class="btn btn--primary search-form__submit">Find my quests</button>
+          <button type="submit" class="btn btn--primary search-form__submit">Find my quests <span class="btn__sparkle" aria-hidden="true">✨</span></button>
         </form>
-        <p class="privacy-note">We don't store anything. Your location stays in your browser tab.</p>
+        <p class="privacy-note"><span class="privacy-note__icon" aria-hidden="true">🔒</span><span class="privacy-note__text">We don't store anything. Your location stays in your browser tab.</span></p>
         <p id="status" class="status" role="status" aria-live="polite"></p>
         <p id="month-info" class="month-info" hidden></p>
       </section>
 
       <section class="map-section" aria-label="Map">
         <div id="map" class="map" role="region" aria-label="Map of nearby birthday quests">
-          <p class="map__placeholder">Your quest map appears here after you search.</p>
+          <div class="map__placeholder">
+            <span class="map__placeholder-art" aria-hidden="true">🗺️</span>
+            <p class="map__placeholder-text">Your quest map appears here after you search.</p>
+          </div>
         </div>
       </section>
 
       <section class="results" aria-labelledby="results-heading">
         <h2 id="results-heading" class="visually-hidden">Your quests</h2>
         <div class="tabs" role="tablist" aria-label="Quest types">
-          <button type="button" class="tab" role="tab" id="tab-nearby" aria-controls="panel-nearby" aria-selected="true" tabindex="0">Nearby</button>
-          <button type="button" class="tab" role="tab" id="tab-online" aria-controls="panel-online" aria-selected="false" tabindex="-1">Online</button>
-          <button type="button" class="tab" role="tab" id="tab-found" aria-controls="panel-found" aria-selected="false" tabindex="-1" hidden>Found online</button>
+          <button type="button" class="tab" role="tab" id="tab-nearby" aria-controls="panel-nearby" aria-selected="true" tabindex="0"><span class="tab__icon" aria-hidden="true">📍</span>Nearby</button>
+          <button type="button" class="tab" role="tab" id="tab-online" aria-controls="panel-online" aria-selected="false" tabindex="-1"><span class="tab__icon" aria-hidden="true">💻</span>Online</button>
+          <button type="button" class="tab" role="tab" id="tab-found" aria-controls="panel-found" aria-selected="false" tabindex="-1" hidden><span class="tab__icon" aria-hidden="true">🔎</span>Found online</button>
         </div>
 
         <div class="tab-panel" role="tabpanel" id="panel-nearby" aria-labelledby="tab-nearby" tabindex="0">
           <div id="nearby-list" class="panel-body">
-            <p class="empty-state">Type your city or area and pick your birthday month to see quests near you.</p>
+            <div class="empty-state" data-kind="empty">
+              <span class="empty-state__art" aria-hidden="true">🎈</span>
+              <p class="empty-state__text">Type your city or area and pick your birthday month to see quests near you.</p>
+            </div>
           </div>
         </div>
 
@@ -81,17 +92,23 @@
         </div>
 
         <div class="tab-panel" role="tabpanel" id="panel-found" aria-labelledby="tab-found" tabindex="0" hidden>
-          <p class="disclaimer">Live web results for your birthday month and country. We haven't checked these — always read the link before you go.</p>
+          <p class="disclaimer"><span class="disclaimer__icon" aria-hidden="true">🧭</span> Live web results for your birthday month and country. We haven't checked these — always read the link before you go.</p>
           <div id="found-list" class="panel-body">
-            <p class="empty-state">Pick your birthday month and a country to see what's out there.</p>
+            <div class="empty-state" data-kind="empty">
+              <span class="empty-state__art" aria-hidden="true">🔭</span>
+              <p class="empty-state__text">Pick your birthday month and a country to see what's out there.</p>
+            </div>
           </div>
         </div>
       </section>
     </main>
 
+    <p id="celebrate-live" class="visually-hidden" aria-live="polite"></p>
+
     <footer class="site-footer">
       <p>Map data &copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap contributors</a>. Search by <a href="https://nominatim.org/" rel="noopener noreferrer" target="_blank">Nominatim</a>.</p>
       <p>Offers change — always check with the brand before you go.</p>
+      <p class="site-footer__love">Made with <span aria-hidden="true">💖</span><span class="visually-hidden">love</span> for birthday people everywhere.</p>
     </footer>
     <script type="module" src="/src/main.ts"></script>
   </body>

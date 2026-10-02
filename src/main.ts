@@ -1,6 +1,9 @@
-import '@fontsource/fredoka/600.css';
-import '@fontsource/nunito/400.css';
-import '@fontsource/nunito/700.css';
+// Only the weights/subsets we use (Fredoka 600 display, Nunito 400/700 body); other scripts fall back to system fonts.
+import '@fontsource/fredoka/latin-600.css';
+import '@fontsource/nunito/latin-400.css';
+import '@fontsource/nunito/latin-700.css';
+import '@fontsource/nunito/latin-ext-400.css';
+import '@fontsource/nunito/latin-ext-700.css';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
@@ -9,6 +12,7 @@ import { GeocodeError, geocode } from './geocode';
 import { isLiveSearchEnabled, liveSearch } from './liveSearch';
 import { filterOffers, loadOffers, monthInfo } from './offers';
 import { fetchBranches, nearestByOffer } from './overpass';
+import { initCelebrations } from './render/confetti';
 import { el } from './render/dom';
 import type { MapView } from './render/map';
 import { renderEmpty, renderLiveList, renderQuestList } from './render/quests';
@@ -142,7 +146,7 @@ function populateCountries(extra?: string): void {
 function renderOnline(): void {
   const list = filterOffers({ offers: state.offers, country: state.onlineCountry, channel: 'online' });
   if (list.length === 0) {
-    renderEmpty(onlineList, 'No online birthday quests for this country yet — try "Worldwide offers only".');
+    renderEmpty(onlineList, 'No online birthday quests for this country yet — try "Worldwide offers only".', 'empty');
   } else {
     renderQuestList(onlineList, list, { idPrefix: 'online' });
   }
@@ -173,14 +177,14 @@ async function refreshFoundOnline(): Promise<void> {
     showLive(cached);
     return;
   }
-  renderEmpty(foundList, 'Searching the web for birthday deals…');
+  renderEmpty(foundList, 'Searching the web for birthday deals…', 'loading');
   foundList.setAttribute('aria-busy', 'true');
   try {
     const results = await liveSearch(month, country);
     liveCache.set(key, results);
     if (state.month === month && state.onlineCountry === country) showLive(results);
   } catch {
-    renderEmpty(foundList, "Live search isn't available right now. The Nearby and Online tabs still work!");
+    renderEmpty(foundList, "Live search isn't available right now. The Nearby and Online tabs still work!", 'error');
   } finally {
     foundList.removeAttribute('aria-busy');
   }
@@ -317,9 +321,10 @@ countrySelect.addEventListener('change', () => {
   renderOnline();
   if (foundTabSelected()) void refreshFoundOnline();
 });
+initCelebrations($('celebrate-live'));
 window.addEventListener('offline', () => setStatus("You're offline. Results already shown will stay here.", 'error'));
 
 // Online tab works without a city — load offers up front (small static file, same origin).
 ensureOffers().catch(() => {
-  renderEmpty(onlineList, "We couldn't load the offers list. Please refresh the page.");
+  renderEmpty(onlineList, "We couldn't load the offers list. Please refresh the page.", 'error');
 });

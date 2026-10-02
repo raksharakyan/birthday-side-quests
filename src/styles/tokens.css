@@ -1,35 +1,79 @@
-/* Design tokens — placeholder values; UI/UX agent owns the final palette. */
+/*
+ * Design tokens — "pastel party" palette.
+ * Pastels are for backgrounds/fills only; every text colour is an "ink" shade.
+ * Contrast ratios (WCAG 2.x) are listed in docs/HANDOFFS.md (UI/UX → Security).
+ */
 :root {
-  --font-display: 'Fredoka', system-ui, sans-serif;
-  --font-body: 'Nunito', system-ui, sans-serif;
+  --font-display: 'Fredoka', ui-rounded, system-ui, sans-serif;
+  --font-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  --color-bg: #fff8fb;
-  --color-surface: #ffffff;
-  --color-text: #2d2235;
-  --color-muted: #5e5068;
-  --color-primary: #b0306a;
-  --color-primary-text: #ffffff;
-  --color-accent: #f472b6;
-  --color-border: #ecd6e2;
-  --color-success-bg: #e3f6ea;
-  --color-success-text: #1d5b34;
-  --color-warning-bg: #fff2d6;
-  --color-warning-text: #6b4a00;
-  --color-stale-bg: #ece8f6;
-  --color-stale-text: #43376a;
-  --color-error-text: #9b1c1c;
-  --color-focus: #6d28d9;
+  /* pastels (backgrounds, fills) */
+  --cream: #fff9f2;
+  --white: #ffffff;
+  --blush: #ffd9e6;
+  --blush-soft: #fff0f5;
+  --lavender: #e9e0ff;
+  --lavender-soft: #f5f0ff;
+  --mint: #d5f5e7;
+  --mint-soft: #eefbf4;
+  --butter: #fff1bf;
+  --butter-soft: #fff8dc;
+  --peach: #ffe1cc;
 
-  --radius-s: 6px;
-  --radius-m: 12px;
-  --radius-l: 20px;
+  /* inks (text, icons, buttons) */
+  --ink: #3b2440;          /* 13.3:1 on cream */
+  --ink-muted: #6a5470;    /* 6.4:1 on cream */
+  --ink-berry: #b02a63;    /* 6.0:1 on cream; white on it 6.3:1 */
+  --ink-berry-deep: #8f1f50;
+  --ink-lavender: #5a3ea6;
+  --ink-mint: #1d6647;
+  --ink-butter: #6e4c00;
+  --ink-error: #a3213a;
+
+  /* semantic */
+  --color-bg: var(--cream);
+  --color-surface: var(--white);
+  --color-text: var(--ink);
+  --color-muted: var(--ink-muted);
+  --color-primary: var(--ink-berry);
+  --color-primary-hover: var(--ink-berry-deep);
+  --color-primary-text: var(--white);
+  --color-accent: var(--blush);
+  --color-border: #ad6b8e;        /* form controls: 3.8:1 on cream (UI ≥3:1) */
+  --color-border-soft: #f1d3e0;   /* decorative card borders only */
+  --color-success-bg: var(--mint);
+  --color-success-text: var(--ink-mint);
+  --color-warning-bg: var(--butter);
+  --color-warning-text: var(--ink-butter);
+  --color-stale-bg: var(--lavender);
+  --color-stale-text: var(--ink-lavender);
+  --color-error-text: var(--ink-error);
+  --color-focus: #7b4fe0;         /* 5.0:1 on cream, 5.2:1 on white */
+
+  /* shape */
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 22px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
+  --space-5: 1.25rem;
   --space-6: 1.5rem;
   --space-8: 2rem;
-  --shadow-card: 0 2px 10px rgb(45 34 53 / 8%);
-  --map-height: 360px;
-  --content-max: 960px;
+
+  --shadow-soft: 0 1px 2px rgb(91 42 80 / 6%), 0 6px 18px rgb(176 42 99 / 8%);
+  --shadow-card: 0 1px 2px rgb(91 42 80 / 6%), 0 8px 24px rgb(176 42 99 / 9%);
+  --shadow-lift: 0 2px 4px rgb(91 42 80 / 8%), 0 14px 32px rgb(176 42 99 / 14%);
+  --shadow-button: 0 3px 0 var(--ink-berry-deep);
+
+  --map-height: 300px;
+  --content-max: 1200px;
+}
+
+@media (min-width: 600px) {
+  :root { --map-height: 380px; }
 }

@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import type { Page, Route } from '@playwright/test';
 
 export const WORKER_ORIGIN = 'https://bsq-worker.e2e.example';
@@ -20,9 +22,27 @@ export const NOMINATIM_BENGALURU = [
 export const OVERPASS_BENGALURU = {
   elements: [
     { type: 'node', id: 1, lat: 12.975, lon: 77.6, tags: { name: 'Starbucks MG Road', 'brand:wikidata': 'Q37158' } },
-    { type: 'way', id: 2, center: { lat: 12.97, lon: 77.58 }, tags: { name: 'Chaayos Church Street' } },
+    { type: 'way', id: 2, center: { lat: 12.97, lon: 77.58 }, tags: { name: 'Third Wave Coffee Church Street' } },
+    { type: 'node', id: 3, lat: 12.9719, lon: 77.6412, tags: { name: 'Theobroma Indiranagar' } },
+    { type: 'node', id: 4, lat: 12.9345, lon: 77.6101, tags: { name: 'The Body Shop Forum Mall', 'brand:wikidata': 'Q837851' } },
   ],
 };
+
+/** Number of mocked Overpass elements above that match an offer (one pin each). */
+export const OVERPASS_BENGALURU_PINS = 4;
+
+interface SeedOffer {
+  channel: string;
+  countries: string[];
+}
+
+/** Expected Nearby card count for a country, derived from the shipped public/offers.json (in-store or both). */
+export function expectedNearbyCount(country: string): number {
+  const file = JSON.parse(readFileSync(resolve(process.cwd(), 'public/offers.json'), 'utf8')) as { offers: SeedOffer[] };
+  return file.offers.filter(
+    (o) => (o.channel === 'in-store' || o.channel === 'both') && (o.countries.includes('*') || o.countries.includes(country)),
+  ).length;
+}
 
 export const WORKER_RESULTS = [
   { title: 'Birthday freebies in India this October', url: 'https://deals.example/birthday', snippet: 'A list of treats.', source: 'deals.example' },

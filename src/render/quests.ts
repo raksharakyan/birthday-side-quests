@@ -3,6 +3,7 @@ import { isStale } from '../offers';
 import { questLine } from '../templates';
 import { directionsUrl } from '../urls';
 import { el, externalLink } from './dom';
+import { CATEGORY_EMOJI } from './icons';
 
 /** Done state lives in memory only — never persisted. */
 const done = new Set<string>();
@@ -28,17 +29,20 @@ export const CLAIM_WINDOW_LABELS: Record<ClaimWindow, string> = {
   varies: 'Varies — check the terms',
 };
 
+/** Badge with a decorative (aria-hidden) emoji so screen readers only hear the words. */
+function badge(kind: string, emoji: string, text: string): HTMLSpanElement {
+  return el('span', { class: `badge badge--${kind}` }, [el('span', { class: 'badge__icon', 'aria-hidden': 'true' }, [emoji]), text]);
+}
+
 function badges(offer: Offer, now: Date): HTMLElement {
   const list = el('div', { class: 'badges' });
-  if (offer.verified) {
-    list.appendChild(el('span', { class: 'badge badge--verified' }, ['✅ Verified']));
-  } else {
-    list.appendChild(el('span', { class: 'badge badge--check' }, ['⚠️ Check with store']));
-  }
-  if (isStale(offer.lastVerified, now)) {
-    list.appendChild(el('span', { class: 'badge badge--stale' }, ['🕰 May be outdated']));
-  }
+  list.appendChild(offer.verified ? badge('verified', '✅', 'Verified') : badge('check', '⚠️', 'Check with store'));
+  if (isStale(offer.lastVerified, now)) list.appendChild(badge('stale', '🕰', 'May be outdated'));
   return list;
+}
+
+function directionsLabel(brand: string, branchName: string): string {
+  return branchName && branchName !== brand ? `Get directions to ${brand}, ${branchName}` : `Get directions to ${brand}`;
 }
 
 function doneToggle(offer: Offer, idPrefix: string): HTMLElement {
@@ -57,7 +61,7 @@ function doneToggle(offer: Offer, idPrefix: string): HTMLElement {
       card?.classList.remove('is-done');
     }
   });
-  return el('div', { class: 'quest-card__done' }, [input, el('label', { for: id }, ['Quest complete!'])]);
+  return el('div', { class: 'quest-card__done' }, [input, el('label', { for: id, class: 'quest-card__done-label' }, ['Quest complete!'])]);
 }
 
 export function questCard(offer: Offer, opts: { branch?: Branch | undefined; now: Date; idPrefix: string }): HTMLLIElement {
@@ -66,12 +70,12 @@ export function questCard(offer: Offer, opts: { branch?: Branch | undefined; now
     opts.branch
       ? externalLink(directionsUrl(opts.branch.lat, opts.branch.lng), 'Get directions', {
           class: 'btn btn--directions',
-          'aria-label': `Get directions to ${offer.brand} (${opts.branch.name})`,
+          'aria-label': `${directionsLabel(offer.brand, opts.branch.name)} (opens in a new tab)`,
         })
       : null,
     externalLink(offer.sourceUrl, 'Verify offer', {
       class: 'btn btn--source',
-      'aria-label': `Verify the ${offer.brand} offer on the official site`,
+      'aria-label': `Verify the ${offer.brand} offer on the official site (opens in a new tab)`,
     }),
   ]);
 
@@ -86,8 +90,12 @@ export function questCard(offer: Offer, opts: { branch?: Branch | undefined; now
     [
       el('article', { class: 'quest-card__inner' }, [
         el('header', { class: 'quest-card__header' }, [
-          el('h3', { class: 'quest-card__brand', id: headingId }, [offer.brand]),
-          badges(offer, opts.now),
+          el('span', { class: 'quest-card__emoji', 'aria-hidden': 'true' }, [CATEGORY_EMOJI[offer.category] ?? '🎁']),
+          el('div', { class: 'quest-card__heading' }, [
+            el('h3', { class: 'quest-card__brand', id: headingId }, [offer.brand]),
+            badges(offer, opts.now),
+          ]),
+          el('span', { class: 'quest-card__stamp', 'aria-hidden': 'true' }, ['🎉 Done!']),
         ]),
         el('p', { class: 'quest-card__line' }, [questLine(offer.category, offer.brand)]),
         el('dl', { class: 'quest-card__details' }, [
@@ -101,7 +109,12 @@ export function questCard(offer: Offer, opts: { branch?: Branch | undefined; now
         el('p', { class: 'quest-card__meta' }, [
           'Last checked: ',
           el('time', { datetime: offer.lastVerified }, [offer.lastVerified]),
-          opts.branch ? el('span', { class: 'quest-card__branch' }, [` · Nearest: ${opts.branch.name}`]) : null,
+          opts.branch
+            ? el('span', { class: 'quest-card__branch' }, [
+                el('span', { class: 'quest-card__sep', 'aria-hidden': 'true' }, [' · ']),
+                `Nearest: ${opts.branch.name}`,
+              ])
+            : null,
         ]),
         actions,
         doneToggle(offer, opts.idPrefix),
@@ -125,10 +138,10 @@ export function liveCard(r: LiveResult): HTMLLIElement {
   return el('li', { class: 'live-card' }, [
     el('article', { class: 'live-card__inner' }, [
       el('h3', { class: 'live-card__title' }, [r.title]),
-      el('span', { class: 'badge badge--unverified' }, ['Unverified — check the link']),
+      badge('unverified', '🔍', 'Unverified — check the link'),
       r.snippet ? el('p', { class: 'live-card__snippet' }, [r.snippet]) : null,
       el('p', { class: 'live-card__source' }, ['Source: ', r.source]),
-      externalLink(r.url, 'Open link', { class: 'btn btn--source', 'aria-label': `Open ${r.source} (unverified)` }),
+      externalLink(r.url, 'Open link', { class: 'btn btn--source', 'aria-label': `Open ${r.source} (unverified, opens in a new tab)` }),
     ]),
   ]);
 }
@@ -139,6 +152,15 @@ export function renderLiveList(container: HTMLElement, results: readonly LiveRes
   container.replaceChildren(list);
 }
 
-export function renderEmpty(container: HTMLElement, message: string): void {
-  container.replaceChildren(el('p', { class: 'empty-state' }, [message]));
+export type EmptyKind = 'empty' | 'loading' | 'error';
+const EMPTY_ART: Record<EmptyKind, string> = { empty: '🎈', loading: '🔮', error: '🌧️' };
+
+/** Friendly empty / loading / error message with a small decorative illustration. */
+export function renderEmpty(container: HTMLElement, message: string, kind: EmptyKind = 'empty'): void {
+  container.replaceChildren(
+    el('div', { class: 'empty-state', 'data-kind': kind }, [
+      el('span', { class: 'empty-state__art', 'aria-hidden': 'true' }, [EMPTY_ART[kind]]),
+      el('p', { class: 'empty-state__text' }, [message]),
+    ]),
+  );
 }

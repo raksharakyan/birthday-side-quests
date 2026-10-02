@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { mockNetwork } from './fixtures';
+import { expectedNearbyCount, mockNetwork, OVERPASS_BENGALURU_PINS } from './fixtures';
 
 test('search → nearby quests with pins, online tab, found online; nothing stored', async ({ page, context }) => {
   const problems: string[] = [];
@@ -26,17 +26,19 @@ test('search → nearby quests with pins, online tab, found online; nothing stor
 
   await expect(page.getByRole('status')).toContainText('on the map', { timeout: 15_000 });
   const nearby = page.locator('#nearby-list .quest-card');
-  await expect(nearby).toHaveCount(2); // Starbucks (*) + Chaayos (IN, both)
-  await expect(page.locator('.map-marker--branch')).toHaveCount(2);
-  const directions = nearby.first().locator('.btn--directions');
+  await expect(nearby).toHaveCount(expectedNearbyCount('IN')); // all in-store/both offers for India
+  await expect(page.locator('.map-marker--branch')).toHaveCount(OVERPASS_BENGALURU_PINS);
+  const directions = nearby.filter({ has: page.locator('.btn--directions') }).first().locator('.btn--directions');
   await expect(directions).toHaveAttribute('href', /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1&destination=-?\d+(\.\d+)?,-?\d+(\.\d+)?$/);
   await expect(directions).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(directions).toHaveAttribute('aria-label', /^Get directions to .+\(opens in a new tab\)$/);
   await expect(page.locator('#month-info')).toBeVisible();
 
   // quest-done event fires
   const fired = page.evaluate(() => new Promise<boolean>((r) => document.addEventListener('quest-done', () => r(true), { once: true })));
   await nearby.first().getByLabel('Quest complete!').check();
   expect(await fired).toBe(true);
+  await expect(nearby.first()).toHaveClass(/is-done/);
 
   await page.getByRole('tab', { name: 'Online', exact: true }).click();
   await expect(page.locator('#country')).toHaveValue('IN');
@@ -79,5 +81,5 @@ test('still lists quests when Overpass fails', async ({ page }) => {
   await page.getByLabel('Birthday month').selectOption('10');
   await page.getByRole('button', { name: 'Find my quests' }).click();
   await expect(page.getByRole('status')).toContainText("couldn't load shop pins");
-  await expect(page.locator('#nearby-list .quest-card')).toHaveCount(2);
+  await expect(page.locator('#nearby-list .quest-card')).toHaveCount(expectedNearbyCount('IN'));
 });
