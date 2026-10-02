@@ -85,7 +85,10 @@ describe('questCard: claim details rendering', () => {
     const r = validateOffer(full);
     if (!r.ok) throw new Error(r.reason);
     const card = questCard(r.offer, { now, idPrefix: 't' });
-    expect(card.querySelector('.quest-card__reward')?.textContent).toBe('You get: One free tall drink');
+    expect(card.querySelector('.quest-card__reward .get__label')?.textContent).toBe('You get');
+    expect(card.querySelector('.quest-card__reward .get__value')?.textContent).toBe('One free tall drink');
+    // The full offer text stays visible under the headline.
+    expect(card.querySelector('.quest-card__reward .quest-card__offer')?.textContent).toBe('Free drink');
     const steps = card.querySelectorAll('.quest-card__claim ol.quest-card__steps > li');
     expect([...steps].map((li) => li.textContent)).toEqual(full.steps);
     // Steps replace the free-text howToClaim.
@@ -93,9 +96,13 @@ describe('questCard: claim details rendering', () => {
     const chips = card.querySelector('ul.claim-chips');
     expect(chips?.getAttribute('aria-label')).toBe('Before you go to Cafe');
     expect([...(chips?.querySelectorAll('li') ?? [])].map((li) => li.textContent)).toEqual([
-      '🛍️Purchase needed (min ₹500)', '📅Join 7+ days before', '⏳Valid: 7 days from your birthday', '🎒Bring: App, Photo ID',
+      'Purchase needed (min ₹500)', 'Join 7+ days before', 'Valid: 7 days from your birthday', 'Bring: App, Photo ID',
     ]);
-    for (const icon of card.querySelectorAll('.claim-chip__icon')) expect(icon.getAttribute('aria-hidden')).toBe('true');
+    // Icons are decorative inline SVG (no emoji anywhere on the card).
+    const icons = chips?.querySelectorAll('svg.icon') ?? [];
+    expect(icons).toHaveLength(4);
+    for (const icon of icons) expect(icon.getAttribute('aria-hidden')).toBe('true');
+    expect(card.textContent).not.toMatch(/\p{Extended_Pictographic}/u);
   });
   it('old entries keep showing offer and howToClaim, with no extra blocks', () => {
     const r = validateOffer(raw);
@@ -114,7 +121,9 @@ describe('questCard: claim details rendering', () => {
     });
     if (!r.ok) throw new Error(r.reason);
     const card = questCard(r.offer, { now, idPrefix: 't' });
-    expect(card.querySelectorAll('img, script, svg, b').length).toBe(0);
+    // Only our own decorative icons (svg.icon / claim tick, all aria-hidden) may be SVG.
+    expect(card.querySelectorAll('img, script, b').length).toBe(0);
+    for (const s of card.querySelectorAll('svg')) expect(s.closest('[aria-hidden="true"]')).not.toBeNull();
     expect([...card.querySelectorAll('*')].some((e) => [...e.attributes].some((a) => a.name.startsWith('on')))).toBe(false);
     expect(card.querySelector('.quest-card__steps li')?.textContent).toBe(XSS);
     expect(card.textContent).toContain('<script>alert(2)</script>');

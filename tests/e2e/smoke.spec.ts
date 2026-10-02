@@ -38,7 +38,7 @@ test('search → nearby quests with pins, online tab, found online; only the ses
 
   // quest-done event fires
   const fired = page.evaluate(() => new Promise<boolean>((r) => document.addEventListener('quest-done', () => r(true), { once: true })));
-  await nearby.first().getByLabel('Quest complete!').check();
+  await nearby.first().getByLabel('Mark claimed').check();
   expect(await fired).toBe(true);
   await expect(nearby.first()).toHaveClass(/is-done/);
 
@@ -65,8 +65,17 @@ test('search → nearby quests with pins, online tab, found online; only the ses
   expect(unexpected).toEqual([]);
   expect(problems).toEqual([]);
 
+  // Let the card entry fade finish first, so colour-contrast isn't sampled mid-animation.
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((an) => an.effect?.getComputedTiming().iterations !== Infinity)
+        .map((an) => an.finished.catch(() => undefined)),
+    ),
+  );
   const axe = await new AxeBuilder({ page }).analyze();
-  expect(axe.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+  expect(axe.violations.map((v) => `${v.id}: ${v.help}: ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`)).toEqual([]);
 });
 
 test('shows a friendly message when the place is not found', async ({ page }) => {

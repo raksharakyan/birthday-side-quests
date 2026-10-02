@@ -81,11 +81,15 @@ test.describe('happy path', () => {
 
     // Mark done → done state + confetti (motion allowed).
     const card = cards.first();
-    await card.getByLabel('Quest complete!').check();
+    await card.getByLabel('Mark claimed').check();
     await expect(card).toHaveClass(/\bis-done\b/);
     await expect(page.locator('body > .confetti')).toHaveCount(1);
+    expect(await page.locator('body > .confetti .confetti__piece').count()).toBe(12);
+    await expect(page.locator('body > .toast')).toContainText(/claimed\. 1 of \d+ done\./);
+    await expect(page.locator('body')).toHaveClass(/\bis-lit\b/); // logo candle lit
+    await expect(page.locator('#progress-count')).toHaveText(new RegExp(`^1 of \\d+$`));
     expect(await page.locator('body > .confetti .confetti__piece').count()).toBeGreaterThan(0);
-    await expect(page.locator('#celebrate-live')).toContainText('quest complete');
+    await expect(page.locator('#celebrate-live')).toContainText(/claimed\. 1 of \d+ done\./);
     await expect(page.locator('body > .confetti')).toHaveCount(0, { timeout: 5000 }); // cleaned up
 
     // Session record: exactly the allowed fields, nothing else anywhere.
@@ -138,9 +142,13 @@ test.describe('happy path', () => {
       await search(page, 'Bengaluru');
       await expect(page.getByRole('status')).toContainText('on the map', { timeout: 15_000 });
       const card = page.locator('#nearby-list .quest-card').first();
-      await card.getByLabel('Quest complete!').check();
+      await card.getByLabel('Mark claimed').check();
       await expect(card).toHaveClass(/\bis-done\b/);
-      await expect(page.locator('#celebrate-live')).toContainText('quest complete');
+      await expect(page.locator('#celebrate-live')).toContainText('claimed.');
+      // End states still happen without motion: toast text, ring count, lit candle.
+      await expect(page.locator('body > .toast')).toContainText('claimed.');
+      await expect(page.locator('#progress-count')).toHaveText(/^1 of \d+$/);
+      await expect(page.locator('body')).toHaveClass(/\bis-lit\b/);
       await page.waitForTimeout(300);
       await expect(page.locator('.confetti, .confetti__piece')).toHaveCount(0);
     });
@@ -202,6 +210,8 @@ test.describe('error states', () => {
     await expect(page.locator('.map-marker--branch')).toHaveCount(0);
     await expect(page.locator('.map-marker--center')).toHaveCount(1);
     await expect(page.locator('#nearby-list .btn--directions')).toHaveCount(0);
+    // The results header says why distances are missing (no stale "Looking for shops" line).
+    await expect(page.locator('#results-sub')).toContainText('Shop pins for Bengaluru didn’t load');
     await expect(page.locator('#nearby-list a.btn--source').first()).toHaveAttribute('href', /^https:\/\//);
   });
 
@@ -306,7 +316,7 @@ test.describe('XSS', () => {
       const t = document.body.textContent ?? '';
       return {
         imgX: document.querySelectorAll('img[src="x"]').length,
-        foundImgs: document.querySelectorAll('#found-list img, #found-list svg, #found-list iframe, #found-list script').length,
+        foundImgs: document.querySelectorAll('#found-list img, #found-list svg:not(.icon), #found-list iframe, #found-list script').length,
         onAttrs: [...document.querySelectorAll('*')].filter((e) => [...e.attributes].some((a) => a.name.startsWith('on'))).length,
         bidi: /[‪-‮⁦-⁩]/.test(t),
         hrefs: [...document.querySelectorAll('#found-list a')].map((a) => a.getAttribute('href')),
@@ -353,7 +363,7 @@ test.describe('XSS', () => {
       await expect(page.getByRole('status')).toContainText('<img src=x onerror=alert(7)>');
     }
     const sb = page.locator('#nearby-list .quest-card[data-offer-id="starbucks-in"]');
-    await expect(sb.locator('.quest-card__branch')).toContainText('Nearest: <svg onload=alert(8)> Starbucks');
+    await expect(sb.locator('.quest-card__branch')).toHaveText('<svg onload=alert(8)> Starbucks');
     await expect(sb.locator('.btn--directions')).toHaveAttribute('aria-label', /<svg onload=alert\(8\)> Starbucks/);
     await page.locator('.map-marker-host[title^="Tata Starbucks"]').click();
     await expect(page.locator('.map-popup__name')).toHaveText('<svg onload=alert(8)> Starbucks');
@@ -416,15 +426,20 @@ test('keyboard-only flow: Tab/type/select/Enter, arrow keys across tabs, Space t
     throw new Error(`focus never matched after ${max} × ${key}; last: ${await focused()}`);
   }
 
-  // Skip link, then the city input.
-  expect(await tabUntil((f) => f.startsWith('input#city'), 2)).toBeLessThanOrEqual(2);
+  // Skip link, the two header links (How it works, Privacy), then the city input.
+  expect(await tabUntil((f) => f.startsWith('input#city'), 4)).toBeLessThanOrEqual(4);
   await page.keyboard.type('Bengaluru');
   await page.keyboard.press('Tab');
   expect(await focused()).toMatch(/^select#month/);
   await page.keyboard.type('Oct'); // type-ahead select on a closed <select>
   await expect(page.locator('#month')).toHaveValue('10');
   await page.keyboard.press('Tab');
-  expect(await focused()).toMatch(/^select#radius/);
+  // Radius is a radio group: Tab lands on the checked option, arrows change it.
+  expect(await focused()).toMatch(/^input#radius-5000/);
+  await page.keyboard.press('ArrowRight');
+  await expect(page.getByRole('radio', { name: '10 km' })).toBeChecked();
+  await page.keyboard.press('ArrowLeft');
+  await expect(page.getByRole('radio', { name: '5 km' })).toBeChecked();
   await page.keyboard.press('Tab');
   expect(await focused()).toMatch(/^button#\|\|.*search-form__submit/);
   await page.keyboard.press('Enter');

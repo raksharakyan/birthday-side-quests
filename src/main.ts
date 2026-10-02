@@ -36,6 +36,8 @@ interface State {
   searchedRadiusM: number | null;
   /** Number of map pins from the last finished branch lookup. */
   pinCount: number;
+  /** The last branch lookup failed (Overpass down); quests are still listed. */
+  pinsFailed: boolean;
 }
 
 const state: State = {
@@ -47,6 +49,7 @@ const state: State = {
   branches: new Map(),
   searchedRadiusM: null,
   pinCount: 0,
+  pinsFailed: false,
 };
 /** True while the saved session is being applied, so intermediate states aren't written back. */
 let restoring = false;
@@ -212,6 +215,8 @@ function updateHeader(): void {
   let sub: string;
   if (!state.place) {
     sub = total > 0 ? `${totalText} Search your city to see shops near you.` : 'Search your city to see birthday offers near you, or open the Online tab.';
+  } else if (state.pinsFailed) {
+    sub = `${totalText} Shop pins for ${shortPlace()} didn’t load, so distances are missing.`;
   } else if (state.searchedRadiusM !== null) {
     sub = `${totalText} ${state.branches.size} within ${km(state.searchedRadiusM)} of ${shortPlace()}.`;
   } else {
@@ -548,6 +553,7 @@ async function runSearch(where: string | Place): Promise<void> {
     state.placeText = text || place.label;
     state.branches = new Map();
     state.searchedRadiusM = null;
+    state.pinsFailed = false;
     // Auto-sync: the Online tab (and Found online) follow the searched city's country.
     syncOnlineCountry(place.countryCode);
     renderNearby();
@@ -582,6 +588,8 @@ async function runSearch(where: string | Place): Promise<void> {
       );
     } catch {
       if (seq !== searchSeq) return;
+      state.pinsFailed = true;
+      updateHeader();
       setStatus(`Found ${quests}. We couldn't load shop pins right now, but your quests are still listed below.`, 'info');
     }
   } catch (err) {
@@ -616,6 +624,7 @@ cityInput.addEventListener('input', () => {
 });
 for (const r of radioInputs) {
   r.addEventListener('change', () => {
+    combobox.cancel();
     persist();
     // Re-run for the place already on screen (no new geocoding; Overpass gets coordinates only).
     if (state.place && readMonth()) void runSearch(state.place);
@@ -624,6 +633,7 @@ for (const r of radioInputs) {
 
 form.addEventListener('submit', (e) => void onSubmit(e));
 monthSelect.addEventListener('change', () => {
+  combobox.cancel();
   state.month = readMonth();
   showMonthInfo();
   persist();
@@ -697,7 +707,7 @@ function clearSearch(): void {
     form.reset();
     setRadius(DEFAULT_RADIUS_M);
     setCityError(false);
-    Object.assign(state, { place: null, placeText: '', month: null, branches: new Map(), searchedRadiusM: null, pinCount: 0 });
+    Object.assign(state, { place: null, placeText: '', month: null, branches: new Map(), searchedRadiusM: null, pinCount: 0, pinsFailed: false });
     setDoneIds([]);
     liveCache.clear();
     showMonthInfo();

@@ -48,11 +48,11 @@ export const QUEST_TEMPLATES: Record<Category, readonly string[]> = {
     'Show it at the till in any {brand} store',
   ],
   online: [
-    'Claim it online or in the {brand} app',
+    'Claim it on the {brand} website or app',
     'Watch your {brand} account for the birthday reward',
     'Redeem it in the {brand} app or website',
     'Check your {brand} inbox or app in your birthday month',
-    'Use it at checkout on {brand}',
+    'Use it at checkout on the {brand} website or app',
   ],
 };
 

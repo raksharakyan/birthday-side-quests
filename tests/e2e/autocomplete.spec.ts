@@ -137,7 +137,7 @@ test('Escape closes the list; Enter without an active option submits via Nominat
   await city(page).click();
   await page.keyboard.press('ArrowDown');
   await expect(listbox(page)).toBeVisible();
-  await page.locator('.site-tagline').click();
+  await page.locator('.brand__name').click();
   await expect(listbox(page)).toBeHidden();
 
   // Free text + Enter (no active option) → normal Nominatim flow.
@@ -167,15 +167,17 @@ test('XSS: hostile Photon names render as text only', async ({ page, guard }) =>
   const scriptsBefore = await page.locator('script').count();
   await typeSlowly(page, 'evil');
   await expect(options(page)).toHaveCount(2);
-  await expect(options(page).nth(0)).toHaveText('📍<img src=x onerror=alert(1)><svg onload=alert(2)> evil, India');
-  await expect(options(page).nth(1)).toHaveText('📍"><script>alert(3)</script>');
+  await expect(options(page).nth(0)).toHaveText('<img src=x onerror=alert(1)><svg onload=alert(2)> evil, India');
+  await expect(options(page).nth(1)).toHaveText('"><script>alert(3)</script>');
   const dom = await page.evaluate(() => ({
     imgX: document.querySelectorAll('img[src="x"]').length,
-    inList: document.querySelectorAll('#city-suggestions img, #city-suggestions svg, #city-suggestions script').length,
+    inList: document.querySelectorAll('#city-suggestions img, #city-suggestions svg:not(.icon), #city-suggestions script').length,
+    // Only our own decorative pin icons (aria-hidden, built with createElementNS) may be SVG.
+    pins: [...document.querySelectorAll('#city-suggestions svg.icon')].every((s) => s.getAttribute('aria-hidden') === 'true' && s.querySelector('[onload]') === null),
     onAttrs: [...document.querySelectorAll('*')].filter((e) => [...e.attributes].some((a) => a.name.startsWith('on'))).length,
     bidi: /[‪-‮⁦-⁩]/.test(document.getElementById('city-suggestions')?.textContent ?? ''),
   }));
-  expect(dom).toEqual({ imgX: 0, inList: 0, onAttrs: 0, bidi: false });
+  expect(dom).toEqual({ imgX: 0, inList: 0, pins: true, onAttrs: 0, bidi: false });
   expect(await page.locator('script').count()).toBe(scriptsBefore);
   await page.waitForTimeout(300);
 });
@@ -198,7 +200,7 @@ test('Photon 500 → no suggestions, Enter still searches via Nominatim', async 
 test('radius select changes the Overpass radius; nearby cards are sorted by distance and grouped', async ({ page, guard }) => {
   await guard.mock();
   await page.goto('./');
-  await page.getByLabel('Search radius').selectOption('10000');
+  await page.getByRole('radio', { name: '10 km' }).check();
   await search(page, 'Bengaluru');
   await expect(page.getByRole('status')).toContainText('within 10 km', { timeout: 15_000 });
   expect(overpassQuery(guard)[0]).toContain('(around:10000,12.976794,77.590082)');
@@ -226,7 +228,7 @@ test('radius select changes the Overpass radius; nearby cards are sorted by dist
   await expect(page.locator('.map-radius')).toHaveCount(1);
 
   // Changing the radius re-runs the lookup for the same place (no new geocoding).
-  await page.getByLabel('Search radius').selectOption('20000');
+  await page.getByRole('radio', { name: '20 km' }).check();
   await expect(page.getByRole('status')).toContainText('within 20 km', { timeout: 15_000 });
   expect(overpassQuery(guard)[1]).toContain('(around:20000,12.976794,77.590082)');
   expect(hostRequests(guard, 'nominatim.openstreetmap.org')).toHaveLength(1);

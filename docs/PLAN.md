@@ -25,7 +25,7 @@ src/
   render/map.ts      Leaflet, OSM tiles + attribution, inline-SVG heart/gift divIcons
   render/quests.ts   cards, done checkbox (in-memory Set), confetti (reduced-motion aware)
   templates.ts       cute per-category quest lines, deterministic by brand hash
-  styles/            pastel tokens, self-hosted fonts via @fontsource (Fredoka display, Nunito body)
+  styles/            Soft Premium tokens (plum accent), self-hosted variable fonts via @fontsource-variable (Bricolage Grotesque display, Plus Jakarta Sans body)
 public/offers.json   versioned seed (schemaVersion, ≥15 brands)
 worker/              Cloudflare Worker (search proxy) + wrangler.toml + tests
 tests/unit, tests/e2e (Playwright, all network mocked), lighthouserc.json

@@ -548,3 +548,79 @@ Branch `feat/autocomplete-more-offers`. Nothing committed. See DECISIONS #18, #1
 - **UI/UX:**
   - The Online `<select>` now has 250 options, so axe takes about 8 s on it.
   - The new pieces are styled minimally and need the planned restyle: count pill, Clear search button, claim chips and steps list.
+
+---
+
+## UI/UX: soft premium port (2026-10-02)
+
+Branch `feat/autocomplete-more-offers`, not committed by me (a "WIP: port soft premium redesign" snapshot commit already exists; everything after it is in the working tree). Ports the approved prototype in `docs/design/` with the **plum** accent. See DECISIONS #21.
+
+### What changed
+| Area | Change |
+|---|---|
+| Fonts | `@fontsource-variable/bricolage-grotesque@5.3.0` + `@fontsource-variable/plus-jakarta-sans@5.3.0` (exact pins, lockfile updated); Fredoka and Nunito removed. `src/styles/fonts.css` declares only latin + latin-ext faces (Bricolage "opsz" build, Jakarta "wght" build), `font-display: swap`, self-hosted, `assetsInlineLimit` still 0. Shipped woff2: 77 + 31 KB (Bricolage), 27 + 22 KB (Jakarta); a page with Latin text only downloads the two latin files. No preload (not needed for perf). |
+| Tokens / CSS | `tokens.css`, `base.css`, `components.css` rewritten from `prototype.css`: porcelain neutrals, plum accent block, radius rule, tinted shadows, motion tokens. Map tile tint via the DESIGN.md filter recipe on `.leaflet-tile-pane`; Leaflet zoom + new recenter control styled as one white pill (44px buttons); popups restyled (`.bsq-popup`). |
+| Icons | `src/render/icons.ts`: the prototype's SVG set (pin, calendar, radius, search, arrow, check, lock, alert, clock, bag, gift, qr, sparkle, plus, minus, locate, close, chevron, globe, refresh, id) plus candle logo, toast candle, empty-state art, pin teardrop, claim tick, and `initials()`. All via `svg()` / `createElementNS`, `aria-hidden`, no innerHTML. |
+| Emoji / copy | Every emoji removed (index.html, templates, status lines, badges, empty states, toast, tabs, combobox, map popup). Quest templates rewritten as plain "where to claim" lines used as the card meta when there's no nearby branch. `monthInfo` labels: "It's your birthday month" / "Your birthday month starts next month" / "...in N months". No em dashes, no exclamation marks. New unit test fails on any emoji in `src/` or `index.html`. |
+| Header | Line-art candle logo (`#site-mark`); flame is a dashed outline until the first claim, then fills plum with glow + 3.2 s flicker (`body.is-lit`), with a 700 ms ignite on each claim. "How it works" / "Privacy" in-page links (desktop) to new footer sections. h1 is still "Birthday Side Quests". |
+| Search panel | City (pin icon, combobox), Birthday month (calendar + chevron), **Search radius as a radio group** (`fieldset`/`legend`, 4 radios 2/5/10/20 km styled as a segmented pill, arrow keys work natively, same re-run behaviour), Find my quests (orb), Clear search, privacy line with lock. `#status` (the single `role=status`) sits under the form: errors in warn colour with an alert icon, loading with a pulsing dot, success **visually hidden** (spoken; the results header shows the summary). Invalid city sets `aria-invalid` + `aria-describedby="status"` and a warn edge. Changing month or radius cancels pending suggestions. |
+| Autocomplete | Floating 18px-radius list, 52px options, pin icon (accent when active), typed prefix in bold (`<b>` text node), region line in ink-3, 180 ms fade/drop. Footer text unchanged. |
+| Results header | Birthday-month pill (`#month-info`, accent tint + sparkle in the birthday month, neutral + calendar otherwise), h2 "Your October quests", summary "37 quests in total. 18 within 5 km of Bengaluru." (or why pins are missing), progress ring "N of M claimed" (`#progress`, plain text, ring is `aria-hidden`; M = unique offers listed in Nearby + Online). |
+| Tabs | Segmented track with a sliding white thumb (`--tab-index`/`--tab-count` set with `style.setProperty`), count chips on all three tabs (`#nearby-count`, `#online-count`, `#found-count`; accessible names like "Nearby 31 quests", "Found online 2 results"). WAI-ARIA tablist + arrows/Home/End unchanged. |
+| Quest card | Mono initials tile, brand h3, meta (branch name · "1.2 km away", or a plain where-to-claim line), badges (Verified / Check with store / May be outdated), "You get" tint panel (rewardItem as headline, full offer text under it), condition chips with icons, numbered steps with connector line, footer (Get directions pill with orb, Verify offer link, round claim checkbox), fine print "Last checked 2 Oct 2026 on starbucks.in". Claim checkbox: `aria-label="Mark claimed: <brand>"`; visible text switches "Mark claimed" → "Claimed". Checking one card syncs every card of that offer (Nearby + Online) and the map pins. Mobile: full-width 52px claim row. |
+| Celebration | `render/confetti.ts`: check draw (CSS) + 0.82→1.08→1 spring (WAAPI), 12 deterministic paper strips (`.confetti__piece`) fanned over 136° via WAAPI, ring fill (900 ms), candle ignite, card wash, dark toast "X claimed. N of M done." (aria-hidden; the same text goes to `#celebrate-live`). Reduced motion: no strips, no movement, states and toast text still appear. |
+| Map | White teardrop pins with plum initials, active pin filled + scaled 1.18, claimed pin tint + check, searched place = ink dot with halo, dotted plum radius circle, recenter control, "Map couldn't load" notice with Try again when no tile loads. Clicking a pin marks the matching card active (and scrolls it into view on desktop). |
+| States | Empty (candle-in-ring art + title + actions, e.g. "See online quests"), error (warn icon), loading skeletons matching the card, "No shops within 2 km yet" notice with "Widen to 5 km". Online tab country select (globe + chevron, optgroups kept), Found online cards with globe tile and "Unverified: check the link" badge. |
+| Layout | Mobile first: search → results head → map → tabs → cards; ≥1100px two columns with a sticky map. No horizontal scroll at 375/390px. |
+
+### Tests changed (equivalent or more coverage)
+- `getByLabel('Quest complete!')` → `getByLabel('Mark claimed')`; celebration test now also checks 12 strips, the toast text, `body.is-lit` and `#progress-count`; reduced-motion test checks end states (toast, ring, candle) and no strips.
+- Radius: `getByLabel('Search radius').selectOption(...)` → `getByRole('radio', { name: '10 km' }).check()`; keyboard flow now Tabs over the two header links and checks ArrowRight/ArrowLeft inside the radio group.
+- XSS tests: `svg` → `svg:not(.icon)` in `#found-list` / `#city-suggestions` (our own aria-hidden icons are allowed; the autocomplete test also asserts every icon is aria-hidden with no `onload`). Option text no longer starts with 📍. Branch name check no longer has the "Nearest: " prefix.
+- `smoke.spec.ts` waits for finite animations before axe (cards fade in now).
+- Overpass 504 test asserts the header explains missing pins.
+- Unit: claim-details (structure of "You get", no emoji, icons aria-hidden), render (initials, date format, `icon()`, claim label, card sync), copy (no emoji), monthInfo labels.
+
+### Results
+- `npm run build`: OK. `npm test`: 561 passed. `npm run test:e2e`: 58 passed, 4 skipped (desktop-only keyboard tests on mobile). axe: 0 violations in every axe step.
+- `npm run lhci` (3 runs): Performance 0.99, Accessibility 1.0, Best Practices 1.0, SEO 1.0; LCP 2.0 s, CLS ≤ 0.01, TBT 0 ms.
+- `npm audit --audit-level=high`: 0 vulnerabilities.
+
+### Screenshots (real app, `vite preview` of the e2e build; Nominatim/Overpass/Worker mocked like `tests/e2e/fixtures.ts` with a few extra Bengaluru branches; real OSM tiles allowed for realism)
+- `docs/screenshots/desktop.png` (1440×900): results, 2 claimed, Starbucks pin active with popup. Compare `docs/design/proto-accent-plum.png`.
+- `docs/screenshots/claimed.png` (1440×900): celebration frozen mid-flight (strips, toast, ring). Compare `docs/design/proto-done.png`.
+- `docs/screenshots/online-tab.png` (1440×900): Online tab with the country select.
+- `docs/screenshots/mobile.png` (390 wide @2x, top 3200 CSS px). Compare `docs/design/proto-mobile.png`.
+Known differences from the prototype: label "Your city" (DECISIONS #19), four radius options, real OSM tiles instead of the hand-drawn map art, cards show branch names instead of street addresses (Overpass gives no address).
+
+### Manual check against the real services (`npm run preview`, built-in browser)
+Typed "Beng" → 5 Photon suggestions with bold prefix; picked Bengaluru (October). First Overpass call returned 504 twice (upstream overload) → status and header said pins didn't load, quests still listed. Reload restored city, month, radius, tab and claimed quest from sessionStorage and re-ran Overpass from coordinates: 31 quests, 60 pins, 18 within 5 km. Claim → 12 strips, toast "Third Wave Coffee claimed. 2 of 37 done.", candle lit, 9 Third Wave pins switched to the check. Pin click opened the popup and highlighted the Tata Starbucks card. Console: only the browser's own "Failed to load resource: 504" lines from Overpass; no app errors, no CSP violations.
+
+### Contrast (WCAG 2.x, relative-luminance formula)
+| Foreground | Background | Ratio | Use |
+|---|---|---|---|
+| `--ink` #221B1F | `--bg` #FAF7F5 / white | 15.82 / 16.87 | body text |
+| `--ink-2` #5E5459 | bg / white / `--sunken` #F3EEEB / `--accent-tint` #F2E7F0 | 6.82 / 7.27 / 6.32 / 6.05 | labels, secondary, "You get" detail |
+| `--ink-3` #71666B | bg / white / sunken / accent-tint | 5.16 / 5.50 / 4.78 / 4.58 | meta, fine print, claimed steps/chips |
+| white | `--accent` #6B2D5E / hover #5A2450 / active #4A1D42 | 9.71 / 11.65 / 13.59 | buttons, count chips, active pin |
+| `--accent` | white / bg / sunken / accent-tint | 9.71 / 9.11 / 8.44 / 8.08 | links, pin initials, icons |
+| `--accent-ink` #5A2450 | accent-tint / accent-tint-2 #E6D2E2 | 9.69 / 8.14 | "You get" label, birthday pill, "Claimed" |
+| `--ok` #2E6A4C | `--ok-tint` #E8F1EB | 5.55 | Verified |
+| `--warn` #82560F | `--warn-tint` #FBF0DA / white / bg | 5.65 / 6.39 / 5.99 | Check with store, Unverified, field errors |
+| bg #FAF7F5 | `--ink` | 15.82 | toast |
+| UI: `--line-control` #958A8F | white / bg | 3.33 / 3.12 | input, checkbox, ghost button edges |
+| UI: selected thumb edge `--ink-3` | track `--sunken` / thumb white | 4.78 / 5.50 | radius + tabs selected state (DESIGN.md open point; `--line-control` would be only 2.89 on the track) |
+| UI: focus ring `--accent` | bg / white | 9.11 / 9.71 | all focusable elements (2px gap + 2px ring) |
+| UI: pin stroke `--accent` | map land #F1ECE9 | 8.29 | pins |
+Claimed cards dim chips and steps by switching to `--ink-3` (not opacity), so they stay AA.
+
+### For Security
+- No new origins; CSP unchanged. No `style=""` in markup, no innerHTML. Dynamic styling only via `style.setProperty` (`--tab-index`, `--tab-count`, `--progress`, `--enter-delay`) and WAAPI keyframes (strips, toast, checkbox spring).
+- New DOM built only with `el()` / `svg()`. The combobox bolds the typed prefix with an `el('b')` text node. Leaflet gets DOM nodes for icons/popups and a new `L.Control` built with `el()`.
+- `el()`/`svg()` allow-lists unchanged.
+- Fonts are referenced from `node_modules` by relative path in `fonts.css` and emitted as hashed same-origin assets (`font-src 'self'`).
+
+### For QA
+- The radius is now a radio group (`input[name=radius]`, ids `radius-2000` … `radius-20000`); tests use `getByRole('radio', { name: 'N km' })`.
+- `#status` success text is visually hidden but still in the accessibility tree (tests unchanged).
+- Watch: the tile-failure notice (`.map-notice`) has no e2e test yet (tiles are always mocked as success); it was checked manually by forcing tile 503s.

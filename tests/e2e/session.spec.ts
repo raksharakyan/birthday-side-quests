@@ -50,7 +50,7 @@ test('pick "Pune" → Online tab auto-syncs to India with a count; refresh resto
   const startUrl = page.url();
   await expectNothingPersisted(page, context, startUrl); // nothing written on a plain visit
   await page.getByLabel('Birthday month').selectOption('3');
-  await page.getByLabel('Search radius').selectOption('10000');
+  await page.getByRole('radio', { name: '10 km' }).check();
   await pickPune(page);
   await expect(page.getByRole('status')).toContainText('on the map', { timeout: 15_000 });
 
@@ -65,7 +65,7 @@ test('pick "Pune" → Online tab auto-syncs to India with a count; refresh resto
   await onlineTab(page).click();
   const first = page.locator('#online-list .quest-card').first();
   const doneId = (await first.getAttribute('data-offer-id')) ?? '';
-  await first.getByLabel('Quest complete!').check();
+  await first.getByLabel('Mark claimed').check();
   const rec = await expectOnlySessionRecord(page, context, startUrl);
   expect(rec).toEqual({
     v: 1, city: PHOTON_PUNE_LABEL, lat: 18.5204, lng: 73.8567, countryCode: 'IN', month: 3, radius: 10000, tab: 'online', done: [doneId],
@@ -76,7 +76,7 @@ test('pick "Pune" → Online tab auto-syncs to India with a count; refresh resto
   await page.reload();
   await expect(city(page)).toHaveValue(PHOTON_PUNE_LABEL);
   await expect(page.getByLabel('Birthday month')).toHaveValue('3');
-  await expect(page.getByLabel('Search radius')).toHaveValue('10000');
+  await expect(page.getByRole('radio', { name: '10 km' })).toBeChecked();
   await expect(onlineTab(page)).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('#panel-online')).toBeVisible();
   await expect(page.locator('#country')).toHaveValue('IN');
@@ -177,7 +177,8 @@ test('cards show detailed claim info (You get, numbered steps, chips) from offer
   await onlineTab(page).click();
   await page.locator('#country').selectOption('IN');
   const card = page.locator(`#online-list .quest-card[data-offer-id="${detailed?.id}"]`);
-  await expect(card.locator('.quest-card__reward')).toHaveText(`You get: ${detailed?.rewardItem}`);
+  await expect(card.locator('.quest-card__reward .get__label')).toHaveText('You get');
+  await expect(card.locator('.quest-card__reward .get__value')).toHaveText(detailed?.rewardItem ?? '');
   await expect(card.locator('.quest-card__claim ol.quest-card__steps > li')).toHaveText(detailed?.steps ?? []);
   expect(await axeViolations(page), 'axe: claim details').toEqual([]);
 });
