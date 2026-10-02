@@ -90,6 +90,15 @@ export function buildQuery(month: number, country: string): string {
   return `birthday freebies birthday month offers ${countryName(country)} ${monthName}`;
 }
 
+/**
+ * Control (C0/C1), bidi embedding/override/isolate/mark and invisible formatting characters.
+ * Kept in sync with src/text.ts (ZWJ/ZWNJ U+200C/U+200D are allowed for Indic scripts and emoji).
+ * Written with \u{...} escapes so no invisible characters live in the source file.
+ */
+// eslint-disable-next-line no-control-regex
+export const UNSAFE_TEXT_RE =
+  /[\u{0}-\u{1f}\u{7f}-\u{9f}\u{61c}\u{180e}\u{200b}\u{200e}\u{200f}\u{2028}-\u{202e}\u{2060}-\u{2064}\u{2066}-\u{206f}\u{feff}\u{fff9}-\u{fffb}]/gu;
+
 const ENTITIES: Record<string, string> = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&nbsp;': ' ' };
 
 export function cleanText(input: unknown, max: number): string {
@@ -98,8 +107,7 @@ export function cleanText(input: unknown, max: number): string {
   s = s.replace(/<[^>]*>?/g, ' '); // strip tags (and dangling "<...")
   s = s.replace(/&(?:amp|lt|gt|quot|#39|nbsp);/g, (m) => ENTITIES[m] ?? ' ');
   s = s.replace(/[<>]/g, ' '); // entities may have re-created angle brackets
-  // eslint-disable-next-line no-control-regex
-  s = s.replace(/[\u0000-\u001f\u007f-\u009f​-‏‪-‮⁦-⁩]/g, ' ');
+  s = s.replace(UNSAFE_TEXT_RE, ' ');
   s = s.replace(/\s+/g, ' ').trim();
   if (s.length > max) s = `${s.slice(0, max - 1).trimEnd()}…`;
   return s;

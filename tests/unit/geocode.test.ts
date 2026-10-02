@@ -36,7 +36,7 @@ describe('parseNominatim', () => {
   );
   it('strips control characters and caps the label', () => {
     const p = parseNominatim([{ ...hit, display_name: `A\u0000B${'x'.repeat(500)}` }]);
-    expect(p?.label.startsWith('AB')).toBe(true);
+    expect(p?.label.startsWith('A B')).toBe(true);
     expect(p?.label.length).toBeLessThanOrEqual(200);
   });
 });

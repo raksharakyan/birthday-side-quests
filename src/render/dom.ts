@@ -3,7 +3,8 @@ import { safeHttpsUrl } from '../urls';
 /**
  * Tiny DOM builder. SECURITY RULES (do not relax):
  *  - text only via text nodes / textContent — never innerHTML, outerHTML, insertAdjacentHTML or document.write;
- *  - attributes only from an allow-list; on* handlers, style, src, srcdoc are rejected;
+ *  - tags: script/style/iframe/frame/object/embed/base/link/meta/template/svg/math are rejected (SVG icons use svg());
+ *  - attributes only from an allow-list; on* handlers, style, src, srcset, srcdoc, formaction, xlink:href are rejected;
  *  - href only via safeHttpsUrl (https, no credentials).
  */
 
@@ -15,6 +16,11 @@ const ALLOWED_ATTRS = new Set([
   'hidden', 'disabled', 'checked', 'selected', 'required', 'readonly', 'placeholder', 'autocomplete',
   'maxlength', 'minlength', 'min', 'max', 'inputmode', 'spellcheck', 'enterkeyhint', 'autocapitalize',
   'href', 'target', 'rel', 'datetime', 'alt', 'width', 'height', 'open', 'scope', 'colspan', 'novalidate',
+]);
+
+// Elements that can run script, load active content, re-point relative URLs or change document policy.
+const BLOCKED_TAGS = new Set([
+  'script', 'style', 'iframe', 'frame', 'frameset', 'object', 'embed', 'base', 'link', 'meta', 'template', 'svg', 'math',
 ]);
 
 function isAllowedAttr(name: string): boolean {
@@ -38,8 +44,9 @@ function applyAttrs(node: Element, attrs: Attrs | undefined): void {
     }
     node.setAttribute(name, value === true ? '' : String(value));
   }
-  // Any external link opened in a new tab must not get window.opener or a referrer.
-  if (node.getAttribute('target') === '_blank') node.setAttribute('rel', 'noopener noreferrer');
+  // Any link that targets another browsing context (not just _blank — a named target opens a new
+  // window too) must not get window.opener or a referrer.
+  if (node.hasAttribute('target')) node.setAttribute('rel', 'noopener noreferrer');
 }
 
 function appendChildren(node: Node, children: readonly Child[]): void {
@@ -54,7 +61,7 @@ export function el<K extends keyof HTMLElementTagNameMap>(
   attrs?: Attrs,
   children: readonly Child[] = [],
 ): HTMLElementTagNameMap[K] {
-  if (tag === ('script' as K) || tag === ('style' as K) || tag === ('iframe' as K)) {
+  if (BLOCKED_TAGS.has(String(tag).toLowerCase())) {
     throw new Error(`el(): <${tag}> is not allowed`);
   }
   const node = document.createElement(tag);

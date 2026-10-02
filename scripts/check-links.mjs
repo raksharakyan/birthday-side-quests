@@ -69,7 +69,15 @@ console.log(`\n${results.length} checked · ${failed.length} failed · ${blocked
 if (failed.length === 0) process.exit(0);
 
 const date = new Date().toISOString().slice(0, 10);
-const row = (r) => `| \`${r.id}\` | ${r.brand.replace(/\|/g, '\\|')} | ${r.url} | ${r.detail} |`;
+// Table cells are built from repo data (reviewed via PR), but escape anyway so a stray "|", backtick,
+// "@mention", "<tag>" or newline can't break the table, ping people or inject markup into the issue.
+const cell = (v) =>
+  String(v)
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/[|`<>\[\]]/g, (c) => `&#${c.charCodeAt(0)};`)
+    .replace(/@/g, '@\u200b')
+    .slice(0, 300);
+const row = (r) => `| \`${cell(r.id)}\` | ${cell(r.brand)} | ${cell(r.url)} | ${cell(r.detail)} |`;
 const body = [
   `Weekly link check on ${date} found **${failed.length}** failing offer source link(s) in \`public/offers.json\`.`,
   '',

@@ -1,4 +1,5 @@
 import type { Category, Channel, ClaimWindow, Offer, OffersFile, OsmHint } from './types';
+import { hasUnsafeText } from './text';
 import { safeHttpsUrl } from './urls';
 
 export const CATEGORIES: readonly Category[] = ['cafe', 'dessert', 'restaurant', 'beauty', 'fashion', 'retail', 'online'];
@@ -31,7 +32,7 @@ function isObj(v: unknown): v is Record<string, unknown> {
 function cleanText(v: unknown, max: number): string | null {
   if (typeof v !== 'string') return null;
   const s = v.trim();
-  if (s.length === 0 || s.length > max || CONTROL_RE.test(s)) return null;
+  if (s.length === 0 || s.length > max || CONTROL_RE.test(s) || hasUnsafeText(s)) return null;
   return s;
 }
 

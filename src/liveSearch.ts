@@ -1,4 +1,5 @@
 import type { LiveResult } from './types';
+import { cleanDisplayText } from './text';
 import { displayHost, safeHttpsUrl } from './urls';
 
 /**
@@ -23,13 +24,8 @@ export function isLiveSearchEnabled(): boolean {
 }
 
 function cleanStr(v: unknown, max: number): string {
-  if (typeof v !== 'string') return '';
-  return v
-    // eslint-disable-next-line no-control-regex
-    .replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, max);
+  // Strips control, bidi-override and invisible characters (see src/text.ts), collapses whitespace, caps length.
+  return cleanDisplayText(v, max);
 }
 
 /** Pure validator for the Worker response. Anything malformed is dropped. */

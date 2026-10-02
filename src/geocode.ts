@@ -1,3 +1,4 @@
+import { cleanDisplayText } from './text';
 import type { Place } from './types';
 
 /**
@@ -51,8 +52,7 @@ export function parseNominatim(json: unknown): Place | null {
   const cc = typeof address.country_code === 'string' ? address.country_code.toUpperCase() : '';
   if (!/^[A-Z]{2}$/.test(cc)) return null;
   const rawLabel = typeof hit.display_name === 'string' ? hit.display_name : typeof hit.name === 'string' ? hit.name : '';
-  // eslint-disable-next-line no-control-regex
-  const label = rawLabel.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 200);
+  const label = cleanDisplayText(rawLabel, 200);
   return { lat, lng, countryCode: cc, label };
 }
 

@@ -4,13 +4,13 @@ Each agent appends: what was finished, what's next, and sign-offs. A feature is 
 
 | Feature | Full-Stack | UI/UX | Security | QA |
 |---|---|---|---|---|
-| Geocoding (Nominatim) | ✅ | ✅ | | |
-| Nearby branches (Overpass) + map | ✅ | ✅ | | |
-| Offers data + filtering | ✅ (placeholder data — research merge pending) | ✅ | | |
-| Quest list + done/confetti | ✅ (event only; confetti = UI) | ✅ | | |
-| Online tab | ✅ | ✅ | | |
-| Found online (Worker) | ✅ (not deployed) | ✅ | | |
-| CI/CD + Pages deploy | ✅ (not yet run on GitHub) | ✅ (n/a — no UI) | | |
+| Geocoding (Nominatim) | ✅ | ✅ | ✅ | |
+| Nearby branches (Overpass) + map | ✅ | ✅ | ✅ | |
+| Offers data + filtering | ✅ (placeholder data — research merge pending) | ✅ | ✅ | |
+| Quest list + done/confetti | ✅ (event only; confetti = UI) | ✅ | ✅ | |
+| Online tab | ✅ | ✅ | ✅ | |
+| Found online (Worker) | ✅ (not deployed) | ✅ | ✅ (code; re-check CORS origin + secret after deploy) | |
+| CI/CD + Pages deploy | ✅ (not yet run on GitHub) | ✅ (n/a — no UI) | ✅ | |
 
 ---
 
@@ -162,3 +162,111 @@ Pastel fills (`--blush`, `--lavender`, `--mint`, `--butter`, `--peach`) are neve
 3. **CSS alt-text syntax.** CSS uses the `content: '🎉' / ''` alt-text syntax in a few `::before` rules. These are static strings in the stylesheet, so there is no CSP impact.
 4. **Leaflet `className` option.** Leaflet popups now get the `className: 'bsq-popup'` option. The content is still DOM nodes from `el()`.
 5. **No changes needed from Security in `dom.ts`.** The new attributes (`aria-hidden`, `data-kind`, `data-category`) already pass the existing allow-list.
+
+---
+
+## Security review (2026-10-02)
+
+**Scope.** I reviewed the whole tree:
+- the app: `src/`, `index.html`, `csp.config.ts`, `vite.config.ts`, `public/`;
+- the Worker: `worker/`;
+- tooling and supply chain: `scripts/`, `.github/`, `package.json` and the lockfile;
+- the built `dist/`;
+- git history, for secrets.
+
+**Status:** green.
+- `npm run build` passes, including the typecheck for app, node and worker.
+- `npm test` gives 186/186. Before this review it was 104, plus 82 new security tests.
+- `npm run test:e2e` gives 6/6 on desktop Chromium and Pixel 7, with 0 console or CSP errors (map, markers and confetti running under the built CSP).
+- `npm audit --audit-level=high` finds 0 vulnerabilities.
+
+No Critical or High findings.
+
+### Findings
+| ID | Severity | File:line (before fix) | Description | Fix | Status |
+|---|---|---|---|---|---|
+| SEC-01 | Medium | `.github/workflows/ci-deploy.yml:70` | Lighthouse CI runs `npx --yes @lhci/cli@0.15.1`, which is unlocked and pulls ~300 transitive packages that are not in the lockfile. It ran **in the same job, before** `upload-pages-artifact`, so a compromised transitive package could rewrite `dist/` and ship to production. The same job also wrote the shared npm cache. | Lighthouse moved to its own `lighthouse` job (`contents: read`, no `cache: npm`). `deploy` now `needs: [test, lighthouse]`, so Lighthouse still gates the deploy but never touches the artifact. Explicit job-level `permissions` were added to `test`. | Fixed |
+| SEC-02 | Low | `src/liveSearch.ts:25`, `src/geocode.ts:55`, `src/overpass.ts:64`, `src/offers.ts:34` | Text from outside the app had only C0/C1 controls stripped (Nominatim and Overpass only `\u0000-\u001f\u007f`). Bidi overrides, isolates, marks and zero-width characters passed through. Rendering is `textContent`, so this was not XSS. It allowed visual spoofing, for example a "Source" that reads as a different domain, or a reordered offer line. `offers.json` didn't reject them either. | New `src/text.ts` (`cleanDisplayText`, `hasUnsafeText`) is used by the Worker-result validator, the Nominatim label and Overpass names. `validateOffer` now rejects these characters. ZWJ/ZWNJ are kept for Indic scripts and emoji. | Fixed |
+| SEC-03 | Low | `worker/src/index.ts:102` | The Worker's sanitiser regex was written with **literal invisible characters** in the source, so it couldn't be reviewed. It also missed U+061C, U+2060–2064, U+206A–206F and U+FFF9–FFFB. | Replaced with an `UNSAFE_TEXT_RE` written in `\u{…}` escapes, kept in sync with `src/text.ts`. New tests cover each code point. | Fixed |
+| SEC-04 | Low | `src/render/dom.ts:42,57` | `el()` only blocked `script`, `style` and `iframe`. `object`, `embed`, `base` (which can re-point relative URLs), `link`, `meta` and `frame` were allowed. `rel="noopener noreferrer"` was forced only for `target="_blank"`, but a named target such as `target="x"` also opens a new browsing context with an opener. | Tag blocklist extended. `rel` is now forced whenever any `target` is set. | Fixed |
+| SEC-05 | Low | `.github/workflows/link-check.yml:10`, `scripts/check-links.mjs:72` | `issues: write` was granted at workflow level. Issue table cells interpolated `url`, `id` and `detail` unescaped, so a `|`, backtick, `@mention`, `<tag>` or newline in repo data could break the table or ping users. The data is repo-controlled and passed through `execFileSync` (no shell), so there was no command injection. | `permissions: {}` at the top, with `contents: read` and `issues: write` on the job only. Cells are escaped (`| \` < > [ ]` become entities, `@` is defused, newlines removed, 300-character cap). | Fixed |
+| SEC-06 | Info | `csp.config.ts` (`img-src … data:`) | I checked whether `data:` is needed. Leaflet 1.9.4 assigns a 1×1 `data:image/gif` to tile `<img>`s when it aborts loads during zoom or pan. | Kept and justified in `SECURITY.md`. A unit test pins the exact `img-src`. data: images can't run script. | Accepted |
+| SEC-07 | Info | `worker/src/index.ts` (rate limiter) | The rate limiter **fails open** if the binding throws. The Cache API is a no-op on `*.workers.dev`. | Documented in `SECURITY.md` known limitations and `worker/README.md`. | Accepted |
+| SEC-08 | Info | GitHub Pages | Pages can't send `frame-ancestors`, `X-Frame-Options`, `nosniff` or `Permissions-Policy`, and a meta CSP has no reporting. | `public/_headers` covers Cloudflare Pages. Documented. | Accepted (DECISIONS #2) |
+
+### Verified OK (no change needed)
+- **XSS sinks.** `src/` has no `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write`, `DOMParser`, `srcdoc`, `eval`, `new Function` or string timers. A new source-scan test enforces this.
+- **Leaflet.** Popups get DOM nodes, `divIcon.html` is an `HTMLElement`, the attribution is a constant, marker `title`/`alt` are set as attributes, and there is no `bindTooltip`. Leaflet's own `innerHTML` uses are constants (zoom and close buttons, attribution).
+- **`dom.ts` allowlist.** It has no `on*`, `style`, `src`, `srcset`, `formaction` or `xlink:href`, and `href` is accepted only through `safeHttpsUrl`. `svg()` is static-only and allows no `href`.
+- **CSP in `dist/index.html`** is exactly `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https://tile.openstreetmap.org; font-src 'self'; connect-src 'self' https://nominatim.openstreetmap.org https://overpass-api.de; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests`. It has no `unsafe-*`, and `VITE_WORKER_URL` must be https with no credentials.
+- **UI/UX questions.**
+  - Q1: CSSOM `style.setProperty` is not governed by `style-src`. Confirmed, and e2e shows 0 violations with the confetti.
+  - Q2: `textContent` with an `offers.json` brand is fine.
+  - Q3: CSS `content: '…' / ''` is static, so there is no CSP impact.
+  - Q4: Leaflet `className` is a constant, so it's fine.
+  - Q5: agreed, no `dom.ts` change was needed for your attributes. I tightened `dom.ts` for other reasons (SEC-04).
+- **Origins in `dist/`** (`grep -ohE https?://… dist`):
+  - Runtime: `tile.openstreetmap.org`, `nominatim.openstreetmap.org`, `overpass-api.de`.
+  - Link-only: `www.openstreetmap.org`, `nominatim.org`, `leafletjs.com`, `www.google.com` (directions), and the brand `sourceUrl` hosts in `offers.json`.
+  - Namespace string: `www.w3.org`.
+  - **There are no third-party runtime scripts, fonts or CDNs.**
+- **Links.** Every `_blank` link has `rel="noopener noreferrer"`. `directionsUrl` rejects non-finite input and clamps the rest. `sourceUrl` is https-only; the validator checks it, and a new per-entry unit test covers every shipped URL.
+- **Privacy.**
+  - No storage, cookies, geolocation or history writes, and no location in the URL. The e2e test and the source-scan test both check this.
+  - The only `console` call is `console.warn` for dropped `offers.json` entries, which is repo data, not user input.
+- **Worker.**
+  - Parameters are validated strictly: no extra or duplicate params, month `^(?:[1-9]|1[0-2])$`, country `^[A-Z]{2}$`. No user text reaches Tavily.
+  - CORS uses the exact origin with `Vary: Origin`. Preflight returns 204 for the allowed origin and 403 for any other. A missing `Origin` also gets 403.
+  - Rate-limit binding, `observability.enabled=false`, no `console.*`. The key comes only from `env`.
+  - Output: tags stripped, controls and bidi stripped, https only, length caps. Errors are generic, and a new test checks that no upstream body leaks.
+  - Response headers: `nosniff`, `no-referrer`, `CSP default-src 'none'`.
+  - Prompt injection is not applicable (no LLM).
+- **Supply chain.**
+  - `package-lock.json` is committed.
+  - 3 runtime dependencies: `leaflet` and the two `@fontsource` font packages.
+  - `npm audit` is clean.
+  - All 6 Action SHAs were checked with `gh api repos/…/git/ref/tags/…`, and all are lightweight tags pointing at the pinned commits:
+    - `checkout` v7.0.1
+    - `setup-node` v7.0.0
+    - `upload-artifact` v7.0.1
+    - `upload-pages-artifact` v5.0.0
+    - `configure-pages` v6.0.0
+    - `deploy-pages` v5.0.1
+  - No `pull_request_target`, and no `${{ github.event.* }}` in `run:`.
+  - `persist-credentials: false` on every checkout. `dependabot.yml` is valid.
+- **Secrets.**
+  - `git log --all -p` shows no `tvly-`, `sk-`, `gh?_`, `github_pat_`, `AKIA`, `AIza`, `xox?-` or PEM matches. The only key-like strings are names and placeholders.
+  - `.gitignore` covers `.dev.vars*` and `.env*` (except `.env.example`).
+- **Repo settings** (`gh api …`):
+  - secret scanning: enabled
+  - push protection: enabled
+  - Dependabot security updates: enabled
+  - vulnerability alerts: enabled (204)
+  - **private vulnerability reporting: enabled by Security** (`{"enabled":true}`)
+
+### Decisions
+- DECISIONS #9: the OSM tile `referrerPolicy: 'strict-origin'` extension is approved.
+- DECISIONS #10: Lighthouse CI is isolated in its own job.
+- DECISIONS #11: `img-src data:` is kept for Leaflet.
+- DECISIONS #12: external text is hygiene-filtered for bidi and invisible characters, with ZWJ/ZWNJ allowed.
+
+### Files changed by Security
+- **New:**
+  - `src/text.ts`
+  - `tests/unit/security.test.ts` (78 tests; 12 of them fail against the pre-review code)
+  - `SECURITY.md`
+- **Edited:**
+  - App: `src/liveSearch.ts`, `src/geocode.ts`, `src/overpass.ts`, `src/offers.ts`, `src/render/dom.ts`
+  - Worker: `worker/src/index.ts`, `worker/test/worker.test.ts` (4 new tests)
+  - `tests/unit/geocode.test.ts`: label control characters now become a space ("A B"), so words aren't glued together.
+  - CI: `.github/workflows/ci-deploy.yml`, `.github/workflows/link-check.yml`, `scripts/check-links.mjs`
+- **Not done:** I didn't commit or push; that's the orchestrator's job.
+
+### For the orchestrator, user and QA
+- **After the Worker is deployed:**
+  - Confirm `ALLOWED_ORIGIN` matches the real Pages origin.
+  - Confirm `TAVILY_API_KEY` is set with `wrangler secret`; it is never in `[vars]`.
+  - Consider a custom domain so the 24h cache works.
+  - `curl -H 'Origin: https://evil.example'` should return 403.
+- **After the first Pages deploy:** load the live URL and check that the console shows no CSP violations, including while zooming the map (the tile-abort `data:` GIF).
+- **For QA:** `tests/unit/security.test.ts` already has XSS-sink and bidi cases. An e2e test with a bidi-laden Worker fixture would be a nice extra.

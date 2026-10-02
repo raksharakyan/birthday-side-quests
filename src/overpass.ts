@@ -1,3 +1,4 @@
+import { cleanDisplayText } from './text';
 import type { Branch, Offer } from './types';
 
 /**
@@ -62,8 +63,7 @@ function isObj(v: unknown): v is Record<string, unknown> {
 }
 
 function cleanName(s: unknown): string {
-  // eslint-disable-next-line no-control-regex
-  return typeof s === 'string' ? s.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 100) : '';
+  return cleanDisplayText(s, 100);
 }
 
 /** Pure parser: maps Overpass elements back to offers, de-duplicates and caps. */

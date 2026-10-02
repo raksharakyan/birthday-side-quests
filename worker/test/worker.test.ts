@@ -63,6 +63,40 @@ describe('sanitizeResults', () => {
     expect(sanitizeResults(null)).toEqual([]);
     expect(sanitizeResults({ results: 'x' })).toEqual([]);
   });
+  it('cleanText removes every bidi override/isolate/mark and invisible formatting character', () => {
+    // fromCodePoint keeps invisible characters out of the source file.
+    for (const code of [0x061c, 0x200b, 0x200e, 0x200f, 0x2028, 0x2029, 0x202a, 0x202b, 0x202c, 0x202d, 0x202e,
+      0x2060, 0x2066, 0x2067, 0x2068, 0x2069, 0xfeff, 0x0085, 0x009b]) {
+      expect(cleanText(`a${String.fromCodePoint(code)}b`, 10)).toBe('a b');
+    }
+    // ZWJ is kept (Indic scripts / emoji sequences).
+    expect(cleanText(`a${String.fromCodePoint(0x200d)}b`, 10)).toBe(`a${String.fromCodePoint(0x200d)}b`);
+  });
+  it('sanitizeResults output never contains bidi overrides, tags or non-https URLs', () => {
+    const rlo = String.fromCodePoint(0x202e);
+    const out = sanitizeResults({
+      results: [{ title: `Free ${rlo}ekac <img src=x onerror=alert(1)>`, url: 'https://e.com/x', content: `&lt;script&gt;${rlo}` }],
+    });
+    expect(out).toHaveLength(1);
+    expect(JSON.stringify(out)).not.toMatch(/[<>\u202e]/u);
+  });
+  it('error responses never echo upstream details', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('secret upstream body tvly-xyz', { status: 500 }));
+    const r = await handleRequest(req('/search?month=10&country=IN'), env, ctx);
+    expect(r.status).toBe(502);
+    const body = await r.text();
+    expect(body).toBe('{"error":"search unavailable"}');
+    expect(r.headers.get('Cache-Control')).toBe('no-store');
+    fetchSpy.mockRestore();
+  });
+  it('403 for a disallowed origin carries no CORS allow header', async () => {
+    const r = await handleRequest(req('/search?month=1&country=IN', { origin: 'https://evil.example' }), env, ctx);
+    expect(r.status).toBe(403);
+    expect(r.headers.get('Access-Control-Allow-Origin')).toBeNull();
+    const pre = await handleRequest(req('/search', { method: 'OPTIONS', origin: 'https://evil.example' }), env, ctx);
+    expect(pre.status).toBe(403);
+    expect(pre.headers.get('Access-Control-Allow-Origin')).toBeNull();
+  });
   it('cleanText removes control and bidi characters', () => {
     expect(cleanText('a\u0000b‮c', 10)).toBe('a b c');
   });

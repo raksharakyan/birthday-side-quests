@@ -5,13 +5,14 @@ on:
     - cron: '17 6 * * 1' # Mondays 06:17 UTC
   workflow_dispatch:
 
-permissions:
-  contents: read
-  issues: write
+permissions: {}
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     timeout-minutes: 15
     steps:
       - name: Checkout
