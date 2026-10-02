@@ -149,7 +149,7 @@ function renderOnline(): void {
     renderEmpty(
       onlineList,
       state.onlineCountry
-        ? 'No online birthday quests for this country yet — try "Pick your country…".'
+        ? 'No online birthday quests for this country yet — try another country, or check back soon 🎀'
         : 'No worldwide online quests yet — pick your country above to see deals you can claim online 💻',
       'empty',
     );
