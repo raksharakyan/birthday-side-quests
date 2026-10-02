@@ -1,0 +1,39 @@
+{
+  "name": "birthday-side-quests",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Privacy-first birthday freebies map: type a city, pick your birthday month, get birthday side quests.",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run lint:typecheck && vite build",
+    "preview": "vite preview --port 4173 --strictPort",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "lint:typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p worker",
+    "audit": "npm audit --audit-level=high",
+    "lhci": "VITE_BASE=/ vite build --outDir dist-lhci --emptyOutDir && npx --yes @lhci/cli@0.15.1 autorun",
+    "worker:test": "vitest run worker"
+  },
+  "dependencies": {
+    "@fontsource/fredoka": "^5.3.0",
+    "@fontsource/nunito": "^5.3.0",
+    "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@cloudflare/workers-types": "^5.20261002.1",
+    "@playwright/test": "^1.63.0",
+    "@types/leaflet": "^1.9.22",
+    "@types/node": "^26.6.4",
+    "jsdom": "^30.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.2",
+    "vitest": "^5.0.3",
+    "wrangler": "^4.146.0"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}

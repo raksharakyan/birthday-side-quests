@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+.dev.vars.*
+playwright-report/
+test-results/
+blob-report/
+.lighthouseci/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+dist-e2e/
+dist-lhci/

@@ -1,0 +1,72 @@
+/* Functional component styles. Class names are the contract for the UI/UX agent. */
+
+/* --- search form --- */
+.search-form { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-end; }
+.field { display: flex; flex-direction: column; gap: var(--space-1); flex: 1 1 12rem; }
+.field__label { font-weight: 700; }
+.field__input {
+  font: inherit; padding: var(--space-2) var(--space-3); min-height: 44px;
+  border: 2px solid var(--color-border); border-radius: var(--radius-m); background: var(--color-surface); color: var(--color-text);
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 44px;
+  padding: var(--space-2) var(--space-4); border-radius: var(--radius-m); border: 2px solid var(--color-primary);
+  font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; background: var(--color-surface); color: var(--color-primary);
+}
+.btn--primary { background: var(--color-primary); color: var(--color-primary-text); }
+.btn[aria-disabled='true'] { opacity: 0.7; cursor: progress; }
+
+.privacy-note { font-size: 0.9rem; color: var(--color-muted); }
+.status { min-height: 1.5em; font-weight: 700; }
+.status[data-kind='error'] { color: var(--color-error-text); }
+.month-info { font-family: var(--font-display); font-size: 1.1rem; }
+
+/* --- map --- */
+.map {
+  height: var(--map-height); border-radius: var(--radius-l); overflow: hidden;
+  border: 2px solid var(--color-border); background: var(--color-surface);
+  display: flex; align-items: center; justify-content: center;
+}
+.map.leaflet-container { display: block; }
+.map__placeholder { color: var(--color-muted); padding: var(--space-4); text-align: center; }
+.map-marker-host { background: none; border: 0; }
+.map-marker { display: block; line-height: 0; }
+.map-marker--branch { color: var(--color-accent); }
+.map-marker--center { color: var(--color-focus); }
+.map-popup__brand { display: block; }
+.map-popup__name { display: block; color: var(--color-muted); font-size: 0.9em; }
+.map-popup__offer { margin: var(--space-1) 0; }
+
+/* --- tabs --- */
+.tabs { display: flex; gap: var(--space-2); border-bottom: 2px solid var(--color-border); margin-top: var(--space-6); }
+.tab {
+  font: inherit; font-weight: 700; padding: var(--space-2) var(--space-4); min-height: 44px; border: 0;
+  background: none; color: var(--color-muted); border-bottom: 3px solid transparent; cursor: pointer;
+}
+.tab[aria-selected='true'] { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+.tab-panel { padding: var(--space-4) 0; }
+.disclaimer { color: var(--color-muted); }
+.empty-state { color: var(--color-muted); }
+
+/* --- cards --- */
+.quest-list, .live-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); }
+.quest-card, .live-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-l); box-shadow: var(--shadow-card); }
+.quest-card__inner, .live-card__inner { padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); height: 100%; }
+.quest-card__header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2); }
+.quest-card__brand, .live-card__title { margin: 0; font-size: 1.2rem; }
+.quest-card__line { margin: 0; font-style: italic; }
+.quest-card__details { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: var(--space-1) var(--space-3); }
+.quest-card__details dt { font-weight: 700; }
+.quest-card__details dd { margin: 0; }
+.quest-card__meta, .live-card__source { margin: 0; font-size: 0.9rem; color: var(--color-muted); }
+.quest-card__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: auto; }
+.quest-card__done { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; }
+.quest-card__done-input { width: 1.25rem; height: 1.25rem; }
+.quest-card.is-done .quest-card__brand { text-decoration: line-through; }
+.live-card__snippet { margin: 0; }
+
+.badges { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.badge { display: inline-block; padding: 0 var(--space-2); border-radius: 999px; font-size: 0.85rem; font-weight: 700; }
+.badge--verified { background: var(--color-success-bg); color: var(--color-success-text); }
+.badge--check, .badge--unverified { background: var(--color-warning-bg); color: var(--color-warning-text); }
+.badge--stale { background: var(--color-stale-bg); color: var(--color-stale-text); }

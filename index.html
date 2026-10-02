@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="description" content="Birthday Side Quests: find birthday freebies near you and online. Type a city, pick your birthday month — nothing is stored." />
+    <meta name="theme-color" content="#fde2ec" />
+    <title>Birthday Side Quests</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <h1 class="site-title">Birthday Side Quests</h1>
+      <p class="site-tagline">Free birthday treats near you, turned into tiny adventures.</p>
+    </header>
+
+    <main id="main" class="app" tabindex="-1">
+      <section class="search-panel" aria-labelledby="search-heading">
+        <h2 id="search-heading" class="visually-hidden">Find your birthday quests</h2>
+        <form id="search-form" class="search-form" novalidate>
+          <div class="field field--city">
+            <label for="city" class="field__label">Your city or area</label>
+            <input id="city" name="city" class="field__input" type="text" inputmode="search" autocomplete="off"
+              autocapitalize="words" spellcheck="false" maxlength="200" placeholder="e.g. Bengaluru, Indiranagar" enterkeyhint="search" />
+          </div>
+          <div class="field field--month">
+            <label for="month" class="field__label">Birthday month</label>
+            <select id="month" name="month" class="field__input" required>
+              <option value="" selected disabled>Choose a month</option>
+              <option value="1">January</option>
+              <option value="2">February</option>
+              <option value="3">March</option>
+              <option value="4">April</option>
+              <option value="5">May</option>
+              <option value="6">June</option>
+              <option value="7">July</option>
+              <option value="8">August</option>
+              <option value="9">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn--primary search-form__submit">Find my quests</button>
+        </form>
+        <p class="privacy-note">We don't store anything. Your location stays in your browser tab.</p>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+        <p id="month-info" class="month-info" hidden></p>
+      </section>
+
+      <section class="map-section" aria-label="Map">
+        <div id="map" class="map" role="region" aria-label="Map of nearby birthday quests">
+          <p class="map__placeholder">Your quest map appears here after you search.</p>
+        </div>
+      </section>
+
+      <section class="results" aria-labelledby="results-heading">
+        <h2 id="results-heading" class="visually-hidden">Your quests</h2>
+        <div class="tabs" role="tablist" aria-label="Quest types">
+          <button type="button" class="tab" role="tab" id="tab-nearby" aria-controls="panel-nearby" aria-selected="true" tabindex="0">Nearby</button>
+          <button type="button" class="tab" role="tab" id="tab-online" aria-controls="panel-online" aria-selected="false" tabindex="-1">Online</button>
+          <button type="button" class="tab" role="tab" id="tab-found" aria-controls="panel-found" aria-selected="false" tabindex="-1" hidden>Found online</button>
+        </div>
+
+        <div class="tab-panel" role="tabpanel" id="panel-nearby" aria-labelledby="tab-nearby" tabindex="0">
+          <div id="nearby-list" class="panel-body">
+            <p class="empty-state">Type your city or area and pick your birthday month to see quests near you.</p>
+          </div>
+        </div>
+
+        <div class="tab-panel" role="tabpanel" id="panel-online" aria-labelledby="tab-online" tabindex="0" hidden>
+          <div class="field field--country">
+            <label for="country" class="field__label">Country</label>
+            <select id="country" class="field__input">
+              <option value="">Worldwide offers only</option>
+            </select>
+          </div>
+          <div id="online-list" class="panel-body"></div>
+        </div>
+
+        <div class="tab-panel" role="tabpanel" id="panel-found" aria-labelledby="tab-found" tabindex="0" hidden>
+          <p class="disclaimer">Live web results for your birthday month and country. We haven't checked these — always read the link before you go.</p>
+          <div id="found-list" class="panel-body">
+            <p class="empty-state">Pick your birthday month and a country to see what's out there.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Map data &copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap contributors</a>. Search by <a href="https://nominatim.org/" rel="noopener noreferrer" target="_blank">Nominatim</a>.</p>
+      <p>Offers change — always check with the brand before you go.</p>
+    </footer>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
