@@ -710,6 +710,7 @@ function clearSearch(): void {
     Object.assign(state, { place: null, placeText: '', month: null, branches: new Map(), searchedRadiusM: null, pinCount: 0, pinsFailed: false });
     setDoneIds([]);
     liveCache.clear();
+    if (tabs[0]) selectTab(tabs[0]);
     showMonthInfo();
     syncOnlineCountry(null);
     renderNearbyStart();

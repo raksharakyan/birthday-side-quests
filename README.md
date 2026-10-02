@@ -1,29 +1,32 @@
-# 🎂 Birthday Side Quests ✨
+# Birthday Side Quests
 
 > Free birthday treats near you, turned into tiny adventures.
 
 **Live:** https://raksharakyan.github.io/birthday-side-quests/
 
-Type in your city and pick your birthday month. You get a pastel map and a list of birthday side quests: cafés, dessert shops, beauty brands and stores near you that give birthday freebies or discounts. Online-only deals have their own tab.
+Type in your city and pick your birthday month. You get a map and a list of birthday side quests: cafés, dessert shops, beauty brands, fashion stores and experiences near you that give birthday freebies or discounts, each with exactly what you get and how to claim it. Online-only deals have their own tab, covering every country.
 
 ![Desktop screenshot](docs/screenshots/desktop.png)
 
-| Mobile | Online tab |
+| Mobile | Claimed |
 |---|---|
-| <img src="docs/screenshots/mobile.png" width="300" alt="Mobile screenshot"> | <img src="docs/screenshots/online-tab.png" width="420" alt="Online tab screenshot"> |
+| <img src="docs/screenshots/mobile.png" width="300" alt="Mobile screenshot"> | <img src="docs/screenshots/claimed.png" width="420" alt="A claimed quest with the celebration"> |
 
 ## Features
-- **Nearby quests.** Finds branches of brands with birthday programs within about 5 km of your city (using OpenStreetMap / Overpass). Shows heart and gift pins on a Leaflet map.
-- **Quest cards.** Each card shows:
-  - the offer and how to claim it, plus the claim window (day, week or month);
-  - a ✅ Verified or ⚠️ Check with store badge, and the date it was last verified;
-  - **Get directions**, which opens Google Maps with no API key;
-  - **Verify offer**, which links to the brand's official page;
-  - a "done" checkbox with confetti. The checkbox is kept in memory only.
-- **Online tab.** App and e-commerce birthday deals for your country. No city needed.
-- **Found online tab (optional).** Live web results for "birthday freebies + month + country" through a Cloudflare Worker. Clearly labelled *unverified*.
-- **Birthday-month awareness.** "It's your birthday month, and your quests are live!" or "Your quest window opens in 3 months 🎀".
-- **Accessible.** Mobile-first, WCAG AA contrast, keyboard navigable, screen-reader labels, respects `prefers-reduced-motion`.
+- **City search for any city in the world.** Suggestions appear as you type (Photon, OpenStreetMap data).
+- **Nearby quests.** Branches of 100+ brands with birthday programs, within a radius you choose (2, 5, 10 or 20 km), sorted nearest first on a Leaflet map.
+- **Detailed quest cards.** Each card shows:
+  - **You get:** the exact reward where the brand publishes it.
+  - **Numbered claim steps.**
+  - **Chips:** no purchase needed, minimum spend, join N days before, valid dates, and what to bring.
+  - **Badges and dates:** Verified, Check with store or May be outdated, plus the date it was last checked.
+  - **Get directions:** opens Google Maps with no API key.
+  - **Verify offer:** links to the brand's official page.
+- **Claim and celebrate.** Mark a quest claimed. A progress ring fills and the candle logo lights up.
+- **Online tab.** App and e-commerce birthday deals for every country. It switches automatically to your city's country.
+- **Survives a refresh.** Your search is kept in this browser tab only and clears when you close it.
+- **Found online tab (optional).** Live web results via a Cloudflare Worker, clearly labelled *unverified*.
+- **Accessible.** Mobile-first, WCAG AA, keyboard navigable, screen-reader labels, respects `prefers-reduced-motion`.
 
 ## Privacy, briefly
 We don't store anything on our servers. Your search stays in this browser tab and clears when you close it (one small `sessionStorage` record, removable with **Clear search**). There are no accounts, cookies, analytics, localStorage or IndexedDB, and no geolocation prompt. See [PRIVACY.md](PRIVACY.md).
@@ -32,7 +35,7 @@ We don't store anything on our servers. Your search stays in this browser tab an
 Offer facts come **only** from [`public/offers.json`](public/offers.json). Every entry was researched by reading the brand's official rewards or terms page ([research notes](docs/OFFER_RESEARCH.md)), and each one records its `sourceUrl` and `lastVerified` date. If we couldn't confirm an offer from an official page, it shows **"Check with store"**. Entries older than 6 months show a **"May be outdated"** badge. A weekly GitHub Action checks every `sourceUrl` and opens an issue when a link breaks. AI is never used as a source of offer facts.
 
 ## Tech
-Vite + vanilla TypeScript, Leaflet + OpenStreetMap tiles, Nominatim (geocoding), Overpass API (branches), and an optional Cloudflare Worker + Tavily for "Found online". Fonts are self-hosted with Fontsource. There are only three runtime dependencies.
+Vite + vanilla TypeScript, Leaflet + OpenStreetMap tiles, Nominatim (geocoding), Overpass API (branches), and an optional Cloudflare Worker + Tavily for "Found online". Fonts are self-hosted with Fontsource. There are only three runtime dependencies. The design system is documented in [DESIGN.md](DESIGN.md).
 
 ## Local setup
 You need Node 22 or later.
@@ -87,7 +90,7 @@ Copy `.env.example` to `.env.local` to set `VITE_BASE` or `VITE_WORKER_URL`.
 4. Open a PR. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Docs
-[SECURITY.md](SECURITY.md) · [PRIVACY.md](PRIVACY.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [docs/PLAN.md](docs/PLAN.md) · [docs/DECISIONS.md](docs/DECISIONS.md) · [docs/HANDOFFS.md](docs/HANDOFFS.md)
+[CLAUDE.md](CLAUDE.md) · [DESIGN.md](DESIGN.md) · [SECURITY.md](SECURITY.md) · [PRIVACY.md](PRIVACY.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [docs/PLAN.md](docs/PLAN.md) · [docs/DECISIONS.md](docs/DECISIONS.md) · [docs/HANDOFFS.md](docs/HANDOFFS.md)
 
 ## Credits
 Map data © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright). Geocoding by Nominatim, branch search by the Overpass API. Please be kind to these free services.

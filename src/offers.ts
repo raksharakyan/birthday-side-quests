@@ -53,6 +53,29 @@ export function isValidIsoDate(s: unknown): s is string {
   return dt.getUTCFullYear() === y && dt.getUTCMonth() === mo - 1 && dt.getUTCDate() === d;
 }
 
+/** Worst-case backtracking paths a nameRegex may have (see nameRegexBranching). */
+export const NAME_REGEX_MAX_BRANCHING = 1024;
+
+/**
+ * Upper bound on the number of ways a nameRegex can try to match at one position: 2 per `?` times
+ * the number of alternatives of every group (and of the top level). The charset already excludes
+ * `*`, `+` and `{}`, but stacked `?` (e.g. `a?a?a?…aaa`) or many alternation groups still backtrack
+ * exponentially in JS's RegExp engine, so this keeps every pattern linear in practice.
+ */
+export function nameRegexBranching(re: string): number {
+  let total = 1;
+  const stack: number[] = [1];
+  for (const ch of re) {
+    if (ch === '?') total *= 2;
+    else if (ch === '|') stack[stack.length - 1] = (stack[stack.length - 1] ?? 1) + 1;
+    else if (ch === '(') stack.push(1);
+    else if (ch === ')' && stack.length > 1) total *= stack.pop() ?? 1;
+    if (total > NAME_REGEX_MAX_BRANCHING) return Infinity;
+  }
+  for (const n of stack) total *= n;
+  return total;
+}
+
 function validateOsm(v: unknown): OsmHint | undefined | null {
   if (v === undefined) return undefined;
   if (!isObj(v)) return null;
@@ -64,6 +87,7 @@ function validateOsm(v: unknown): OsmHint | undefined | null {
   if (v.nameRegex !== undefined) {
     if (typeof v.nameRegex !== 'string' || v.nameRegex.length === 0 || v.nameRegex.length > LIMITS.nameRegex) return null;
     if (!NAME_REGEX_RE.test(v.nameRegex)) return null;
+    if (nameRegexBranching(v.nameRegex) > NAME_REGEX_MAX_BRANCHING) return null;
     try {
       new RegExp(v.nameRegex, 'i');
     } catch {

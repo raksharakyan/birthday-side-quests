@@ -534,6 +534,8 @@ select.field__input option, select.field__input optgroup { color: var(--ink); fo
   max-width: calc(100vw - 32px); padding: 10px 18px 10px 10px; border-radius: var(--r-pill);
   background: var(--ink); color: var(--bg); box-shadow: var(--shadow-3);
   font-size: 14px; font-weight: 500; line-height: 1.35;
+  width: max-content;
+  pointer-events: none;
   transform: translate(-50%, 0);
 }
 .toast__mark { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; flex: none; background: rgb(255 255 255 / 8%); }

@@ -1,5 +1,7 @@
 # Birthday Side Quests: Soft Premium design spec
 
+> **Historical prototype spec.** The live design system is [/DESIGN.md](../../DESIGN.md) (plum accent, as shipped). This file records the original prototype and the accent options that were explored.
+
 **Design read:** a privacy-first consumer utility for young women planning their birthday month, in a soft-premium language (Glossier and Apple calm, warm porcelain, one rich accent), built with native CSS, inline SVG and WAAPI, no new runtime deps.
 
 Dials (taste-skill vocabulary): variance 6, motion 5, density 4. It is a tool you scan on a phone, so layout stays calm and legible. The celebration lives in small, earned moments, not in decoration.

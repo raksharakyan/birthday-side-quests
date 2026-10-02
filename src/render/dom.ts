@@ -80,6 +80,9 @@ export function externalLink(href: string, text: string, attrs: Attrs = {}): HTM
 }
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
+// Shape-only SVG elements. No <script>, <a>, <foreignObject>, <use>, <image>, <style> or animation
+// elements (<animate>/<set> can rewrite attributes such as href at runtime).
+const SVG_TAGS = new Set(['svg', 'g', 'path', 'circle', 'ellipse', 'rect', 'line', 'polyline', 'polygon']);
 const SVG_ATTRS = new Set([
   'viewbox', 'd', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'width', 'height',
   'cx', 'cy', 'r', 'x', 'y', 'rx', 'ry', 'points', 'class', 'aria-hidden', 'focusable', 'role', 'transform',
@@ -87,6 +90,7 @@ const SVG_ATTRS = new Set([
 
 /** Static SVG builder (icons only; never pass external data in here). */
 export function svg(tag: string, attrs: Record<string, string> = {}, children: readonly SVGElement[] = []): SVGElement {
+  if (!SVG_TAGS.has(tag)) throw new Error(`svg(): <${tag}> is not allowed`);
   const node = document.createElementNS(SVG_NS, tag) as SVGElement;
   for (const [k, v] of Object.entries(attrs)) {
     if (!SVG_ATTRS.has(k.toLowerCase())) throw new Error(`svg(): attribute "${k}" is not allowed`);

@@ -50,13 +50,11 @@
       "osm": {
         "nameRegex": "boost juice"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join the Boost app with your birthday",
         "Check the app around your birthday"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "donut-king-au",
@@ -107,8 +105,7 @@
         "Make a purchase over $1 in the prior 12 months",
         "Redeem the birthday scoop in store"
       ],
-      "purchaseRequired": false,
-      "validFor": "Not stated"
+      "purchaseRequired": false
     },
     {
       "id": "gloria-jeans-au",
@@ -133,8 +130,7 @@
         "Add your birthday to your account",
         "Redeem the birthday drink"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "grilld-au",
@@ -180,14 +176,12 @@
       "osm": {
         "nameRegex": "lindt"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join MyLindt Rewards for free",
         "Add your birthday to your account",
         "Use the emailed voucher in a Lindt shop or the eShop"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "max-brenner-au",
@@ -233,14 +227,12 @@
       "osm": {
         "nameRegex": "mecca"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join MECCA Beauty Loop",
         "Reach Level 1 or above ($300+ spend a year)",
         "Add your birthday to your account"
       ],
       "purchaseRequired": null,
-      "validFor": "Not stated",
       "minSpend": "$300+ a year to reach Beauty Loop"
     },
     {
@@ -286,13 +278,11 @@
       "osm": {
         "nameRegex": "muffin break"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join Muffin Break rewards with your birthday",
         "Check the app in your birthday month"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "nandos-au",
@@ -393,8 +383,7 @@
         "Reward is added 7 days before your birthday",
         "Dine in and check in with the app, your phone number or a printout"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "indigo-ca",
@@ -439,13 +428,11 @@
       "osm": {
         "nameRegex": "second cup"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join Second Cup rewards with your birthday",
         "Check the app offers around your birthday"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "starbucks-ca",
@@ -503,14 +490,12 @@
         "wikidata": "Q2408041",
         "nameRegex": "sephora"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join MY SEPHORA",
         "Reach Black status (150 points or 4 visits)",
         "Check your birthday mail for the gift and terms"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "costa-gb",
@@ -536,8 +521,7 @@
         "Add your birthday in the app",
         "Redeem the birthday treat in store"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "greggs-gb",
@@ -563,8 +547,7 @@
         "Add your birthday",
         "The treat is added to your app wallet on your birthday"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "krispy-kreme-gb",
@@ -603,7 +586,6 @@
         "wikidata": "Q662845",
         "nameRegex": "pizza ?express"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join PizzaExpress Club",
         "Reward unlocks in your birthday month",
@@ -636,8 +618,7 @@
         "Visit once first",
         "Claim the birthday cake"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "space-nk-gb",
@@ -656,7 +637,6 @@
       "osm": {
         "nameRegex": "space ?nk"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join N.DULGE Rewards",
         "Add your birthday to your account",
@@ -707,8 +687,7 @@
         "Join Stripes Rewards and add your birthday",
         "Claim the dessert on your birthday"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "the-body-shop-gb",
@@ -747,14 +726,12 @@
         "wikidata": "Q503715",
         "nameRegex": "wagamama"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join wagamama soul club",
         "Add your birthday to your account",
         "The gift arrives in your wallet on the 1st of your birthday month"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "zizzi-gb",
@@ -773,7 +750,6 @@
       "osm": {
         "nameRegex": "zizzi"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join Zizzi Zillionaires' Club",
         "The Birthday Perk lands in your Perkz Wallet about 2 weeks before your birthday",
@@ -853,14 +829,12 @@
         "wikidata": "Q3895",
         "nameRegex": "^adidas"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join adiClub free in the adidas app or website",
         "Reach Level 2 (1,000+ adiClub points)",
         "Add your birthday and check the app for the gift"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "and-in",
@@ -961,13 +935,11 @@
       "osm": {
         "nameRegex": "caratlane"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Create a CaratLane account and add your birthday",
         "Use the birthday coupon on a purchase, optionally with Treasure Chest"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "costa-coffee-in",
@@ -994,7 +966,6 @@
         "Ask for the birthday cake in store and scan your app QR code"
       ],
       "purchaseRequired": null,
-      "validFor": "Not stated",
       "bring": [
         "Costa app QR code"
       ]
@@ -1075,13 +1046,11 @@
       "osm": {
         "nameRegex": "health (&|and) glow"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join h&g Club",
         "Add your birthday to your profile"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "hidesign-in",
@@ -1100,7 +1069,6 @@
       "osm": {
         "nameRegex": "hidesign"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Register for the Hidesign loyalty program",
         "In store: give your DOB at billing",
@@ -1108,7 +1076,6 @@
         "Receive the coupon in your birthday month"
       ],
       "purchaseRequired": null,
-      "validFor": "Not stated",
       "bring": [
         "Govt ID (online registration)"
       ]
@@ -1137,8 +1104,7 @@
         "Claim the free Express upgrade ticket at the park counter"
       ],
       "purchaseRequired": true,
-      "minSpend": "4 Regular tickets booked by your group",
-      "validFor": "Not stated"
+      "minSpend": "4 Regular tickets booked by your group"
     },
     {
       "id": "club-itc-in",
@@ -1183,14 +1149,12 @@
       "osm": {
         "nameRegex": "kiehl('|’)?s"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join Kiehl's Rewards in India",
         "Reach Silver, Gold or Black tier",
         "Ask in store about your birthday gift or discount"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "loccitane-in",
@@ -1209,7 +1173,6 @@
       "osm": {
         "nameRegex": "l('|’)?occitane"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Become a My L'OCCITANE Club or Gold member",
         "Visit a store in your birthday month",
@@ -1238,13 +1201,11 @@
       "osm": {
         "nameRegex": "la pino('|’)?z"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join La Pino'z loyalty on the website or app",
         "Add your date of birth"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "lakme-salon-in",
@@ -1318,13 +1279,11 @@
       "osm": {
         "nameRegex": "metro shoes"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join ClubMetro",
         "Share your date of birth when you enrol"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "mia-by-tanishq-in",
@@ -1340,7 +1299,6 @@
       "sourceUrl": "https://www.miabytanishq.com/en_IN/offertnc.html",
       "lastVerified": "2026-10-02",
       "verified": false,
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Register on the Mia website or app with your birthday (it can't be changed)",
         "Shop on the Mia website or app in your birthday month",
@@ -1363,14 +1321,12 @@
       "sourceUrl": "https://blog.myntra.com/celebrating-fans-with-the-myntra-insider-programme/",
       "lastVerified": "2026-10-02",
       "verified": false,
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join Myntra Insider in the Myntra app",
         "Add your birthday to your profile",
         "Check the app for birthday offers"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "nykaa-in",
@@ -1401,7 +1357,6 @@
       "sourceUrl": "https://www.plumgoodness.com/pages/plum-rewards",
       "lastVerified": "2026-10-02",
       "verified": false,
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join Plum+ by making any purchase on plumgoodness.com",
         "Add your birthday to your account",
@@ -1445,14 +1400,12 @@
       "osm": {
         "nameRegex": "skechers"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join Skechers Plus free on skechers.in with your mobile number",
         "Watch for the Birthday Delight offer by SMS, email or WhatsApp",
         "Redeem online, or in store in Mumbai only"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "swarovski-in",
@@ -1474,8 +1427,7 @@
         "Share your birthday in your profile",
         "Use the birthday coupon on a purchase"
       ],
-      "purchaseRequired": true,
-      "validFor": "Not stated"
+      "purchaseRequired": true
     },
     {
       "id": "titan-encircle-in",
@@ -1552,8 +1504,7 @@
         "Join The Face Shop India loyalty program on thefaceshop.in",
         "Add your birthday to your profile"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "theobroma-in",
@@ -1770,7 +1721,6 @@
       "osm": {
         "nameRegex": "tealive"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join the Tealive loyalty programme",
         "Register before your birthday month",
@@ -1796,7 +1746,6 @@
       "osm": {
         "nameRegex": "burger ?fuel"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join VIB Club with your correct date of birth",
         "Sign up at least 24 hours before your birthday",
@@ -1920,14 +1869,12 @@
         "wikidata": "Q37158",
         "nameRegex": "starbucks"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join Starbucks Rewards Singapore",
         "Add your birthday to your account",
         "Check the app in your birthday month"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "swensens-sg",
@@ -2038,7 +1985,6 @@
       "sourceUrl": "https://www.clinique.com/loyalty",
       "lastVerified": "2026-10-02",
       "verified": true,
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join Clinique Smart Rewards",
         "Add your birthday to your account",
@@ -2065,14 +2011,12 @@
       "osm": {
         "nameRegex": "corner bakery"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join Corner Bakery Rewards",
         "Add your birthday to your account",
         "Redeem the birthday treat"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "crumbl-us",
@@ -2119,14 +2063,12 @@
         "wikidata": "Q1141226",
         "nameRegex": "dairy queen|^dq$"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Download the DQ app and join DQ Rewards",
         "Add your birthday to your account",
         "Look for the birthday surprise in the app"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "dsw-us",
@@ -2145,14 +2087,12 @@
       "osm": {
         "nameRegex": "dsw|designer shoe warehouse"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join DSW VIP for free",
         "Add your birthday to your account",
         "Use the Birthday Bonus Reward"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "duck-donuts-us",
@@ -2271,8 +2211,7 @@
         "Add your birthday to your account",
         "Redeem the birthday reward for your tier"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "nothing-bundt-cakes-us",
@@ -2297,8 +2236,7 @@
         "Add your birthday to your account",
         "Redeem the Bundtlet for your birthday"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "pf-changs-us",
@@ -2350,8 +2288,7 @@
         "Add your birthday to your account",
         "Redeem the birthday treat"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "peets-us",
@@ -2376,8 +2313,7 @@
         "Add your birthday to your account",
         "Redeem the birthday drink"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "ritas-us",
@@ -2396,7 +2332,6 @@
       "osm": {
         "nameRegex": "rita'?s"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join Rita's Rewards and give your birthday when you sign up",
         "Redeem the reward at a participating US shop"
@@ -2448,8 +2383,7 @@
         "The birthday offer loads automatically",
         "Redeem it in store or in the app"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "starbucks-us",
@@ -2488,14 +2422,12 @@
         "wikidata": "Q1046951",
         "nameRegex": "^target$"
       },
-      "rewardItem": "Not published by the brand, varies by member",
       "steps": [
         "Join Target Circle for free",
         "Add your birthday to your account",
         "Use the birthday gift"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "cheesecake-factory-us",
@@ -2522,7 +2454,6 @@
         "Redeem the slice when you make a purchase"
       ],
       "purchaseRequired": true,
-      "validFor": "Not stated",
       "minSpend": "Any purchase"
     },
     {
@@ -2548,8 +2479,7 @@
         "Keep your birthday up to date in your account",
         "Redeem the birthday smoothie reward"
       ],
-      "purchaseRequired": null,
-      "validFor": "Not stated"
+      "purchaseRequired": null
     },
     {
       "id": "ulta-us",
