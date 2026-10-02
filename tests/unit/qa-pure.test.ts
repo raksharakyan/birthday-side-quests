@@ -24,6 +24,8 @@ const mk = (id: string, channel: Offer['channel'], countries: string[], extra: P
   sourceUrl: 'https://example.com',
   lastVerified: '2026-10-02',
   verified: true,
+  rewardType: 'free',
+  needsPastSpend: false,
   ...extra,
 });
 

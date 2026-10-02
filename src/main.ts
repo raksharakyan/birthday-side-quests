@@ -7,7 +7,23 @@ import './styles/components.css';
 import { countryName, countryOptions } from './countries';
 import { GeocodeError, geocode } from './geocode';
 import { isLiveSearchEnabled, liveSearch } from './liveSearch';
-import { applyVerifiedFilter, filterOffers, loadOffers, monthInfo, nearbyOffers, onlineCounts, type VenueHit } from './offers';
+import {
+  ALL_QUEST_TYPES,
+  allTypesOn,
+  applyQuestFilters,
+  filterOffers,
+  hiddenTypeCount,
+  loadOffers,
+  monthInfo,
+  nearbyOffers,
+  onlineCounts,
+  QUEST_TYPES,
+  type QuestFilters,
+  type QuestType,
+  type QuestTypeFilter,
+  typeFilterMessage,
+  type VenueHit,
+} from './offers';
 import type { Suggestion } from './autocomplete';
 import { DEFAULT_RADIUS_M, RADIUS_OPTIONS_M, distanceM, fetchBranches, nearestByOffer } from './overpass';
 import { createCombobox } from './render/combobox';
@@ -16,7 +32,7 @@ import { el, svg } from './render/dom';
 import { candleMark, icon, type IconName } from './render/icons';
 import type { MapView } from './render/map';
 import { doneIds, isDone, onDoneChange, renderEmpty, renderLiveList, renderNearbyList, renderQuestList, setDoneIds } from './render/quests';
-import { clearSession, loadSession, saveSession, SESSION_TABS, type SessionTab } from './session';
+import { clearSession, loadSession, saveSession, SESSION_TABS, SESSION_VERSION, type SessionTab } from './session';
 import type { Branch, LiveResult, Offer, Place } from './types';
 
 /*
@@ -44,6 +60,8 @@ interface State {
   circleRadiusM: number;
   /** "Verified only" switch (DECISIONS #25). */
   verifiedOnly: boolean;
+  /** Quest types shown by the Filter box (DECISIONS #27). */
+  types: QuestTypeFilter;
 }
 
 const state: State = {
@@ -59,6 +77,7 @@ const state: State = {
   pins: [],
   circleRadiusM: DEFAULT_RADIUS_M,
   verifiedOnly: false,
+  types: { ...ALL_QUEST_TYPES },
 };
 /** Listed Nearby quests with a branch or venue inside the search circle (for the header summary). */
 let nearbyWithin = 0;
@@ -103,6 +122,12 @@ const progressCount = $('progress-count');
 const tablist = document.querySelector<HTMLElement>('[role="tablist"]');
 const verifiedSwitch = $('verified-only') as HTMLButtonElement;
 const foundVerifiedNote = $('found-verified-note');
+const filterWrap = $('type-filter');
+const filterToggle = $('filter-toggle') as HTMLButtonElement;
+const filterBox = $('filter-box');
+const filterCount = $('filter-count');
+const filterReset = $('filter-reset') as HTMLButtonElement;
+const typeInputs = Array.from(filterBox.querySelectorAll<HTMLInputElement>('input[name="quest-type"]'));
 
 // ---------- static decoration (icons are built with createElementNS, never innerHTML) ----------
 function decorate(): void {
@@ -110,6 +135,7 @@ function decorate(): void {
   $('submit-orb').appendChild(icon('search'));
   $('privacy-note').prepend(icon('lock'));
   $('found-disclaimer').prepend(icon('globe'));
+  $('filter-icon').appendChild(icon('filter'));
   for (const ctl of document.querySelectorAll<HTMLElement>('.field__control[data-icon]')) {
     ctl.prepend(icon(ctl.dataset.icon as IconName));
     if (ctl.dataset.chevron) ctl.appendChild(icon('chevron', 'icon--chev'));
@@ -314,25 +340,40 @@ function venueBranch(offerId: string, hit: VenueHit): Branch {
   return b;
 }
 
-/** Empty state when "Verified only" hides every quest in a list. */
-function renderVerifiedEmpty(container: HTMLElement): void {
-  renderEmpty(container, 'Every quest here is marked Check with store. Show all quests to see them, then confirm the offer with the shop.', 'empty', {
-    title: 'No verified quests here yet',
-    actions: [
-      ghostButton('Show all quests', () => {
-        setVerifiedOnly(false);
-        verifiedSwitch.focus();
-      }),
-    ],
+/** Current list filters: "Verified only" plus the quest-type Filter box. */
+function filters(): QuestFilters {
+  return { verifiedOnly: state.verifiedOnly, types: state.types };
+}
+
+/**
+ * Empty state when the filters hide every quest in a list. "Show all quests" resets every filter.
+ * With only "Verified only" on, the copy is the one from DECISIONS #25.
+ */
+function renderFilteredEmpty(container: HTMLElement): void {
+  const onlyVerified = allTypesOn(state.types);
+  const showAll = ghostButton('Show all quests', () => {
+    resetFilters();
+    (onlyVerified ? verifiedSwitch : filterToggle).focus();
+  });
+  if (onlyVerified) {
+    renderEmpty(container, 'Every quest here is marked Check with store. Show all quests to see them, then confirm the offer with the shop.', 'empty', {
+      title: 'No verified quests here yet',
+      actions: [showAll],
+    });
+    return;
+  }
+  renderEmpty(container, 'None of the quests here match your filters. Turn a quest type back on in Filter, or show all quests.', 'empty', {
+    title: 'No quests match your filters',
+    actions: [showAll],
   });
 }
 
 function renderOnline(): void {
   const all = onlineAll();
-  const list = applyVerifiedFilter(all, state.verifiedOnly);
+  const list = applyQuestFilters(all, filters());
   setCount(onlineCountEl, state.offers.length ? list.length : null);
   if (all.length > 0 && list.length === 0) {
-    renderVerifiedEmpty(onlineList);
+    renderFilteredEmpty(onlineList);
   } else if (list.length === 0) {
     renderEmpty(
       onlineList,
@@ -398,11 +439,11 @@ function widenNotice(): HTMLElement | null {
 function renderNearby(): void {
   if (!state.place) return;
   const { offers: all, venues } = nearbyAll();
-  const list = applyVerifiedFilter(all, state.verifiedOnly);
+  const list = applyQuestFilters(all, filters());
   setCount(nearbyCountEl, list.length);
   nearbyWithin = 0;
   if (all.length > 0 && list.length === 0) {
-    renderVerifiedEmpty(nearbyList);
+    renderFilteredEmpty(nearbyList);
     updateHeader();
     return;
   }
@@ -454,8 +495,8 @@ function km(radiusM: number): string {
 /**
  * Map pins: every Overpass branch, plus the nearest venue of each venue offer when it is exact and
  * inside the search circle. Venues further out keep their card distance and directions but get no
- * pin, so the map never zooms out to a park 100 km away (DECISIONS #24). "Verified only" hides
- * pins of unverified offers.
+ * pin, so the map never zooms out to a park 100 km away (DECISIONS #24). "Verified only" and the
+ * quest-type Filter hide the pins of offers they hide from the lists.
  */
 function currentPins(): Branch[] {
   if (!state.place) return [];
@@ -463,9 +504,9 @@ function currentPins(): Branch[] {
   for (const [id, hit] of nearbyAll().venues) {
     if (hit.venue.exact && hit.distanceM <= state.circleRadiusM) pins.push(venueBranch(id, hit));
   }
-  if (!state.verifiedOnly) return pins;
-  const verified = new Set(state.offers.filter((o) => o.verified).map((o) => o.id));
-  return pins.filter((p) => verified.has(p.offerId));
+  if (!state.verifiedOnly && allTypesOn(state.types)) return pins;
+  const shown = new Set(applyQuestFilters(state.offers, filters()).map((o) => o.id));
+  return pins.filter((p) => shown.has(p.offerId));
 }
 
 function renderPins(fit: boolean): number {
@@ -481,27 +522,102 @@ function applyVerifiedUi(): void {
   foundVerifiedNote.hidden = !state.verifiedOnly;
 }
 
-/** Unique offers across Nearby and Online (before the filter), and how many of them are verified. */
-function verifiedCounts(): { verified: number; total: number } {
-  const ids = new Map<string, boolean>();
-  for (const o of [...nearbyAll().offers, ...onlineAll()]) ids.set(o.id, o.verified);
-  let verified = 0;
-  for (const v of ids.values()) if (v) verified += 1;
-  return { verified, total: ids.size };
+/** Unique offers across Nearby and Online: before any filter, and after every filter. */
+function filterCounts(): { shown: number; total: number } {
+  const all = new Map<string, Offer>();
+  for (const o of [...nearbyAll().offers, ...onlineAll()]) all.set(o.id, o);
+  return { shown: applyQuestFilters([...all.values()], filters()).length, total: all.size };
+}
+
+/** Re-renders both lists and the pins after a filter change, and saves it. */
+function rerenderFiltered(): void {
+  renderOnline();
+  if (state.place) renderNearby();
+  renderPins(false);
+  persist();
 }
 
 /** Turns "Verified only" on or off: re-renders both lists and the pins, saves and announces it. */
 function setVerifiedOnly(on: boolean): void {
   state.verifiedOnly = on;
   applyVerifiedUi();
-  renderOnline();
-  if (state.place) renderNearby();
-  renderPins(false);
-  persist();
-  const { verified, total } = verifiedCounts();
-  setStatus(on ? `Showing verified quests only, ${verified} of ${total}` : `Showing all quests, ${total} in total`, 'success');
+  rerenderFiltered();
+  const { shown, total } = filterCounts();
+  setStatus(on ? `Showing verified quests only, ${shown} of ${total}` : `Showing all quests, ${total} in total`, 'success');
 }
 verifiedSwitch.addEventListener('click', () => setVerifiedOnly(!state.verifiedOnly));
+
+// ---------- quest-type Filter box (DECISIONS #27): disclosure with three checkboxes ----------
+function applyTypesUi(): void {
+  for (const input of typeInputs) input.checked = state.types[input.value as QuestType] !== false;
+  const hidden = hiddenTypeCount(state.types);
+  if (hidden > 0) {
+    // Visible "2"; screen readers hear "Filter, 2 types hidden".
+    filterCount.replaceChildren(
+      el('span', { class: 'visually-hidden' }, [', ']),
+      String(hidden),
+      el('span', { class: 'visually-hidden' }, [` ${hidden === 1 ? 'type' : 'types'} hidden`]),
+    );
+    filterCount.hidden = false;
+  } else {
+    filterCount.replaceChildren();
+    filterCount.hidden = true;
+  }
+  filterToggle.classList.toggle('is-filtered', hidden > 0);
+}
+
+function setTypes(types: QuestTypeFilter): void {
+  state.types = { ...types };
+  applyTypesUi();
+  rerenderFiltered();
+  const { shown, total } = filterCounts();
+  setStatus(typeFilterMessage(state.types, shown, total), 'success');
+}
+
+/** "Show all quests": every quest type back on and "Verified only" off. */
+function resetFilters(): void {
+  state.types = { ...ALL_QUEST_TYPES };
+  applyTypesUi();
+  setVerifiedOnly(false);
+}
+
+function isFilterOpen(): boolean {
+  return filterToggle.getAttribute('aria-expanded') === 'true';
+}
+function setFilterOpen(open: boolean, returnFocus = false): void {
+  filterToggle.setAttribute('aria-expanded', String(open));
+  filterBox.hidden = !open;
+  if (!open && returnFocus) filterToggle.focus();
+}
+filterToggle.addEventListener('click', () => setFilterOpen(!isFilterOpen()));
+filterWrap.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && isFilterOpen()) {
+    e.preventDefault();
+    setFilterOpen(false, true);
+  }
+});
+// Close when focus or a click moves outside the Filter control.
+filterWrap.addEventListener('focusout', (e) => {
+  const next = e.relatedTarget;
+  if (isFilterOpen() && next instanceof Node && !filterWrap.contains(next)) setFilterOpen(false);
+});
+document.addEventListener('pointerdown', (e) => {
+  if (isFilterOpen() && e.target instanceof Node && !filterWrap.contains(e.target)) setFilterOpen(false);
+});
+for (const input of typeInputs) {
+  input.addEventListener('change', () => {
+    const next: QuestTypeFilter = { ...state.types };
+    for (const t of QUEST_TYPES) {
+      const box = typeInputs.find((i) => i.value === t);
+      if (box) next[t] = box.checked;
+    }
+    setTypes(next);
+  });
+}
+filterReset.addEventListener('click', () => {
+  setTypes({ ...ALL_QUEST_TYPES });
+  typeInputs[0]?.focus();
+});
 
 // ---------- found online ----------
 async function refreshFoundOnline(): Promise<void> {
@@ -687,7 +803,7 @@ async function runSearch(where: string | Place): Promise<void> {
       setStatus(`No in-store quests near ${place.label} yet. The Online tab has offers you can claim anywhere.`, 'info');
       return;
     }
-    const shown = applyVerifiedFilter(nearby, state.verifiedOnly).length;
+    const shown = applyQuestFilters(nearby, filters()).length;
     const quests = `${shown} ${state.verifiedOnly ? 'verified ' : ''}quest${shown === 1 ? '' : 's'}`;
     setStatus(`Found ${quests}. Looking for shops within ${km(radiusM)}…`, 'loading');
     try {
@@ -778,7 +894,7 @@ function persist(): void {
   if (restoring) return;
   const place = state.place;
   saveSession({
-    v: 2,
+    v: SESSION_VERSION,
     city: place ? state.placeText : null,
     lat: place ? place.lat : null,
     lng: place ? place.lng : null,
@@ -788,6 +904,7 @@ function persist(): void {
     tab: currentTab(),
     done: doneIds(),
     verifiedOnly: state.verifiedOnly,
+    types: { ...state.types },
   });
 }
 onDoneChange(() => {
@@ -808,6 +925,8 @@ function restoreSession(): void {
     setDoneIds(saved.done);
     state.verifiedOnly = saved.verifiedOnly;
     applyVerifiedUi();
+    state.types = { ...saved.types };
+    applyTypesUi();
     const tab = tabs.find((t) => t.id === `tab-${saved.tab}` && !t.hidden) ?? tabs[0];
     if (tab) selectTab(tab);
     if (saved.city !== null && saved.lat !== null && saved.lng !== null && saved.countryCode) {
@@ -847,8 +966,11 @@ function clearSearch(): void {
       pins: [],
       circleRadiusM: DEFAULT_RADIUS_M,
       verifiedOnly: false,
+      types: { ...ALL_QUEST_TYPES },
     });
     applyVerifiedUi();
+    applyTypesUi();
+    setFilterOpen(false);
     setDoneIds([]);
     liveCache.clear();
     if (tabs[0]) selectTab(tabs[0]);

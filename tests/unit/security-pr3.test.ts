@@ -10,6 +10,7 @@ import { parseSession, SESSION_FIELDS } from '../../src/session';
 const base = {
   id: 'x', brand: 'Brand', category: 'cafe', offer: 'Free drink', howToClaim: 'App', countries: ['IN'],
   channel: 'in-store', sourceUrl: 'https://example.com', lastVerified: '2026-10-02',
+  rewardType: 'free', needsPastSpend: false,
 };
 
 describe('svg() builds shape elements only', () => {
@@ -100,7 +101,10 @@ describe('Photon request and response', () => {
 });
 
 describe('session record: hostile values never load', () => {
-  const good = { v: 2, city: 'Bengaluru', lat: 12.97, lng: 77.59, countryCode: 'IN', month: 3, radius: 5000, tab: 'nearby', done: [], verifiedOnly: false };
+  const good = {
+    v: 3, city: 'Bengaluru', lat: 12.97, lng: 77.59, countryCode: 'IN', month: 3, radius: 5000, tab: 'nearby', done: [], verifiedOnly: false,
+    types: { free: true, discount: true, past: true },
+  };
   it('accepts a clean record', () => expect(parseSession(JSON.stringify(good))).not.toBeNull());
   it.each([
     ['markup in city', { ...good, city: '<img src=x onerror=alert(1)>' }],
@@ -112,7 +116,9 @@ describe('session record: hostile values never load', () => {
     ['lowercase country', { ...good, countryCode: 'in' }],
     ['bad done id', { ...good, done: ['"><svg>'] }],
     ['duplicate done ids', { ...good, done: ['a', 'a'] }],
-    ['version bump', { ...good, v: 3 }],
+    ['version bump', { ...good, v: 4 }],
+    ['markup in types', { ...good, types: { free: '<img src=x>', discount: true, past: true } }],
+    ['types with a href key', { ...good, types: { free: true, discount: true, past: true, href: 'javascript:alert(1)' } }],
     ['verifiedOnly not boolean', { ...good, verifiedOnly: '<img src=x>' }],
   ])('rejects %s', (_name, rec) => {
     expect(parseSession(JSON.stringify(rec))).toBeNull();
@@ -120,7 +126,7 @@ describe('session record: hostile values never load', () => {
   it('rejects oversized and non-JSON input', () => {
     expect(parseSession('x'.repeat(20_000))).toBeNull();
     expect(parseSession('{')).toBeNull();
-    expect(SESSION_FIELDS).toHaveLength(10);
+    expect(SESSION_FIELDS).toHaveLength(11);
   });
 });
 

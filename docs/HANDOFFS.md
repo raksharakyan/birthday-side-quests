@@ -850,3 +850,135 @@ Served with `vite preview` on **port 4174** instead of 4173, so a concurrent Pla
 | Performance (Lighthouse) | ✅ 0.99 / 1.00 / 1.00 |
 
 **QA ✅** for PR #4. QA-PR4-01 is a one-word copy fix that can land with or after the merge.
+
+## Full-Stack: free treats first, quest types and Filter box (DECISIONS #27), branch `feat/sort-free-first`
+
+**User requests:** "first the freebies should be listed and then discount items, and items where we get discount if we have made any spend in the past shall come up last", then "don't touch Verified only, make a filter box beside it where we can have check box for free, discount & past spend".
+
+### What changed
+- **Data:** all 102 offers in `public/offers.json` gained required `rewardType` (`free` | `discount`) and `needsPastSpend` (boolean), classified only from each entry's own fields and the research notes. Counts: **28 free (tier 0), 40 discount (tier 1), 34 needs past spend (tier 2)**. Full table with the deciding field per offer, plus 27 judgement calls: `docs/OFFER_CLASSIFICATION.md`.
+- **Schema:** `src/types.ts` (`RewardType`, both fields required); `validateOffer` rejects missing or invalid values. README "Adding a new offer" and CONTRIBUTING updated.
+- **Order:** `questTier`, `questType`, `compareQuests`, `sortQuests` in `src/offers.ts` (tier, then distance, then brand A to Z, then id). Used by `renderQuestList` (Online) and inside both Nearby groups in `renderNearbyList` (near group first, "Also in <Country>" second, unchanged).
+- **Type chip:** first badge on every card (Free / Discount / Needs past spend), `typeBadge` in `src/render/quests.ts`, new `tag`, `receipt` and `filter` icons. No per-type subheadings (reason in DECISIONS #27).
+- **Filter box:** "Filter" disclosure button right of the untouched "Verified only" switch; fieldset "Show" with three checkboxes (all on), hint line, Reset. Escape closes and refocuses the button; outside click or tabbing out closes it. Hidden-type count chip on the button. One pure pipeline `applyQuestFilters` for lists, tab counts, header, ring and pins; `typeFilterMessage` for the live region. Empty state "No quests match your filters" with "Show all quests" (resets checkboxes and Verified only); Verified only alone keeps its own copy.
+- **Session:** `bsq-session` v3 adds `types: {free, discount, past}` (exact keys, booleans); v2 and v1 records migrate with every type on. Clear search resets the filters. SECURITY.md, PRIVACY.md, CLAUDE.md, DESIGN.md updated.
+
+### Results
+| Check | Result |
+|---|---|
+| `npm run build` | ✅ |
+| `npm test` | ✅ 808 passed (21 files; new `tests/unit/quest-order.test.ts`, extended validator, session and security tests) |
+| `npm run test:e2e` | ✅ 114 passed, 12 skipped (new `tests/e2e/quest-types.spec.ts`; order-dependent expectations updated in `autocomplete`, `qa-pr3`, `qa-pr4`; session v3 everywhere) |
+| `npm run lhci` | ✅ 0.99 / 1.00 / 1.00 / 1.00 in all 3 runs |
+| `npm audit --audit-level=high` | ✅ 0 vulnerabilities |
+| Manual, `npm run preview` with real services (Bengaluru, October) | ✅ Nearby 28 quests, near group and rest group both in tier order, 60 places; unchecking Free gives Nearby 26, ring "0 of 32", announcement "Showing discount and past-spend quests, 32 of 34"; reload restores the filter (session v3); Clear search resets it and empties storage; box fits at 360px with no horizontal scroll. Only console errors were public Overpass 504s, retried successfully. |
+
+### For review
+- **Security:** new persisted field `types` (strict exact-key boolean validation, prototype-pollution case tested); new DOM built with `el()`/`svg()` only; no new origin, CSP unchanged. Security ✅ pending.
+- **QA:** please re-run the judgement calls in `docs/OFFER_CLASSIFICATION.md`, especially `starbucks-us`/`starbucks-ca` (`needsPastSpend: true` because the entry says "make 1 Star-earning purchase first") and `costa-gb` (`false`, no past-transaction rule stated for GB). QA ✅ pending.
+
+## Security review: PR #5
+
+Reviewed `git diff origin/main...HEAD` on `feat/sort-free-first` (commit `189c34d`): required `rewardType`/`needsPastSpend` and their validator, `questTier`/`compareQuests`/`sortQuests`, `applyQuestFilters`, the Filter disclosure box (markup, listeners), the type chip, session v3 and the v1/v2 migrations, `public/offers.json`, and the privacy docs.
+
+| # | Severity | Area | Finding | Status |
+|---|---|---|---|---|
+| SEC-PR5-01 | Low (docs accuracy) | `PRIVACY.md` | The "It holds only:" list of what the session record stores did not include the new quest-type filter (`types`), although a later bullet mentioned it. The privacy page must list every stored field. | Fixed: added "which quest types the Filter shows (Free, Discount, Needs past spend)". Guarded by `tests/unit/security-pr5.test.ts`. |
+| SEC-PR5-02 | Info | Offer validator | `rewardType` checked with `typeof === 'string'` plus an exact allow-list; `needsPastSpend` must be a real boolean; only the primitive is copied into the normalised offer. `__proto__`, `toString`, wrong case, padding, arrays, `"false"`, `0`, `null` all rejected. All 102 shipped offers carry exact values; the `offers.json` diff only adds these two fields (no URL, text or id changes, no invisible characters). | OK, tested |
+| SEC-PR5-03 | Info | Session v3 | Exact top-level key sets per version (v3 needs `types`; v2/v1 must not have it; v1 must not have `verifiedOnly`); `types` must be a plain object with exactly `free`, `discount`, `past`, each boolean, and a fresh object is returned. `__proto__`/`constructor` keys, strings, nested objects and version relabelling are rejected; no prototype pollution. 16 KB cap applies before `JSON.parse`. Same single key `bsq-session`. | OK, tested |
+| SEC-PR5-04 | Info | Filter box | Static markup in `index.html` (no `style=`, no `on*`), `aria-expanded`/`aria-controls` on the button, box `hidden` (`[hidden]` is `!important`, so `display` rules don't override it). All dynamic DOM via `el()`/`replaceChildren`, no `innerHTML`. Listeners (`click`, `keydown` Escape, `focusout`, one `document` `pointerdown`) are registered once at module load, never per render, so no leaks. Checkbox values are only looked up against the constant `QUEST_TYPES`. | OK, tested |
+| SEC-PR5-05 | Info | Type chip / ordering | `typeBadge` renders only constant text and attributes (`class`, `data-quest-type` from a 3-value union; `data-*` names allow-listed in `el()`). `compareQuests` is total and treats NaN/missing distances as last; `applyQuestFilters` doesn't mutate input. | OK, tested |
+| SEC-PR5-06 | Info | Privacy model | No new storage key, origin, URL/history state, network call or dependency; `csp.config.ts`, `vite.config.ts`, `worker/`, `package*.json` and workflows unchanged. SECURITY.md I1 (v3 fields, `types` validation, migrations) is accurate. | OK |
+
+### Results
+| Check | Result |
+|---|---|
+| `npm run build` | ✅ |
+| `npm test` | ✅ 841 passed (22 files; new `tests/unit/security-pr5.test.ts`, 33 tests) |
+| `npm audit --audit-level=high` | ✅ 0 vulnerabilities |
+| `npm run test:e2e` (port 4173 confirmed free first) | ✅ 114 passed, 12 skipped |
+
+**Security ✅** for PR #5 with SEC-PR5-01 fixed (`PRIVACY.md`, `tests/unit/security-pr5.test.ts`). Not committed; left in the working tree for the orchestrator.
+
+## QA: PR #5 (2026-10-02, branch `feat/sort-free-first`)
+
+Working tree at commit `189c34d` plus Security's uncommitted PR #5 changes (`PRIVACY.md`, `tests/unit/security-pr5.test.ts`). QA added only `tests/unit/qa-pr5.test.ts` and `tests/e2e/qa-pr5.spec.ts`. No `src/`, `index.html` or data edits. Nothing committed.
+
+### Results
+| Command | Result |
+|---|---|
+| `npm run build` | ✅ pass (typechecks both new test files) |
+| `npm test` | ✅ **880/880** in 23 files (39 new from QA) |
+| `npm run test:e2e` (2 full runs in a row, port 4173 checked free first) | ✅ **133 passed, 13 skipped** in both runs (146 = 73 tests x 2 projects). The 2 "passes" for QA-PR5-03 are `test.fail()` expected failures (bug reproduced); skips are desktop-only/mobile-only by design. |
+| `npm run lhci` (3 runs) | ✅ Performance **0.99**, Accessibility **1.00**, Best Practices **1.00**, SEO **1.00** in all 3. LCP 1.8 to 2.0 s, CLS 0.01, TBT 0 ms |
+| `npm audit --audit-level=high` | ✅ 0 vulnerabilities |
+
+### Data QA: classification review (all 102 offers read against their own fields)
+Counts confirmed: 28 free / 40 discount / 34 needs past spend. The doc table matches `public/offers.json` row for row (now tested).
+
+**Agree with the flagged calls:** `starbucks-us` and `starbucks-ca` true ("make 1 Star-earning purchase first"); `costa-gb` false (no past-transaction rule in the entry; worth re-checking the official Costa UK page, since `costa-coffee-in` has one); `duck-donuts-us`, `prezzo-gb`, `timezone-in`, `loccitane-in`, `kiehls-in` true; `pizza-express-gb`, `grilld-au`, `cheesecake-factory-us`, `clinique-us`, the three parks and `wonderla-in` as discount; `sephora-us-ca` and `ulta-us` free. No free offer has `purchaseRequired: true` or a `minSpend`. No missed past-spend tier, past transaction or paid membership: every entry that states one is `needsPastSpend: true`.
+
+**Disagree (QA-PR5-01):**
+| id | Now | Should be | Field text |
+|---|---|---|---|
+| `la-pinoz-in` | free / false | discount / false | offer: "unlocks birthday and anniversary treats; details not published" (`verified: false`) |
+| `theobroma-in` | free / false | discount / false | offer: "Birthday treat for registered customers, details not published, check with store" (`verified: false`) |
+| `starbucks-sg` | free / false | discount / false | offer: "Birthday treats and bonus Stars" (bonus Stars are points; no item stated; "tier details are not on the page") |
+
+The doc's own rule is "when the wording was unclear, the conservative choice was taken (discount over free)", and it applies that rule to "Birthday surprise" (Dairy Queen, MECCA), "Birthday reward" (Krispy Kreme US, Rita's) and "Complimentary voucher" (Tealive). An unpublished "treat" is just as unclear. In the live Bengaluru smoke these two unverified entries are the **only** Free cards at the top of Nearby, so the "freebies first" promise currently leads with "details not published".
+
+### New tests
+| File | Tests | Covers |
+|---|---|---|
+| `tests/unit/qa-pr5.test.ts` | 39 | `minSpend` never tier 0; `purchaseRequired` or `minSpend` means discount; tier 0 never asks you to buy (in store; `sephora-us-ca` allowed, online only); tier 0 names a free thing and never only % off, BOGO, cash voucher or points; % off / BOGO / cash / bonus points are discount; broad past-spend detector (prior windows, first visit, spend- or points-earned tiers, paid membership, yearly spend; catches 32 of 34 past-spend offers, with a 6-id base-tier allow-list); 25 spot checks quoting the deciding field; allow-lists for QA-PR5-01 and QA-PR5-02 that may only shrink; **doc table = data** (ids, both fields, counts table, judgement-call ids); per-country type filters partition the sorted list in tier order; Verified only and Filter commute. |
+| `tests/e2e/qa-pr5.spec.ts` | 10 (x 2 projects; 1 desktop-only, 1 keyboard part desktop-only) | **Verified only unchanged:** `outerHTML` equals main's markup byte for byte, same hint and accessible description, white pill / ink-2 / 44 px off, plum on, Space toggles, same announcements as main, first in the row and above the tabs, never touches the checkboxes. **Filter box:** Escape after a click on the legend or hint (QA-PR5-03, `test.fail`), one click on Verified only closes the box and toggles the switch, Shift+Tab out closes it, count chip shows 1/2/3 with "Filter, N types hidden" and white on plum, axe with every type off and the box open, Online "Show all quests" resets. **Persistence:** Filter plus Verified only together through a reload (box stays closed), Clear search resets both and empties storage. **Order:** Bengaluru near group tier then nearest first (also with Free off and with Verified only), rest group and Online; Pune: free first, then the three parks nearest first, before far shops. **Claimed x Filter:** claim a free and a discount quest, ring "2 of N" to "1 of M" with `--progress` 1/M, claimed pin kept, hidden pin gone, "0 of P" with the candle still lit, session `done` kept, back to "2 of N". **Layout:** 768 and 360 px with switch on and 2 types hidden: no horizontal scroll, box on screen, 44 px button, axe. **Reduced motion:** box has no animation, opacity 1, axe. |
+
+### Bugs
+| ID | Severity | Owner | Repro | Expected | Actual | Exact fix | Status |
+|---|---|---|---|---|---|---|---|
+| QA-PR5-03 | **Medium (blocking)** | Full-Stack | Search Bengaluru, open Filter, click or tap the "Show" legend, the hint text, or the box padding. (Also then press Escape.) | The box stays open; Escape closes it and returns focus to Filter. | The box closes at once. The click moves focus to `<main tabindex="-1">`, so the `focusout` handler sees a `relatedTarget` outside `#type-filter` and closes it. Reproduced in Playwright (desktop and Pixel 7) and in the live build (`document.activeElement` = `main`). | `index.html`: change `<div class="filter__box" id="filter-box" hidden>` to `<div class="filter__box" id="filter-box" tabindex="-1" hidden>`. Verified by injecting the attribute in a test: legend and hint clicks keep it open, Escape closes and refocuses the button, outside click still closes, no focus outline shows, axe clean. Then delete the `test.fail(...)` line in `tests/e2e/qa-pr5.spec.ts` ("Filter box: Escape still closes after a click..."). | **Fixed** (follow-up below) |
+| QA-PR5-01 | Medium (data, product call) | Full-Stack + Product | See the table above. | Unclear, unverified "treats" and points-based rewards are not listed as Free. | `la-pinoz-in`, `theobroma-in`, `starbucks-sg` are tier 0. | In `public/offers.json` set `"rewardType": "discount"` for the three ids; in `docs/OFFER_CLASSIFICATION.md` update their rows and judgement calls, and the counts to **25 / 43 / 34**; remove the ids from `KNOWN_UNCLEAR_FREE` in `tests/unit/qa-pr5.test.ts`. Ripple: `tests/e2e/quest-types.spec.ts` and `tests/e2e/qa-pr5.spec.ts` use Theobroma as the only free mocked shop (near-group head, "Free only" = 1 pin, claimed free quest); swap in a free IN offer with an OSM hint, or add a free shop to `OVERPASS_BENGALURU`. If Product keeps "treat" = free, record that in DECISIONS #27 and keep only `starbucks-sg` as a change. | **Fixed** (orchestrator accepted; DECISIONS #28) |
+| QA-PR5-02 | Low (data) | Full-Stack | Search Bengaluru; or any AU search. Read the Timezone or Muffin Break card. | A "Needs past spend" card says in its steps what the past spend is. | The cards show steps only (howToClaim is hidden when steps exist) and the steps leave the condition out. | `public/offers.json` steps, insert as step 2: `muffin-break-au`: "Make a purchase in the 12 months before your birthday"; `timezone-in`: "Reach Blue Elite tier or above (the Welcome card tier gets no birthday treat)". Then empty `KNOWN_STEPS_WITHOUT_REASON` in `tests/unit/qa-pr5.test.ts`. | **Fixed** |
+| QA-PR5-04 | Low (data) | Full-Stack | n/a | `nykaa-in` says "make a purchase in your birthday month". | `purchaseRequired` is not set, so the card has no "Purchase needed" chip. Classification (discount, false) is right. | Add `"purchaseRequired": true` to `nykaa-in`. | **Fixed** |
+| QA-PR5-05 | Info | none | Hide a type. | Brief: badge "Filter · N". | The button reads "Filter" plus a plum count chip "N"; screen readers hear "Filter, N types hidden". This matches DESIGN.md. | None. | Accepted |
+
+QA-PR4-01 is fixed on this branch (status now says "60 places on the map").
+
+### Live smoke test (built `dist/`, real Nominatim, Overpass, OSM tiles, built-in browser)
+Served with `vite preview --port 4174 --strictPort` (not 4173); stopped afterwards, both ports free.
+- **Bengaluru, October:** Nearby 28, Online 24, ring "0 of 34", 60 places on the map. Near group: Free (Theobroma 1.0 km, La Pino'z 3.2 km), then 10 Discount nearest first (Third Wave 840 m ... Wonderla 26 km), then 7 Needs past spend nearest first (Forest Essentials 1.0 km ... Barbeque Nation 2.9 km). "Also in India" group: discount then past. Online: 2 free, 13 discount, 9 past, in that order.
+- **Uncheck Free:** Nearby 26, Online 22, ring "0 of 32", 56 pins, 0 Free chips, button "Filter, 1 type hidden", announced "Showing discount and past-spend quests, 32 of 34", session v3 `types.free: false`. Box stayed open while choosing. Clicking the hint text inside the box closed it (QA-PR5-03).
+- **Reload:** city Bengaluru, Free still off, Nearby 26 in tier order, ring "0 of 32", box closed. Overpass returned 504 this time: "We couldn't load shop pins right now, but your quests are still listed below." (graceful).
+- **Clear search:** city empty, all three boxes checked, no count chip, box closed, Verified only off, 0 pins, sessionStorage empty.
+- **Console:** only the public Overpass 504 lines; no CSP or script errors.
+
+### Follow-up: fixes applied (orchestrator decision; QA authorised for `index.html`, `public/offers.json`, docs)
+- **QA-PR5-03:** `index.html` `#filter-box` now has `tabindex="-1"`; the `test.fail` line is gone from `tests/e2e/qa-pr5.spec.ts`, and the legend/hint click test passes on desktop and Pixel 7.
+- **QA-PR5-01:** `la-pinoz-in`, `theobroma-in`, `starbucks-sg` are `"discount"`. `docs/OFFER_CLASSIFICATION.md` rows, judgement calls, counts and a revision note are updated; **DECISIONS #28** appended (#27 left as history). README, DESIGN and CONTRIBUTING have no counts. Unit allow-list emptied. Consequence for the product: **India now has no Free (tier 0) quest**; `costa-coffee-in` is its only free reward and it needs past spend, so Bengaluru lists Discount first.
+- **E2E knock-on:** India has no free offer with an OSM hint left, so `tests/e2e/fixtures.ts` gained `routeFreeFixture` / `freeFixtureOffers` (a test copy of `offers.json` with `theobroma-in` free; shipped data untouched) and `expectedNearbyOffers` takes an optional offers list. `quest-types.spec.ts` (all Free-dependent tests) and the claimed x Filter test in `qa-pr5.spec.ts` use it. `qa-pr3.spec.ts` journey orders updated (Theobroma now sorts by distance among discounts: 5 km `starbucks, third-wave, body-shop, theobroma, wonderla`; 20 km `third-wave, body-shop, theobroma, starbucks, wonderla`). The `qa-pr5` Pune test now expects the three parks first and no Free chip.
+- **QA-PR5-02:** step 2 added: `muffin-break-au` "Make a purchase in the 12 months before your birthday" (53 chars, 3 steps); `timezone-in` "Reach Blue Elite tier or above (the Welcome card tier gets no birthday treat)" (77 chars, 5 steps). Allow-list emptied.
+- **QA-PR5-04:** `nykaa-in` has `"purchaseRequired": true` (it was already `discount`, so counts are unchanged by this).
+- New unit checks: tier counts 25 / 43 / 34, `nykaa-in` shape, step limits, spot checks for the five changed offers (47 tests in `qa-pr5.test.ts`).
+
+**Final tier counts: 25 free, 43 discount, 34 needs past spend (102).**
+
+| Command (after the fixes) | Result |
+|---|---|
+| `npm run build` | ✅ |
+| `npm test` | ✅ **888/888** in 23 files |
+| `npm run test:e2e` (2 runs, port 4173 checked free) | ✅ **133 passed, 13 skipped** in both runs, no expected failures left |
+| `npm run lhci` (3 runs) | ✅ 0.99 / 1.00 / 1.00 / 1.00 |
+| `npm audit --audit-level=high` | ✅ 0 vulnerabilities |
+
+### Sign-off
+| Feature | QA |
+|---|---|
+| Order: free, discount, needs past spend (Nearby both groups, Online; desktop and mobile; distance inside tiers) | ✅ |
+| Type chip on every card | ✅ |
+| Verified only unchanged (markup, label, look, behaviour, copy) | ✅ |
+| Filter box: checkboxes, counts, ring, pins, persistence, Clear search, empty state, combos, claimed quests | ✅ |
+| Filter box: clicking its own text keeps it open (QA-PR5-03) | ✅ fixed |
+| Classification data (QA-PR5-01, 02, 04) | ✅ fixed; 25 / 43 / 34 |
+| Mobile 360/375/390/768, keyboard, reduced motion, axe, Lighthouse | ✅ |
+
+**QA ✅** for PR #5 with the follow-up fixes (uncommitted in the working tree: `index.html`, `public/offers.json`, `docs/OFFER_CLASSIFICATION.md`, `docs/DECISIONS.md`, `docs/HANDOFFS.md`, `tests/e2e/fixtures.ts`, `tests/e2e/qa-pr3.spec.ts`, `tests/e2e/quest-types.spec.ts`, `tests/e2e/qa-pr5.spec.ts`, `tests/unit/qa-pr5.test.ts`). The live smoke above predates the fixes; Bengaluru will now list Discount first because India has no Free quest.

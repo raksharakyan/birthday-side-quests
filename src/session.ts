@@ -1,4 +1,4 @@
-import { ID_RE, LIMITS } from './offers';
+import { ID_RE, LIMITS, QUEST_TYPES, type QuestTypeFilter } from './offers';
 import { RADIUS_OPTIONS_M } from './overpass';
 import { hasUnsafeText } from './text';
 
@@ -10,14 +10,16 @@ import { hasUnsafeText } from './text';
  * - One key, one versioned record with a fixed set of fields. Anything else on load (bad JSON,
  *   unknown/missing fields, wrong types, HTML-ish text, out-of-range numbers) is rejected and the
  *   key is removed.
- * - Version 2 added `verifiedOnly` (DECISIONS #25). A version 1 record with exactly the version 1
- *   fields is migrated (verifiedOnly: false); any other version is rejected.
+ * - Version 2 added `verifiedOnly` (DECISIONS #25). Version 3 added `types`, the quest-type Filter
+ *   (DECISIONS #27): exactly {free, discount, past}, each a boolean. A version 1 or 2 record with
+ *   exactly that version's fields is migrated (verifiedOnly: false for v1, every type on); any other
+ *   version is rejected.
  * - Every access is wrapped in try/catch: storage can be blocked (private mode, sandboxing) and the
  *   app then simply works without persistence.
  */
 
 export const SESSION_KEY = 'bsq-session';
-export const SESSION_VERSION = 2;
+export const SESSION_VERSION = 3;
 export const SESSION_TABS = ['nearby', 'online', 'found'] as const;
 export type SessionTab = (typeof SESSION_TABS)[number];
 
@@ -36,9 +38,12 @@ export interface SessionData {
   done: string[];
   /** "Verified only" switch in the results header. */
   verifiedOnly: boolean;
+  /** Quest types shown by the Filter box (all true by default). */
+  types: QuestTypeFilter;
 }
 
-const FIELDS = ['city', 'countryCode', 'done', 'lat', 'lng', 'month', 'radius', 'tab', 'v', 'verifiedOnly'] as const;
+const FIELDS = ['city', 'countryCode', 'done', 'lat', 'lng', 'month', 'radius', 'tab', 'types', 'v', 'verifiedOnly'] as const;
+const FIELDS_V2 = ['city', 'countryCode', 'done', 'lat', 'lng', 'month', 'radius', 'tab', 'v', 'verifiedOnly'] as const;
 const FIELDS_V1 = ['city', 'countryCode', 'done', 'lat', 'lng', 'month', 'radius', 'tab', 'v'] as const;
 export const SESSION_FIELDS: readonly string[] = FIELDS;
 const MAX_RAW = 16_384;
@@ -52,15 +57,32 @@ function isCoord(v: unknown, limit: number): v is number {
   return typeof v === 'number' && Number.isFinite(v) && Math.abs(v) <= limit;
 }
 
+/** Exactly {free, discount, past}, each a boolean, as a plain object. null otherwise. */
+function validateTypes(v: unknown): QuestTypeFilter | null {
+  if (!isPlainObject(v)) return null;
+  const keys = Object.keys(v).sort();
+  const want = [...QUEST_TYPES].sort();
+  if (keys.length !== want.length || !keys.every((k, i) => k === want[i])) return null;
+  if (!QUEST_TYPES.every((t) => typeof v[t] === 'boolean')) return null;
+  return { free: v.free as boolean, discount: v.discount as boolean, past: v.past as boolean };
+}
+
 /** Strict schema check. Returns a clean copy, or null when anything is off. */
 export function validateSession(raw: unknown): SessionData | null {
   if (!isPlainObject(raw)) return null;
   const keys = Object.keys(raw).sort();
   const sameKeys = (want: readonly string[]) => keys.length === want.length && keys.every((k, i) => k === want[i]);
   let verifiedOnly: boolean;
+  let types: QuestTypeFilter = { free: true, discount: true, past: true };
   if (raw.v === SESSION_VERSION && sameKeys(FIELDS)) {
     if (typeof raw.verifiedOnly !== 'boolean') return null;
     verifiedOnly = raw.verifiedOnly;
+    const t = validateTypes(raw.types);
+    if (!t) return null;
+    types = t;
+  } else if (raw.v === 2 && sameKeys(FIELDS_V2)) {
+    if (typeof raw.verifiedOnly !== 'boolean') return null;
+    verifiedOnly = raw.verifiedOnly; // migrated from version 2: every quest type on
   } else if (raw.v === 1 && sameKeys(FIELDS_V1)) {
     verifiedOnly = false; // migrated from version 1
   } else {
@@ -99,6 +121,7 @@ export function validateSession(raw: unknown): SessionData | null {
     tab: tab as SessionTab,
     done: [...seen],
     verifiedOnly,
+    types,
   };
 }
 

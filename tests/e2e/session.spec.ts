@@ -68,8 +68,8 @@ test('pick "Pune" → Online tab auto-syncs to India with a count; refresh resto
   await first.getByLabel('Mark claimed').check();
   const rec = await expectOnlySessionRecord(page, context, startUrl);
   expect(rec).toEqual({
-    v: 2, city: PHOTON_PUNE_LABEL, lat: 18.5204, lng: 73.8567, countryCode: 'IN', month: 3, radius: 10000, tab: 'online', done: [doneId],
-    verifiedOnly: false,
+    v: 3, city: PHOTON_PUNE_LABEL, lat: 18.5204, lng: 73.8567, countryCode: 'IN', month: 3, radius: 10000, tab: 'online', done: [doneId],
+    verifiedOnly: false, types: { free: true, discount: true, past: true },
   });
 
   await guard.checkpoint();

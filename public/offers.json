@@ -16,6 +16,8 @@
       "sourceUrl": "https://www.starbucks.ae/en/rewards/ts-and-cs",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "wikidata": "Q37158",
         "nameRegex": "starbucks"
@@ -47,6 +49,8 @@
       "sourceUrl": "https://www.boostjuice.com.au/",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "boost juice"
       },
@@ -70,6 +74,8 @@
       "sourceUrl": "https://www.donutking.com.au/rewards-frequently-asked-questions",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "donut king"
       },
@@ -96,6 +102,8 @@
       "sourceUrl": "https://gelatissimo.com.au/club-gelato-terms-conditions/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "gelatissimo"
       },
@@ -121,6 +129,8 @@
       "sourceUrl": "https://www.gloriajeans.com.au/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "gloria jean'?s"
       },
@@ -146,6 +156,8 @@
       "sourceUrl": "https://www.grilld.com.au/relish",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "grill'?d"
       },
@@ -173,6 +185,8 @@
       "sourceUrl": "https://www.lindt.com.au/mylindt",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "lindt"
       },
@@ -197,6 +211,8 @@
       "sourceUrl": "https://maxbrenner.com.au/pages/loyalty",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "max brenner"
       },
@@ -224,6 +240,8 @@
       "sourceUrl": "https://www.mecca.com/en-au/beauty-loop/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "mecca"
       },
@@ -249,6 +267,8 @@
       "sourceUrl": "https://www.michels.com.au/frequently-asked-questions",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "michel'?s patisserie"
       },
@@ -275,11 +295,14 @@
       "sourceUrl": "https://muffinbreak.com.au/rewards-program-terms-and-conditions/",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "muffin break"
       },
       "steps": [
         "Join Muffin Break rewards with your birthday",
+        "Make a purchase in the 12 months before your birthday",
         "Check the app in your birthday month"
       ],
       "purchaseRequired": null
@@ -298,6 +321,8 @@
       "sourceUrl": "https://www.nandos.com.au/peri-perks-terms-and-conditions",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "osm": {
         "wikidata": "Q3472954",
         "nameRegex": "nando'?s"
@@ -317,6 +342,8 @@
       "sourceUrl": "https://www.sanchurro.com/el-social/faqs/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "san churro"
       },
@@ -343,6 +370,8 @@
       "sourceUrl": "https://boosterjuice.com/en-ca/a/faq",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "booster juice"
       },
@@ -374,6 +403,8 @@
       "sourceUrl": "https://bostonpizza.com/en/mybp.html",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "boston pizza"
       },
@@ -399,6 +430,8 @@
       "sourceUrl": "https://www.indigo.ca/pages/plum",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "indigo|chapters"
       },
@@ -425,6 +458,8 @@
       "sourceUrl": "https://secondcup.com/rewards",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "second cup"
       },
@@ -448,6 +483,8 @@
       "sourceUrl": "https://www.starbucks.ca/terms/rewards/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "wikidata": "Q37158",
         "nameRegex": "starbucks"
@@ -467,6 +504,8 @@
       "sourceUrl": "https://help.timhortons.ca/hc/en-ca/articles/33452510390427-What-is-a-birthday-offer",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "wikidata": "Q175106",
         "nameRegex": "tim horton'?s|tims"
@@ -486,6 +525,8 @@
       "sourceUrl": "https://www.sephora.fr/decouvrir-carte-sephora/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "wikidata": "Q2408041",
         "nameRegex": "sephora"
@@ -511,6 +552,8 @@
       "sourceUrl": "https://www.costa.co.uk/costa-club",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q608845",
         "nameRegex": "costa"
@@ -537,6 +580,8 @@
       "sourceUrl": "https://www.greggs.com/app",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q3403981",
         "nameRegex": "greggs"
@@ -563,6 +608,8 @@
       "sourceUrl": "https://www.krispykreme.co.uk/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q1192805",
         "nameRegex": "krispy kreme"
@@ -582,6 +629,8 @@
       "sourceUrl": "https://www.pizzaexpress.com/club",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q662845",
         "nameRegex": "pizza ?express"
@@ -609,6 +658,8 @@
       "sourceUrl": "https://www.prezzo.co.uk/club-prezzo/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "prezzo"
       },
@@ -634,6 +685,8 @@
       "sourceUrl": "https://www.spacenk.com/uk/inside-space/in-focus/ndulge-loyalty-scheme.html",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "space ?nk"
       },
@@ -659,6 +712,8 @@
       "sourceUrl": "https://www.starbucks.co.uk/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "wikidata": "Q37158",
         "nameRegex": "starbucks"
@@ -678,6 +733,8 @@
       "sourceUrl": "https://www.tgifridays.co.uk/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "tgi fridays|t.g.i. friday'?s"
       },
@@ -703,6 +760,8 @@
       "sourceUrl": "https://www.thebodyshop.com/pages/lybc/love-your-body-club",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q837851",
         "nameRegex": "the body shop"
@@ -722,6 +781,8 @@
       "sourceUrl": "https://www.wagamama.com/soul-club",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q503715",
         "nameRegex": "wagamama"
@@ -747,6 +808,8 @@
       "sourceUrl": "https://www.zizzi.co.uk/help/faq-zillionaires-club",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "zizzi"
       },
@@ -772,6 +835,8 @@
       "sourceUrl": "https://www.insomnia.ie/insomnia-treats/terms-conditions",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "insomnia"
       },
@@ -798,6 +863,8 @@
       "sourceUrl": "https://www.starbucks.ie/rewards/ts-and-cs",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "wikidata": "Q37158",
         "nameRegex": "starbucks"
@@ -825,6 +892,8 @@
       "sourceUrl": "https://www.adidas.co.in/adiClub",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "wikidata": "Q3895",
         "nameRegex": "^adidas"
@@ -850,6 +919,8 @@
       "sourceUrl": "https://www.andindia.com/rise-rewards.html",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "rewardItem": "10% off (Insider) or 20% off (Trendsetter) apparel; extra 5% above ₹15,000",
       "steps": [
         "Join RISE Rewards and reach Insider or Trendsetter tier",
@@ -875,6 +946,8 @@
       "sourceUrl": "https://www.barbequenation.com/smiles",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "barbeque nation"
       },
@@ -902,6 +975,8 @@
       "sourceUrl": "https://www.bata.com/in/bata_club.html",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "^bata$|^bata "
       },
@@ -932,6 +1007,8 @@
       "sourceUrl": "https://www.caratlane.com/treasure-chest-gold-scheme",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "caratlane"
       },
@@ -955,6 +1032,8 @@
       "sourceUrl": "https://www.costacoffee.in/legal-and-data-privacy/costa-club-terms",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "wikidata": "Q608845",
         "nameRegex": "costa coffee|^costa$"
@@ -984,6 +1063,8 @@
       "sourceUrl": "https://www.forestessentialsindia.com/soundarya-club-faqs",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "forest essentials"
       },
@@ -1015,6 +1096,8 @@
       "sourceUrl": "https://www.globaldesi.in/rise-rewards.html",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "global desi"
       },
@@ -1043,6 +1126,8 @@
       "sourceUrl": "https://corporate.healthandglow.com/pages/hg-club",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "health (&|and) glow"
       },
@@ -1066,6 +1151,8 @@
       "sourceUrl": "https://hidesigncustomercare.zohodesk.in/portal/en/kb/articles/loyaltiy-prog",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "hidesign"
       },
@@ -1094,6 +1181,8 @@
       "sourceUrl": "https://www.imagicaaworld.com/tickets-and-offers/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "venues": [
         {
           "name": "Imagicaa, Khopoli",
@@ -1124,6 +1213,8 @@
       "sourceUrl": "https://www.itchotels.com/in/en/clubitc/membership-benefits",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "^itc (grand|maratha|maurya|gardenia|kohenur|sonar|windsor|royal|mughal|narmada)"
       },
@@ -1150,6 +1241,8 @@
       "sourceUrl": "https://www.kiehls.in/pages/rewards-terms-conditions",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "kiehl('|’)?s"
       },
@@ -1174,6 +1267,8 @@
       "sourceUrl": "https://in.loccitane.com/pages/vip-membership-program",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "l('|’)?occitane"
       },
@@ -1202,6 +1297,8 @@
       "sourceUrl": "https://lapinozpizza.in/wallet",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "la pino('|’)?z"
       },
@@ -1225,6 +1322,8 @@
       "sourceUrl": "https://www.lakmesalon.in/pages/runway-terms-and-conditions",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "lakm(e|é) salon"
       },
@@ -1253,6 +1352,8 @@
       "sourceUrl": "https://www.marksandspencer.in/loyalty_page.html",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q714491",
         "nameRegex": "marks (&|and) spencer|^m&s"
@@ -1280,6 +1381,8 @@
       "sourceUrl": "https://www.metroshoes.com/loyalty-tc",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "metro shoes"
       },
@@ -1303,6 +1406,8 @@
       "sourceUrl": "https://www.miabytanishq.com/en_IN/offertnc.html",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "steps": [
         "Register on the Mia website or app with your birthday (it can't be changed)",
         "Shop on the Mia website or app in your birthday month",
@@ -1325,6 +1430,8 @@
       "sourceUrl": "https://blog.myntra.com/celebrating-fans-with-the-myntra-insider-programme/",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "steps": [
         "Join Myntra Insider in the Myntra app",
         "Add your birthday to your profile",
@@ -1345,7 +1452,10 @@
       "claimWindow": "month",
       "sourceUrl": "https://www.nykaa.com/app-nykaa-prive-help",
       "lastVerified": "2026-10-02",
-      "verified": true
+      "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
+      "purchaseRequired": true
     },
     {
       "id": "plum-in",
@@ -1361,6 +1471,8 @@
       "sourceUrl": "https://www.plumgoodness.com/pages/plum-rewards",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "steps": [
         "Join Plum+ by making any purchase on plumgoodness.com",
         "Add your birthday to your account",
@@ -1383,6 +1495,8 @@
       "sourceUrl": "https://www.shoppersstop.com/fc-birthday",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "shoppers stop"
       }
@@ -1401,6 +1515,8 @@
       "sourceUrl": "https://www.skechers.in/faq-detail/?fid=skechers-plus",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "skechers"
       },
@@ -1425,6 +1541,8 @@
       "sourceUrl": "https://www.swarovski.com/en-IN/s-sclanding/Swarovski-Club/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "rewardItem": "20% off birthday coupon",
       "steps": [
         "Join Swarovski Club online or in a boutique",
@@ -1447,6 +1565,8 @@
       "sourceUrl": "https://www.titaneyeplus.com/titan-encircle",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "tanishq|world of titan|titan eye|fastrack|helios|zoya|taneira"
       }
@@ -1465,6 +1585,8 @@
       "sourceUrl": "https://www.starbucks.in/rewards",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q37158",
         "nameRegex": "starbucks"
@@ -1484,6 +1606,8 @@
       "sourceUrl": "https://www.thebodyshop.in/loyalty-club",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q837851",
         "nameRegex": "the body shop"
@@ -1503,6 +1627,8 @@
       "sourceUrl": "https://thefaceshop.in/pages/loyalty-page",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "rewardItem": "20 bonus Glow Points",
       "steps": [
         "Join The Face Shop India loyalty program on thefaceshop.in",
@@ -1524,6 +1650,8 @@
       "sourceUrl": "https://theobroma.in/",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "theobroma"
       }
@@ -1542,6 +1670,8 @@
       "sourceUrl": "https://www.thirdwavecoffeeroasters.com/",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "third wave coffee"
       }
@@ -1560,12 +1690,15 @@
       "sourceUrl": "https://www.timezonegames.com/en-in/rewards/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "^timezone"
       },
       "rewardItem": "Blue Elite 200 tickets; Gold 500 bonus + 200 tickets; Platinum 1,000 bonus + 1,000 tickets",
       "steps": [
         "Register your Powercard in the Timezone Fun App or Member Portal",
+        "Reach Blue Elite tier or above (the Welcome card tier gets no birthday treat)",
         "Add your DOB at least 7 days before the 1st of your birthday month",
         "Find the voucher in the app's Vouchers section",
         "Show the voucher at a Timezone venue"
@@ -1590,6 +1723,8 @@
       "sourceUrl": "https://uspoloassn.in/pages/uspa-rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "u.?s.? polo"
       },
@@ -1616,6 +1751,8 @@
       "sourceUrl": "https://www.waterkingdom.in/offers/birthday-bash-offer.html",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "venues": [
         {
           "name": "Water Kingdom, Gorai, Mumbai",
@@ -1650,6 +1787,8 @@
       "sourceUrl": "https://www.westside.com/pages/membership",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "westside"
       }
@@ -1668,6 +1807,8 @@
       "sourceUrl": "https://www.lonavala.wetnjoy.in/offers/birthday-bash/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "venues": [
         {
           "name": "Wet'nJoy Water Park Lonavala",
@@ -1704,6 +1845,8 @@
       "sourceUrl": "https://www.wonderla.com/offers/birthday-offer-wonderla",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "venues": [
         {
           "name": "Wonderla Bengaluru",
@@ -1755,6 +1898,8 @@
       "sourceUrl": "https://www.tealive.com.my/support",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "tealive"
       },
@@ -1780,6 +1925,8 @@
       "sourceUrl": "https://www.burgerfuel.com/nz/vib-club",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "burger ?fuel"
       },
@@ -1809,6 +1956,8 @@
       "sourceUrl": "https://www.nandos.co.nz/policies-and-terms/peri-perks-terms-and-conditions",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": true,
       "osm": {
         "wikidata": "Q3472954",
         "nameRegex": "nando'?s"
@@ -1841,6 +1990,8 @@
       "sourceUrl": "https://www.starbucks.co.nz/starbucks-rewards-terms-of-use",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q37158",
         "nameRegex": "starbucks"
@@ -1873,6 +2024,8 @@
       "sourceUrl": "https://www.tankjuice.co.nz/terms-of-use",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "^tank"
       },
@@ -1902,6 +2055,8 @@
       "sourceUrl": "https://www.starbucks.com.sg/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q37158",
         "nameRegex": "starbucks"
@@ -1927,6 +2082,8 @@
       "sourceUrl": "https://swensens.com.sg/complimentary-firehouse-happy-birthday/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "swensen'?s"
       },
@@ -1957,6 +2114,8 @@
       "sourceUrl": "https://www.baskinrobbins.com/",
       "lastVerified": "2026-10-02",
       "verified": false,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q584601",
         "nameRegex": "baskin.?robbins"
@@ -1976,6 +2135,8 @@
       "sourceUrl": "https://customercare.bathandbodyworks.com/hc/en-us/articles/4410658819347-How-do-I-redeem-a-My-Bath-Body-Works-Reward-or-Birthday-Reward",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q810773",
         "nameRegex": "bath (&|and) body works"
@@ -1995,6 +2156,8 @@
       "sourceUrl": "https://www.chilis.com/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q1072948",
         "nameRegex": "chili'?s"
@@ -2022,6 +2185,8 @@
       "sourceUrl": "https://www.clinique.com/loyalty",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "steps": [
         "Join Clinique Smart Rewards",
         "Add your birthday to your account",
@@ -2045,6 +2210,8 @@
       "sourceUrl": "https://www.cornerbakerycafe.com/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "corner bakery"
       },
@@ -2069,6 +2236,8 @@
       "sourceUrl": "https://crumblcookies.com/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "crumbl"
       },
@@ -2096,6 +2265,8 @@
       "sourceUrl": "https://www.dairyqueen.com/en-us/rewards/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q1141226",
         "nameRegex": "dairy queen|^dq$"
@@ -2121,6 +2292,8 @@
       "sourceUrl": "https://www.dsw.com/en/us/vip",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "dsw|designer shoe warehouse"
       },
@@ -2145,6 +2318,8 @@
       "sourceUrl": "https://www.duckdonuts.com/rewards/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "nameRegex": "duck donuts"
       },
@@ -2171,6 +2346,8 @@
       "sourceUrl": "https://www.dutchbros.com/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "dutch bros"
       },
@@ -2201,6 +2378,8 @@
       "sourceUrl": "https://www.ihop.com/en/about-ihop/faqs/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q1185675",
         "nameRegex": "ihop"
@@ -2220,6 +2399,8 @@
       "sourceUrl": "https://www.krispykreme.com/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q1192805",
         "nameRegex": "krispy kreme"
@@ -2239,6 +2420,8 @@
       "sourceUrl": "https://www.noodles.com/rewards/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "noodles (&|and) co"
       },
@@ -2264,6 +2447,8 @@
       "sourceUrl": "https://www.nothingbundtcakes.com/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "nothing bundt cakes"
       },
@@ -2289,6 +2474,8 @@
       "sourceUrl": "https://www.pfchangs.com/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "p.? ?f.? chang'?s"
       },
@@ -2315,6 +2502,8 @@
       "sourceUrl": "https://www.panerabread.com/en-us/mypanera/meet-mypanera.html",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q7130852",
         "nameRegex": "panera"
@@ -2341,6 +2530,8 @@
       "sourceUrl": "https://www.peets.com/pages/peetnik-rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "peet'?s"
       },
@@ -2366,6 +2557,8 @@
       "sourceUrl": "https://www.ritasice.com/rewards/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "rita'?s"
       },
@@ -2391,6 +2584,8 @@
       "sourceUrl": "https://newsroom.sephora.com/sephora-unwraps-another-year-of-beauty-with-its-2026-beauty-insider-birthday-gift-offerings/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q2408041",
         "nameRegex": "sephora"
@@ -2410,6 +2605,8 @@
       "sourceUrl": "https://www.smoothieking.com/healthy-rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "smoothie king"
       },
@@ -2436,6 +2633,8 @@
       "sourceUrl": "https://www.starbucks.com/terms/rewards/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": true,
       "osm": {
         "wikidata": "Q37158",
         "nameRegex": "starbucks"
@@ -2455,6 +2654,8 @@
       "sourceUrl": "https://www.target.com/circle",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q1046951",
         "nameRegex": "^target$"
@@ -2480,6 +2681,8 @@
       "sourceUrl": "https://www.thecheesecakefactory.com/rewards",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "discount",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q1045842",
         "nameRegex": "cheesecake factory"
@@ -2507,6 +2710,8 @@
       "sourceUrl": "https://www.tropicalsmoothiecafe.com/rewards/",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "nameRegex": "tropical smoothie"
       },
@@ -2532,6 +2737,8 @@
       "sourceUrl": "https://www.ulta.com/rewards/terms-and-conditions",
       "lastVerified": "2026-10-02",
       "verified": true,
+      "rewardType": "free",
+      "needsPastSpend": false,
       "osm": {
         "wikidata": "Q7880076",
         "nameRegex": "ulta"

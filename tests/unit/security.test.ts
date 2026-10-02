@@ -60,6 +60,7 @@ describe('external data is cleaned of spoofing characters', () => {
     const offer: Offer = {
       id: 'sb', brand: 'Starbucks', category: 'cafe', offer: 'o', howToClaim: 'h', countries: ['IN'], channel: 'in-store',
       claimWindow: 'day', sourceUrl: 'https://example.com', lastVerified: '2026-10-02', verified: true, osm: { wikidata: 'Q37158' },
+      rewardType: 'free', needsPastSpend: false,
     };
     const [b] = parseOverpass(
       { elements: [{ type: 'node', lat: 1, lon: 2, tags: { 'brand:wikidata': 'Q37158', name: `Starbucks${RLO}${ZWSP}GM` } }] },
@@ -71,6 +72,7 @@ describe('external data is cleaned of spoofing characters', () => {
     const base = {
       id: 'x', brand: 'Brand', category: 'cafe', offer: 'Free drink', howToClaim: 'App', countries: ['IN'],
       channel: 'in-store', sourceUrl: 'https://example.com', lastVerified: '2026-10-02',
+      rewardType: 'free', needsPastSpend: false,
     };
     expect(validateOffer(base).ok).toBe(true);
     expect(validateOffer({ ...base, brand: `Brand${RLO}` }).ok).toBe(false);

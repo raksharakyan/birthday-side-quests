@@ -11,7 +11,8 @@ So a refresh doesn't lose your search, the app keeps **one small record in your 
 - your birthday month and search radius;
 - which tab is open (Nearby, Online or Found online);
 - which quests you ticked as complete;
-- whether the **Verified only** switch is on.
+- whether the **Verified only** switch is on;
+- which quest types the **Filter** shows (Free, Discount, Needs past spend).
 
 Nothing else is saved, and nothing is saved until you search or change one of these. **Clear search** deletes the record straight away. On load the app checks the record strictly and throws it away if anything looks wrong. Session storage is separate for each tab, isn't shared with other sites, and is never sent to us or to anyone else.
 
@@ -25,7 +26,7 @@ Nothing else is saved, and nothing is saved until you search or change one of th
 | Birthday **month** + **country code** only | **Our Cloudflare Worker** → Tavily search (only if "Found online" is enabled) | To find birthday deals online. Your city and coordinates are never sent |
 
 - Map and search results are cached **in memory** only. After a refresh the app reruns your saved search (Overpass again, no geocoding).
-- Quest "done" checkmarks are kept in the session record above, so they survive a refresh but not closing the tab.
+- Quest "done" checkmarks and your list filters ("Verified only" and the Free / Discount / Needs past spend checkboxes) are kept in the session record above, so they survive a refresh but not closing the tab.
 - Your location is never put in this app's URL, so it doesn't end up in your history or in shared links.
 - We never ask for your full date of birth, name, email or phone number.
 - The site sends `Referrer-Policy: no-referrer`. Requests to OpenStreetMap services and Photon send only the site's origin (`https://raksharakyan.github.io`), because their usage policy asks apps to identify themselves. No path and no user data is included.

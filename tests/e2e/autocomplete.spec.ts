@@ -1,5 +1,5 @@
 import type { Page, Route } from '@playwright/test';
-import { expectedNearbyCount, OVERPASS_BENGALURU_PINS, PHOTON_FIRST_LABEL, PHOTON_PUNE_LABEL } from './fixtures';
+import { cardTypes, expectedNearbyCount, isTierThenDistanceOrder, OVERPASS_BENGALURU_PINS, PHOTON_FIRST_LABEL, PHOTON_PUNE_LABEL } from './fixtures';
 import { axeViolations, CORS, expect, expectLocationOnlyToNominatim, expectOnlySessionRecord, search, test, type Guard } from './harness';
 
 /*
@@ -206,7 +206,8 @@ test('radius select changes the Overpass radius; nearby cards are sorted by dist
   expect(overpassQuery(guard)[0]).toContain('(around:10000,12.976794,77.590082)');
   expect(overpassQuery(guard)[0]).toContain('out center 150;');
 
-  // Cards with a branch first, nearest first, each with "x km away"; the rest under a heading.
+  // Cards with a branch first, each with "x km away", ordered free, discount, past spend and nearest
+  // first within each (DECISIONS #27); the rest under a heading.
   const first = page.locator('#nearby-list > .quest-list .quest-card');
   const withBranch = await first.count();
   expect(withBranch).toBeGreaterThan(0);
@@ -217,7 +218,7 @@ test('radius select changes the Overpass radius; nearby cards are sorted by dist
     return m ? Number(m[1]) * (m[2] === 'km' ? 1000 : 1) : Number.NaN;
   });
   expect(metres.every(Number.isFinite)).toBe(true);
-  expect([...metres].sort((a, b) => a - b)).toEqual(metres);
+  expect(isTierThenDistanceOrder(await cardTypes(page, '#nearby-list > .quest-list .quest-card'), metres)).toBe(true);
   const total = expectedNearbyCount('IN');
   if (total > withBranch) {
     await expect(page.getByRole('heading', { name: 'Also in India: find your nearest branch' })).toBeVisible();

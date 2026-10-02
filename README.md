@@ -20,8 +20,10 @@ Type in your city and pick your birthday month. You get a map and a list of birt
   - **Numbered claim steps.**
   - **Chips:** no purchase needed, minimum spend, join N days before, valid dates, and what to bring.
   - **Badges and dates:** Verified, Check with store or May be outdated, plus the date it was last checked.
+  - **Type chip:** Free, Discount or Needs past spend.
   - **Get directions:** opens Google Maps with no API key.
   - **Verify offer:** links to the brand's official page.
+- **Free treats first.** Every list shows free treats first, then discounts, then offers that need past spend with the brand (a tier, a recent purchase or a paid membership). A **Filter** box beside "Verified only" lets you hide any of the three.
 - **Claim and celebrate.** Mark a quest claimed. A progress ring fills and the candle logo lights up.
 - **Online tab.** App and e-commerce birthday deals for every country. It switches automatically to your city's country.
 - **Survives a refresh.** Your search is kept in this browser tab only and clears when you close it.
@@ -78,6 +80,8 @@ Copy `.env.example` to `.env.local` to set `VITE_BASE` or `VITE_WORKER_URL`.
      "sourceUrl": "https://brand.example/rewards",
      "lastVerified": "2026-10-02",
      "verified": true,
+     "rewardType": "free",
+     "needsPastSpend": false,
      "osm": { "wikidata": "Q123", "nameRegex": "brand" }
    }
    ```
@@ -85,9 +89,11 @@ Copy `.env.example` to `.env.local` to set `VITE_BASE` or `VITE_WORKER_URL`.
    - `channel`: `in-store | online | both`
    - `claimWindow`: `day | week | month | varies`
    - `countries`: ISO-2 codes, or `["*"]`
+   - `rewardType` (required): `free` for a free item, gift, treat or entry with nothing to buy beyond joining a free programme; `discount` for money or percent off, a cash-value voucher, buy one get one, bonus points, or a free item that needs a purchase.
+   - `needsPastSpend` (required): `true` when you only qualify after spending before (a tier reached by spend or points, a purchase in a past window, a paid membership, a yearly spend); `false` when anyone can join for free and get it. When unsure, pick `discount` and `true`. See [docs/OFFER_CLASSIFICATION.md](docs/OFFER_CLASSIFICATION.md).
    - `osm` is optional. Use `wikidata` for the brand's `brand:wikidata` tag; `nameRegex` allows only letters, digits, spaces and `'’&.-|()?^$`.
    - `venues` is optional and is for single-location destinations (theme parks, water parks): 1 to 20 `{ "name", "lat", "lng", "exact"? }`. The offer shows in Nearby only when a venue is within 150 km of the searched city. Use `"exact": false` for approximate coordinates (no map pin, directions by name). Use `venues` instead of `osm` and set `channel` to `in-store`.
-3. Run `npm test`. The schema test rejects non-https URLs, unknown categories, overlong text and hidden Unicode tricks.
+3. Run `npm test`. The schema test rejects non-https URLs, unknown categories, a missing `rewardType` or `needsPastSpend`, overlong text and hidden Unicode tricks.
 4. Open a PR. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Docs

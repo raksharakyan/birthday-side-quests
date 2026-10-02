@@ -26,8 +26,8 @@ Before you call a change done, run `build`, `test` and `test:e2e`. For UI work, 
 - `src/geocode.ts`: Nominatim (submit only, `featureType=city`, 1 req/s throttle, in-memory cache).
 - `src/autocomplete.ts`: Photon city suggestions (`layer=city`, debounced, min 3 chars).
 - `src/overpass.ts`: one combined Overpass query. It narrows to food amenities and shops first (DECISIONS #15), then retries once on 429 or 504.
-- `src/offers.ts`: loads and strictly validates `public/offers.json`, filters by country and channel, resolves fixed venues (`nearestVenue`, `nearbyOffers`, `VENUE_MAX_M`), applies the "Verified only" filter, and handles month logic.
-- `src/session.ts`: the **only** module allowed to touch storage. It keeps one `sessionStorage` record, `bsq-session` (version 2, includes `verifiedOnly`; version 1 records are migrated), which is strictly validated.
+- `src/offers.ts`: loads and strictly validates `public/offers.json`, filters by country and channel, resolves fixed venues (`nearestVenue`, `nearbyOffers`, `VENUE_MAX_M`), applies the list filters (`applyQuestFilters`: "Verified only" plus the quest-type Filter), orders quests (`questTier`, `compareQuests`: free, then discount, then needs past spend; then distance; then brand), and handles month logic.
+- `src/session.ts`: the **only** module allowed to touch storage. It keeps one `sessionStorage` record, `bsq-session` (version 3, includes `verifiedOnly` and the quest-type filter `types`; version 1 and 2 records are migrated), which is strictly validated.
 - `src/countries.ts`: all ISO countries via `Intl.DisplayNames`.
 - `src/liveSearch.ts`: the optional "Found online" tab via the Cloudflare Worker (hidden unless `VITE_WORKER_URL` is set).
 - `src/text.ts`: cleans external text (bidi and control characters).
@@ -58,6 +58,7 @@ Before you call a change done, run `build`, `test` and `test:e2e`. For UI work, 
 **Offer data** (`public/offers.json`)
 - Facts come **only** from the brand's official https page (its own domain, help centre or T&C). Blogs, coupon sites and AI are never sources.
 - If you can't confirm an offer, set `verified: false`, which the UI shows as "Check with store".
+- Every offer **must** have `rewardType` (`"free"` or `"discount"`) and `needsPastSpend` (boolean); the validator drops entries without them. Classify only from what the entry and its official page state; when unsure use `"discount"` and `true`, and record it in `docs/OFFER_CLASSIFICATION.md` (DECISIONS #27).
 - Leave optional claim fields out when they're unknown. Never use placeholder text like "Not stated".
 - Write `offer`, `rewardItem` and `steps` as paraphrases; don't copy marketing text.
 - `osm.nameRegex` uses a restricted charset and a ReDoS branching cap (`validateOsm`).

@@ -15,6 +15,8 @@ const base = {
   sourceUrl: 'https://example.com/rewards',
   lastVerified: '2026-10-02',
   verified: true,
+  rewardType: 'free',
+  needsPastSpend: false,
   osm: { wikidata: 'Q37158', nameRegex: 'Test Cafe' },
 };
 
@@ -41,8 +43,19 @@ describe('validateOffer', () => {
     ['non-boolean verified', { verified: 'yes' }],
     ['bad wikidata', { osm: { wikidata: 'Q1"];out;' } }],
     ['unsafe nameRegex', { osm: { nameRegex: 'a"];node(1);' } }],
+    ['missing rewardType', { rewardType: undefined }],
+    ['unknown rewardType', { rewardType: 'bogo' }],
+    ['rewardType in caps', { rewardType: 'Free' }],
+    ['rewardType as boolean', { rewardType: true }],
+    ['missing needsPastSpend', { needsPastSpend: undefined }],
+    ['needsPastSpend as string', { needsPastSpend: 'false' }],
+    ['needsPastSpend null', { needsPastSpend: null }],
   ])('rejects %s', (_label, patch) => {
     expect(validateOffer({ ...base, ...patch }).ok).toBe(false);
+  });
+  it('keeps rewardType and needsPastSpend', () => {
+    const r = validateOffer({ ...base, rewardType: 'discount', needsPastSpend: true });
+    expect(r.ok && [r.offer.rewardType, r.offer.needsPastSpend]).toEqual(['discount', true]);
   });
   it('defaults verified to false when missing', () => {
     const { verified: _v, ...rest } = base;
