@@ -75,7 +75,7 @@ describe('monthInfo — year boundaries', () => {
   });
   it('January birthday seen in December is next month', () => {
     const info = monthInfo(1, new Date(2026, 11, 31, 23, 59));
-    expect(info).toMatchObject({ isBirthdayMonth: false, monthsAway: 1, label: 'Your quest window opens next month 🎀' });
+    expect(info).toMatchObject({ isBirthdayMonth: false, monthsAway: 1, label: 'Your birthday month starts next month' });
   });
   it('December birthday in December is live; January 1st flips it', () => {
     expect(monthInfo(12, new Date(2026, 11, 31, 23, 59, 59)).isBirthdayMonth).toBe(true);

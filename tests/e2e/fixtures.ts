@@ -31,6 +31,26 @@ export const OVERPASS_BENGALURU = {
 /** Number of mocked Overpass elements above that match an offer (one pin each). */
 export const OVERPASS_BENGALURU_PINS = 4;
 
+const photonFeature = (props: Record<string, unknown>, lng: number, lat: number) => ({
+  type: 'Feature',
+  geometry: { type: 'Point', coordinates: [lng, lat] },
+  properties: { osm_key: 'place', ...props },
+});
+
+/** Photon FeatureCollection (city layer) returned for any query by default (5 places). */
+export const PHOTON_BENG = {
+  type: 'FeatureCollection',
+  features: [
+    photonFeature({ name: 'Bengaluru', county: 'Bangalore North', state: 'Karnataka', country: 'India', countrycode: 'IN', type: 'city' }, 77.5946, 12.9716),
+    photonFeature({ name: 'Pune', county: 'Pune City', state: 'Maharashtra', country: 'India', countrycode: 'IN', type: 'city' }, 73.8567, 18.5204),
+    photonFeature({ name: 'Benguela', state: 'Benguela', country: 'Angola', countrycode: 'AO', type: 'city' }, 13.4055, -12.5763),
+    photonFeature({ name: 'Benghazi', state: 'Benghazi', country: 'Libya', countrycode: 'LY', type: 'city' }, 20.07, 32.11),
+    photonFeature({ name: 'Bengbu', state: 'Anhui Province', country: 'China', countrycode: 'CN', type: 'city' }, 117.38, 32.92),
+  ],
+};
+export const PHOTON_FIRST_LABEL = 'Bengaluru, Bangalore North, Karnataka, India';
+export const PHOTON_PUNE_LABEL = 'Pune, Pune City, Maharashtra, India';
+
 interface SeedOffer {
   channel: string;
   countries: string[];
@@ -53,6 +73,7 @@ export interface MockOptions {
   nominatim?: (route: Route) => Promise<void>;
   overpass?: (route: Route) => Promise<void>;
   worker?: (route: Route) => Promise<void>;
+  photon?: (route: Route) => Promise<void>;
 }
 
 /** Mocks every external host; anything unexpected is aborted and recorded. */
@@ -67,6 +88,9 @@ export async function mockNetwork(page: Page, opts: MockOptions = {}): Promise<s
       }
       if (url.hostname === 'overpass-api.de') {
         return opts.overpass ? opts.overpass(route) : route.fulfill({ json: OVERPASS_BENGALURU, headers: { 'Access-Control-Allow-Origin': '*' } });
+      }
+      if (url.hostname === 'photon.komoot.io') {
+        return opts.photon ? opts.photon(route) : route.fulfill({ json: PHOTON_BENG, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (url.hostname === 'tile.openstreetmap.org') {
         return route.fulfill({ body: PNG_1PX, contentType: 'image/png' });

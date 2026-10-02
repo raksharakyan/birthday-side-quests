@@ -1,4 +1,4 @@
-# Birthday Side Quests — Build Plan
+# Birthday Side Quests: Build Plan
 
 ## Context
 The user wants a free, privacy-first web app. They enter a city and a birthday month and get "birthday side quests": nearby stores with birthday freebies shown on a pastel map, online-only birthday deals, and a live "Found online" section from web search. `/Users/raksharakyan/BirthdayPicks` is empty, and Node is not installed. GitHub CLI is logged in as `raksharakyan` (ssh).
@@ -21,11 +21,11 @@ src/
   offers.ts          load offers.json, filter by country/channel, month logic (claim window, "active now")
   liveSearch.ts      call Worker (if VITE_WORKER_URL set) with {month,country}; validate+sanitize response
   urls.ts            directionsUrl(lat,lng), safeHttpsUrl()
-  render/dom.ts      el() helper — textContent only, never innerHTML with data
+  render/dom.ts      el() helper: textContent only, never innerHTML with data
   render/map.ts      Leaflet, OSM tiles + attribution, inline-SVG heart/gift divIcons
   render/quests.ts   cards, done checkbox (in-memory Set), confetti (reduced-motion aware)
   templates.ts       cute per-category quest lines, deterministic by brand hash
-  styles/            pastel tokens, self-hosted fonts via @fontsource (Fredoka display, Nunito body)
+  styles/            Soft Premium tokens (plum accent), self-hosted variable fonts via @fontsource-variable (Bricolage Grotesque display, Plus Jakarta Sans body)
 public/offers.json   versioned seed (schemaVersion, ≥15 brands)
 worker/              Cloudflare Worker (search proxy) + wrangler.toml + tests
 tests/unit, tests/e2e (Playwright, all network mocked), lighthouserc.json

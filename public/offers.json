@@ -3,23 +3,436 @@
   "updated": "2026-10-02",
   "offers": [
     {
-      "id": "starbucks-us",
+      "id": "starbucks-ae",
       "brand": "Starbucks",
       "category": "cafe",
-      "offer": "One free handcrafted drink, food item or bottled drink on your birthday for Starbucks Rewards members",
-      "howToClaim": "Join Starbucks Rewards 7+ days before your birthday, add your birthday, make 1 Star-earning purchase first; scan app barcode in store",
+      "offer": "Free handcrafted drink on your birthday for Gold-level Starbucks Rewards members, valid 30 days",
+      "howToClaim": "Reach Gold (750 Stars) in the Starbucks UAE app with your birthday on file; scan the app QR code",
       "countries": [
-        "US"
+        "AE"
       ],
       "channel": "in-store",
-      "claimWindow": "varies",
-      "sourceUrl": "https://www.starbucks.com/terms/rewards/",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.starbucks.ae/en/rewards/ts-and-cs",
       "lastVerified": "2026-10-02",
       "verified": true,
       "osm": {
         "wikidata": "Q37158",
         "nameRegex": "starbucks"
+      },
+      "rewardItem": "One handcrafted beverage",
+      "steps": [
+        "Join Starbucks Rewards in the Starbucks UAE app",
+        "Add your birthday",
+        "Reach Gold level (750 Stars)",
+        "Scan the app QR code to redeem"
+      ],
+      "purchaseRequired": null,
+      "validFor": "30 days from issue",
+      "bring": [
+        "App QR code"
+      ]
+    },
+    {
+      "id": "boost-juice-au",
+      "brand": "Boost Juice",
+      "category": "cafe",
+      "offer": "Birthday drink for Boost app members (check the app for details)",
+      "howToClaim": "Join the Boost app with your birthday on file; check the app around your birthday",
+      "countries": [
+        "AU"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.boostjuice.com.au/",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "nameRegex": "boost juice"
+      },
+      "steps": [
+        "Join the Boost app with your birthday",
+        "Check the app around your birthday"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "donut-king-au",
+      "brand": "Donut King",
+      "category": "cafe",
+      "offer": "Free regular-size drink for your birthday for DK Rewards members, valid one month",
+      "howToClaim": "Register DK Rewards (app or online) with your birthday; reward arrives 7 days before",
+      "countries": [
+        "AU"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.donutking.com.au/rewards-frequently-asked-questions",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "donut king"
+      },
+      "rewardItem": "Free regular-size beverage",
+      "steps": [
+        "Register for DK Rewards in the app or online",
+        "Give your birthday when you register",
+        "The reward appears 7 days before your birthday"
+      ],
+      "purchaseRequired": null,
+      "validFor": "One month"
+    },
+    {
+      "id": "gelatissimo-au",
+      "brand": "Gelatissimo",
+      "category": "dessert",
+      "offer": "Free single scoop (cup or cone) on your birthday for Club Gelato members",
+      "howToClaim": "Register before your birthday and make a purchase over $1 in the prior 12 months",
+      "countries": [
+        "AU"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://gelatissimo.com.au/club-gelato-terms-conditions/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "gelatissimo"
+      },
+      "rewardItem": "Free single scoop, cup or cone, one flavour",
+      "steps": [
+        "Register for Club Gelato before your birthday",
+        "Make a purchase over $1 in the prior 12 months",
+        "Redeem the birthday scoop in store"
+      ],
+      "purchaseRequired": false
+    },
+    {
+      "id": "gloria-jeans-au",
+      "brand": "Gloria Jean's",
+      "category": "cafe",
+      "offer": "Free small Gloria Jean's beverage on your birthday for rewards members",
+      "howToClaim": "Join Gloria Jean's rewards and add your birthday; redeem in store",
+      "countries": [
+        "AU"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.gloriajeans.com.au/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "gloria jean'?s"
+      },
+      "rewardItem": "Any small Gloria Jean's beverage",
+      "steps": [
+        "Join Gloria Jean's rewards",
+        "Add your birthday to your account",
+        "Redeem the birthday drink"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "grilld-au",
+      "brand": "Grill'd",
+      "category": "restaurant",
+      "offer": "Free snack chips with a burger or salad, every day of your birthday month, for Relish members",
+      "howToClaim": "Join Relish and add your birthday; scan in restaurant, or order online or in the app",
+      "countries": [
+        "AU"
+      ],
+      "channel": "both",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.grilld.com.au/relish",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "grill'?d"
+      },
+      "rewardItem": "Free snack chips (Famous, sweet potato or zucchini)",
+      "steps": [
+        "Join Relish and add your birthday",
+        "Order a burger or salad",
+        "Scan in restaurant, or order online or in the app"
+      ],
+      "purchaseRequired": true,
+      "validFor": "Whole birthday month",
+      "minSpend": "A burger or salad"
+    },
+    {
+      "id": "lindt-au",
+      "brand": "Lindt",
+      "category": "dessert",
+      "offer": "Birthday surprise voucher for MyLindt Rewards members",
+      "howToClaim": "Join MyLindt Rewards for free with your birthday; use the voucher at Lindt Chocolate Shops or the eShop",
+      "countries": [
+        "AU"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.lindt.com.au/mylindt",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "lindt"
+      },
+      "steps": [
+        "Join MyLindt Rewards for free",
+        "Add your birthday to your account",
+        "Use the emailed voucher in a Lindt shop or the eShop"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "max-brenner-au",
+      "brand": "Max Brenner",
+      "category": "dessert",
+      "offer": "Free regular Classic Hot Chocolate, redeemable 14 days either side of your birthday",
+      "howToClaim": "Verify your loyalty account, add your birthday, and make a purchase within 6 months before your birthday month",
+      "countries": [
+        "AU"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://maxbrenner.com.au/pages/loyalty",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "max brenner"
+      },
+      "rewardItem": "Free regular Classic Hot Chocolate (alternative milk costs extra)",
+      "steps": [
+        "Join and verify your loyalty account",
+        "Add your date of birth to your profile",
+        "Make a purchase within 6 months before your birthday month",
+        "Redeem the voucher in store"
+      ],
+      "purchaseRequired": null,
+      "validFor": "14 days before to 14 days after your birthday"
+    },
+    {
+      "id": "mecca-au",
+      "brand": "MECCA",
+      "category": "beauty",
+      "offer": "Birthday surprise for MECCA Beauty Loop members (from $300 yearly spend)",
+      "howToClaim": "Reach Beauty Loop Level 1 or higher ($300+ spend a year) with your birthday on file",
+      "countries": [
+        "AU"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.mecca.com/en-au/beauty-loop/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "mecca"
+      },
+      "steps": [
+        "Join MECCA Beauty Loop",
+        "Reach Level 1 or above ($300+ spend a year)",
+        "Add your birthday to your account"
+      ],
+      "purchaseRequired": null,
+      "minSpend": "$300+ a year to reach Beauty Loop"
+    },
+    {
+      "id": "michels-au",
+      "brand": "Michel's Patisserie",
+      "category": "cafe",
+      "offer": "Free regular hot beverage for your birthday, valid one month",
+      "howToClaim": "Register your Michel's loyalty membership with your birthday; reward arrives 7 days before",
+      "countries": [
+        "AU"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.michels.com.au/frequently-asked-questions",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "michel'?s patisserie"
+      },
+      "rewardItem": "Free regular-size hot beverage",
+      "steps": [
+        "Register your Michel's loyalty membership",
+        "Give your birthday when you register",
+        "The reward appears 7 days before your birthday"
+      ],
+      "purchaseRequired": null,
+      "validFor": "One month"
+    },
+    {
+      "id": "muffin-break-au",
+      "brand": "Muffin Break",
+      "category": "cafe",
+      "offer": "Birthday treat for Muffin Break rewards members (check the terms in the app)",
+      "howToClaim": "Join Muffin Break rewards with your birthday and buy in the year before; check the app in your birthday month",
+      "countries": [
+        "AU"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://muffinbreak.com.au/rewards-program-terms-and-conditions/",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "nameRegex": "muffin break"
+      },
+      "steps": [
+        "Join Muffin Break rewards with your birthday",
+        "Check the app in your birthday month"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "nandos-au",
+      "brand": "Nando's",
+      "category": "restaurant",
+      "offer": "$15 Nando's voucher in your birthday month for PERi-Perks members",
+      "howToClaim": "Verified PERi-Perks account with DOB, purchase in the 6 months before birthday month; show barcode + photo ID; valid 30 days",
+      "countries": [
+        "AU"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.nandos.com.au/peri-perks-terms-and-conditions",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q3472954",
+        "nameRegex": "nando'?s"
       }
+    },
+    {
+      "id": "san-churro-au",
+      "brand": "San Churro",
+      "category": "dessert",
+      "offer": "Free Birthday Medium Churros plus a $20 Churros Fiesta offer in your birthday month",
+      "howToClaim": "Be a verified el SOCIAL member before your birthday month, with a full-price purchase in the prior 11 months",
+      "countries": [
+        "AU"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.sanchurro.com/el-social/faqs/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "san churro"
+      },
+      "rewardItem": "Free Birthday Medium Churros plus a $20 Churros Fiesta offer",
+      "steps": [
+        "Join el SOCIAL and verify before your birthday month",
+        "Make a full-price purchase in the 11 months before",
+        "Scan your el SOCIAL app or card to redeem"
+      ],
+      "purchaseRequired": null,
+      "validFor": "Birthday month"
+    },
+    {
+      "id": "booster-juice-ca",
+      "brand": "Booster Juice",
+      "category": "cafe",
+      "offer": "Free regular smoothie for your birthday for Booster Rewards members, valid 7 days",
+      "howToClaim": "Have an account 7+ days old with your birthdate and 1 purchase in the past year; offer appears in the app",
+      "countries": [
+        "CA"
+      ],
+      "channel": "in-store",
+      "claimWindow": "week",
+      "sourceUrl": "https://boosterjuice.com/en-ca/a/faq",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "booster juice"
+      },
+      "rewardItem": "Free regular smoothie",
+      "steps": [
+        "Join Booster Rewards with your birthdate at least 7 days before",
+        "Make at least 1 purchase in the past year",
+        "Find the offer in the app's Offers on your birthday",
+        "Redeem in store at a participating location"
+      ],
+      "purchaseRequired": null,
+      "validFor": "7 days from issue",
+      "signupLeadDays": 7,
+      "bring": [
+        "Photo ID if asked"
+      ]
+    },
+    {
+      "id": "boston-pizza-ca",
+      "brand": "Boston Pizza",
+      "category": "restaurant",
+      "offer": "Free dine-in dessert on your birthday for MyBP members",
+      "howToClaim": "Join MyBP with your birthday; the reward is added 7 days before. Check in with the app or give your phone number",
+      "countries": [
+        "CA"
+      ],
+      "channel": "in-store",
+      "claimWindow": "week",
+      "sourceUrl": "https://bostonpizza.com/en/mybp.html",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "boston pizza"
+      },
+      "rewardItem": "Free dessert (dine-in)",
+      "steps": [
+        "Join MyBP and add your birthday",
+        "Reward is added 7 days before your birthday",
+        "Dine in and check in with the app, your phone number or a printout"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "indigo-ca",
+      "brand": "Indigo",
+      "category": "retail",
+      "offer": "20% off one purchase in your birthday month for plum members (plum PLUS also gets bonus points)",
+      "howToClaim": "Join plum rewards for free and add your birthday; use the emailed code in Canadian stores or online",
+      "countries": [
+        "CA"
+      ],
+      "channel": "both",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.indigo.ca/pages/plum",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "indigo|chapters"
+      },
+      "rewardItem": "20% off one purchase (plum PLUS also gets 2,500 bonus points)",
+      "steps": [
+        "Join plum rewards and add your birthday",
+        "Get the offer code by email",
+        "Use it once in a Canadian store or online"
+      ],
+      "purchaseRequired": true,
+      "validFor": "Birthday month"
+    },
+    {
+      "id": "second-cup-ca",
+      "brand": "Second Cup",
+      "category": "cafe",
+      "offer": "Birthday bonus for Second Cup Café rewards members (details not stated)",
+      "howToClaim": "Join Second Cup rewards in the app with your birthday on file; check offers around your birthday",
+      "countries": [
+        "CA"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://secondcup.com/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "nameRegex": "second cup"
+      },
+      "steps": [
+        "Join Second Cup rewards with your birthday",
+        "Check the app offers around your birthday"
+      ],
+      "purchaseRequired": null
     },
     {
       "id": "starbucks-ca",
@@ -38,140 +451,6 @@
       "osm": {
         "wikidata": "Q37158",
         "nameRegex": "starbucks"
-      }
-    },
-    {
-      "id": "starbucks-gb",
-      "brand": "Starbucks",
-      "category": "cafe",
-      "offer": "Free birthday drink for Starbucks Rewards members who have reached Gold level",
-      "howToClaim": "Be a Gold-level Starbucks Rewards member (2,500 Stars) in the UK app with your birthday saved",
-      "countries": [
-        "GB"
-      ],
-      "channel": "in-store",
-      "claimWindow": "varies",
-      "sourceUrl": "https://www.starbucks.co.uk/rewards",
-      "lastVerified": "2026-10-02",
-      "verified": true,
-      "osm": {
-        "wikidata": "Q37158",
-        "nameRegex": "starbucks"
-      }
-    },
-    {
-      "id": "starbucks-in",
-      "brand": "Tata Starbucks",
-      "category": "cafe",
-      "offer": "Birthday reward for Starbucks Rewards members in India — reward details shown in app, check with store",
-      "howToClaim": "Join Starbucks Rewards in the Tata Starbucks app and add your birthday in your profile",
-      "countries": [
-        "IN"
-      ],
-      "channel": "in-store",
-      "claimWindow": "varies",
-      "sourceUrl": "https://www.starbucks.in/rewards",
-      "lastVerified": "2026-10-02",
-      "verified": false,
-      "osm": {
-        "wikidata": "Q37158",
-        "nameRegex": "starbucks"
-      }
-    },
-    {
-      "id": "sephora-us-ca",
-      "brand": "Sephora",
-      "category": "beauty",
-      "offer": "Free birthday gift (choice of set) for Beauty Insider members, or 250 points instead in store",
-      "howToClaim": "Join Beauty Insider free with birthday saved; redeem free in store or online with a $25 minimum purchase",
-      "countries": [
-        "US",
-        "CA"
-      ],
-      "channel": "both",
-      "claimWindow": "varies",
-      "sourceUrl": "https://newsroom.sephora.com/sephora-unwraps-another-year-of-beauty-with-its-2026-beauty-insider-birthday-gift-offerings/",
-      "lastVerified": "2026-10-02",
-      "verified": true,
-      "osm": {
-        "wikidata": "Q2408041",
-        "nameRegex": "sephora"
-      }
-    },
-    {
-      "id": "ulta-us",
-      "brand": "Ulta Beauty",
-      "category": "beauty",
-      "offer": "Free birthday gift once a year plus 2x points on purchases during your birthday month",
-      "howToClaim": "Ulta Beauty Rewards member with email/app and birthday in profile; no purchase needed in store, $0+ purchase online",
-      "countries": [
-        "US"
-      ],
-      "channel": "both",
-      "claimWindow": "month",
-      "sourceUrl": "https://www.ulta.com/rewards/terms-and-conditions",
-      "lastVerified": "2026-10-02",
-      "verified": true,
-      "osm": {
-        "wikidata": "Q7880076",
-        "nameRegex": "ulta"
-      }
-    },
-    {
-      "id": "bath-and-body-works-us",
-      "brand": "Bath & Body Works",
-      "category": "beauty",
-      "offer": "One free item (original price up to $9.95) as a Birthday Reward for My Bath & Body Works members",
-      "howToClaim": "Add birth month/day to your Rewards profile; reward appears in app/account Wallet; show barcode in US stores or use code online",
-      "countries": [
-        "US"
-      ],
-      "channel": "both",
-      "claimWindow": "month",
-      "sourceUrl": "https://customercare.bathandbodyworks.com/hc/en-us/articles/4410658819347-How-do-I-redeem-a-My-Bath-Body-Works-Reward-or-Birthday-Reward",
-      "lastVerified": "2026-10-02",
-      "verified": true,
-      "osm": {
-        "wikidata": "Q810773",
-        "nameRegex": "bath (&|and) body works"
-      }
-    },
-    {
-      "id": "krispy-kreme-us",
-      "brand": "Krispy Kreme",
-      "category": "dessert",
-      "offer": "Birthday reward for Krispy Kreme Rewards members, issued on your birthday",
-      "howToClaim": "Join Krispy Kreme Rewards and save your birthday in your profile; reward is valid 30 days from issue",
-      "countries": [
-        "US"
-      ],
-      "channel": "both",
-      "claimWindow": "month",
-      "sourceUrl": "https://www.krispykreme.com/rewards",
-      "lastVerified": "2026-10-02",
-      "verified": true,
-      "osm": {
-        "wikidata": "Q1192805",
-        "nameRegex": "krispy kreme"
-      }
-    },
-    {
-      "id": "krispy-kreme-gb",
-      "brand": "Krispy Kreme",
-      "category": "dessert",
-      "offer": "Free Original Glazed doughnut on your birthday for Krispy Kreme Rewards members",
-      "howToClaim": "Sign up for Krispy Kreme Rewards (UK app) with your birthday saved",
-      "countries": [
-        "GB"
-      ],
-      "channel": "in-store",
-      "claimWindow": "varies",
-      "sourceUrl": "https://www.krispykreme.co.uk/rewards",
-      "lastVerified": "2026-10-02",
-      "verified": true,
-      "osm": {
-        "wikidata": "Q1192805",
-        "nameRegex": "krispy kreme"
       }
     },
     {
@@ -194,23 +473,221 @@
       }
     },
     {
-      "id": "ihop-us",
-      "brand": "IHOP",
-      "category": "restaurant",
-      "offer": "5 bonus PanCoins credited on the first day of your birthday month for IHOP Rewards members",
-      "howToClaim": "Join IHOP Rewards (International Bank of Pancakes) with birthday saved; redeem PanCoins in the app's Stack Market",
+      "id": "sephora-fr",
+      "brand": "Sephora",
+      "category": "beauty",
+      "offer": "Birthday gift for Sephora Black status members; Gold members get a birthday discount",
+      "howToClaim": "Reach Black status (150 points or 4 store visits) in MY SEPHORA; Gold at 1,500 points in 12 months",
       "countries": [
-        "US"
+        "FR"
       ],
       "channel": "both",
       "claimWindow": "varies",
-      "sourceUrl": "https://www.ihop.com/en/about-ihop/faqs/rewards",
+      "sourceUrl": "https://www.sephora.fr/decouvrir-carte-sephora/",
       "lastVerified": "2026-10-02",
       "verified": true,
       "osm": {
-        "wikidata": "Q1185675",
-        "nameRegex": "ihop"
+        "wikidata": "Q2408041",
+        "nameRegex": "sephora"
+      },
+      "steps": [
+        "Join MY SEPHORA",
+        "Reach Black status (150 points or 4 visits)",
+        "Check your birthday mail for the gift and terms"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "costa-gb",
+      "brand": "Costa Coffee",
+      "category": "cafe",
+      "offer": "Free cake (sweet treat) on your birthday for Costa Club app members",
+      "howToClaim": "Join Costa Club in the Costa app and add your birthday; the treat appears in the app",
+      "countries": [
+        "GB"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.costa.co.uk/costa-club",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q608845",
+        "nameRegex": "costa"
+      },
+      "rewardItem": "Free cake (a sweet treat)",
+      "steps": [
+        "Download the Costa app and join Costa Club",
+        "Add your birthday in the app",
+        "Redeem the birthday treat in store"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "greggs-gb",
+      "brand": "Greggs",
+      "category": "cafe",
+      "offer": "Free sweet treat added to your Greggs App wallet on your birthday each year",
+      "howToClaim": "Download the Greggs App, create an account and add your birthday; scan the app in shop",
+      "countries": [
+        "GB"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.greggs.com/app",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q3403981",
+        "nameRegex": "greggs"
+      },
+      "rewardItem": "Free sweet treat",
+      "steps": [
+        "Download the Greggs App and create an account",
+        "Add your birthday",
+        "The treat is added to your app wallet on your birthday"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "krispy-kreme-gb",
+      "brand": "Krispy Kreme",
+      "category": "dessert",
+      "offer": "Free Original Glazed doughnut on your birthday for Krispy Kreme Rewards members",
+      "howToClaim": "Sign up for Krispy Kreme Rewards (UK app) with your birthday saved",
+      "countries": [
+        "GB"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.krispykreme.co.uk/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q1192805",
+        "nameRegex": "krispy kreme"
       }
+    },
+    {
+      "id": "pizza-express-gb",
+      "brand": "PizzaExpress",
+      "category": "restaurant",
+      "offer": "Birthday treat for PizzaExpress Club members, unlocked in your birthday month (£15 min spend)",
+      "howToClaim": "Join PizzaExpress Club (Bronze tier and up); spend £15+; not combinable with promo offers",
+      "countries": [
+        "GB"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.pizzaexpress.com/club",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q662845",
+        "nameRegex": "pizza ?express"
+      },
+      "steps": [
+        "Join PizzaExpress Club",
+        "Reward unlocks in your birthday month",
+        "Spend at least £15 to use it"
+      ],
+      "purchaseRequired": true,
+      "validFor": "Birthday month",
+      "minSpend": "£15"
+    },
+    {
+      "id": "prezzo-gb",
+      "brand": "Prezzo",
+      "category": "restaurant",
+      "offer": "Free birthday cake for Club Prezzo members after their first visit",
+      "howToClaim": "Join Club Prezzo in the app, add your birthday and dine once before your birthday",
+      "countries": [
+        "GB"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.prezzo.co.uk/club-prezzo/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "prezzo"
+      },
+      "rewardItem": "Free birthday cake",
+      "steps": [
+        "Download the app and join Club Prezzo",
+        "Visit once first",
+        "Claim the birthday cake"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "space-nk-gb",
+      "brand": "Space NK",
+      "category": "beauty",
+      "offer": "Birthday gift for N.DULGE Rewards members in their birthday month",
+      "howToClaim": "Join N.DULGE Rewards with your birthday on file; claim the gift during your birthday month",
+      "countries": [
+        "GB"
+      ],
+      "channel": "both",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.spacenk.com/uk/inside-space/in-focus/ndulge-loyalty-scheme.html",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "space ?nk"
+      },
+      "steps": [
+        "Join N.DULGE Rewards",
+        "Add your birthday to your account",
+        "Claim the gift during your birthday month"
+      ],
+      "purchaseRequired": null,
+      "validFor": "Birthday month"
+    },
+    {
+      "id": "starbucks-gb",
+      "brand": "Starbucks",
+      "category": "cafe",
+      "offer": "Free birthday drink for Starbucks Rewards members who have reached Gold level",
+      "howToClaim": "Be a Gold-level Starbucks Rewards member (2,500 Stars) in the UK app with your birthday saved",
+      "countries": [
+        "GB"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.starbucks.co.uk/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q37158",
+        "nameRegex": "starbucks"
+      }
+    },
+    {
+      "id": "tgi-fridays-gb",
+      "brand": "TGI Fridays",
+      "category": "restaurant",
+      "offer": "Free dessert on your birthday every year for Stripes Rewards members",
+      "howToClaim": "Download the TGI Fridays UK app (18+), join Stripes Rewards and add your birthday",
+      "countries": [
+        "GB"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.tgifridays.co.uk/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "tgi fridays|t.g.i. friday'?s"
+      },
+      "rewardItem": "Free dessert",
+      "steps": [
+        "Download the TGI Fridays UK app (18+)",
+        "Join Stripes Rewards and add your birthday",
+        "Claim the dessert on your birthday"
+      ],
+      "purchaseRequired": null
     },
     {
       "id": "the-body-shop-gb",
@@ -229,6 +706,764 @@
       "osm": {
         "wikidata": "Q837851",
         "nameRegex": "the body shop"
+      }
+    },
+    {
+      "id": "wagamama-gb",
+      "brand": "wagamama",
+      "category": "restaurant",
+      "offer": "Birthday gift added to your soul club wallet on the 1st of your birthday month",
+      "howToClaim": "Join wagamama soul club with your birthday on file; the gift appears in your wallet",
+      "countries": [
+        "GB"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.wagamama.com/soul-club",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q503715",
+        "nameRegex": "wagamama"
+      },
+      "steps": [
+        "Join wagamama soul club",
+        "Add your birthday to your account",
+        "The gift arrives in your wallet on the 1st of your birthday month"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "zizzi-gb",
+      "brand": "Zizzi",
+      "category": "restaurant",
+      "offer": "Birthday Perk for Zillionaires' Club members, valid for 28 days",
+      "howToClaim": "Join the Zillionaires' Club; the perk lands in your Perkz Wallet about 2 weeks before your birthday",
+      "countries": [
+        "GB"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.zizzi.co.uk/help/faq-zillionaires-club",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "zizzi"
+      },
+      "steps": [
+        "Join Zizzi Zillionaires' Club",
+        "The Birthday Perk lands in your Perkz Wallet about 2 weeks before your birthday",
+        "Use it within 28 days"
+      ],
+      "purchaseRequired": null,
+      "validFor": "28 days from when it arrives"
+    },
+    {
+      "id": "insomnia-ie",
+      "brand": "Insomnia Coffee",
+      "category": "cafe",
+      "offer": "Free small Insomnia drink in your birthday month for Insomnia Treats members",
+      "howToClaim": "Add your DOB to your profile and make a purchase in the previous 12 months; excludes ICECAPS, shakes, seasonal drinks",
+      "countries": [
+        "IE"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.insomnia.ie/insomnia-treats/terms-conditions",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "insomnia"
+      },
+      "rewardItem": "Free small Insomnia drink (no ICECAPS, shakes, ice cream or seasonal)",
+      "steps": [
+        "Join Insomnia Treats and add your date of birth",
+        "Make a purchase in the previous 12 months",
+        "Redeem in your birthday month"
+      ],
+      "purchaseRequired": null,
+      "validFor": "Birthday month"
+    },
+    {
+      "id": "starbucks-ie",
+      "brand": "Starbucks",
+      "category": "cafe",
+      "offer": "Free drink of your choice on your birthday for Gold-level Starbucks Rewards members, valid 30 days",
+      "howToClaim": "Reach Gold level and add your birthday to your account; redeem at participating Irish stores",
+      "countries": [
+        "IE"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.starbucks.ie/rewards/ts-and-cs",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q37158",
+        "nameRegex": "starbucks"
+      },
+      "rewardItem": "Free drink of your choice",
+      "steps": [
+        "Join Starbucks Rewards and add your birthday",
+        "Reach Gold level",
+        "Redeem the coupon at a participating Irish store"
+      ],
+      "purchaseRequired": null,
+      "validFor": "30 days from issue"
+    },
+    {
+      "id": "adidas-in",
+      "brand": "adidas",
+      "category": "fashion",
+      "offer": "adiClub Level 2+ members (1,000+ points) get a birthday gift; details shown in the adidas app",
+      "howToClaim": "Join adiClub free in the adidas app or website, reach Level 2 and add your birthday",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.adidas.co.in/adiClub",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "wikidata": "Q3895",
+        "nameRegex": "^adidas"
+      },
+      "steps": [
+        "Join adiClub free in the adidas app or website",
+        "Reach Level 2 (1,000+ adiClub points)",
+        "Add your birthday and check the app for the gift"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "and-in",
+      "brand": "AND",
+      "category": "fashion",
+      "offer": "RISE Rewards birthday treat on apparel: 10% off (Insider) or 20% off (Trendsetter), plus 5% extra above ₹15,000",
+      "howToClaim": "Reach Insider or Trendsetter tier and add your DOB 30+ days ahead; coupon arrives 14 days before your birthday, valid 30 days",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.andindia.com/rise-rewards.html",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "rewardItem": "10% off (Insider) or 20% off (Trendsetter) apparel; extra 5% above ₹15,000",
+      "steps": [
+        "Join RISE Rewards and reach Insider or Trendsetter tier",
+        "Add your DOB at least 30 days before your birthday",
+        "Receive the coupon 14 days before your birthday",
+        "Use it on apparel within 30 days"
+      ],
+      "purchaseRequired": true,
+      "signupLeadDays": 30,
+      "validFor": "30 days from when the coupon is issued"
+    },
+    {
+      "id": "barbeque-nation-in",
+      "brand": "Barbeque Nation",
+      "category": "restaurant",
+      "offer": "Gold and Platinum Smiles members get 100 Smile Coins (₹1 each) once a year for their birthday",
+      "howToClaim": "Reach Gold or Platinum in the Barbeque Nation Smiles program before your birthday; redeem coins when booking or paying the bill",
+      "countries": [
+        "IN"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.barbequenation.com/smiles",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "barbeque nation"
+      },
+      "rewardItem": "100 Smile Coins (1 coin = ₹1)",
+      "steps": [
+        "Join Barbeque Nation Smiles",
+        "Reach Gold (2+ visits in 120 days) or Platinum before your birthday",
+        "Get coins credited for your birthday",
+        "Redeem coins in the app when booking or at bill payment"
+      ],
+      "purchaseRequired": null,
+      "validFor": "Coins valid 90 days"
+    },
+    {
+      "id": "bata-in",
+      "brand": "Bata",
+      "category": "fashion",
+      "offer": "Bata Club birthday surprise: a gift voucher worth up to ₹750 in your birthday month, sent by SMS",
+      "howToClaim": "Join Bata Club and add your birthday to your profile; use the SMS code in store or online",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.bata.com/in/bata_club.html",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "^bata$|^bata "
+      },
+      "rewardItem": "Gift voucher worth up to ₹750",
+      "steps": [
+        "Join Bata Club",
+        "Add your birthday to your profile",
+        "Receive the voucher code by SMS in your birthday month",
+        "Use the code when you shop"
+      ],
+      "purchaseRequired": null,
+      "validFor": "Birthday month",
+      "bring": [
+        "SMS voucher code"
+      ]
+    },
+    {
+      "id": "caratlane-in",
+      "brand": "CaratLane",
+      "category": "retail",
+      "offer": "CaratLane issues birthday and anniversary coupons; value not published, check the app or store",
+      "howToClaim": "Add your birthday to your CaratLane profile; the coupon can be combined with a Treasure Chest redemption",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.caratlane.com/treasure-chest-gold-scheme",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "nameRegex": "caratlane"
+      },
+      "steps": [
+        "Create a CaratLane account and add your birthday",
+        "Use the birthday coupon on a purchase, optionally with Treasure Chest"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "costa-coffee-in",
+      "brand": "Costa Coffee",
+      "category": "cafe",
+      "offer": "Free birthday cake for Costa Club members in India",
+      "howToClaim": "Join Costa Club in the Costa Coffee India app; you need at least one transaction in the past 12 months to qualify",
+      "countries": [
+        "IN"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.costacoffee.in/legal-and-data-privacy/costa-club-terms",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q608845",
+        "nameRegex": "costa coffee|^costa$"
+      },
+      "rewardItem": "Free birthday cake",
+      "steps": [
+        "Download the Costa Coffee India app and join Costa Club",
+        "Make at least one transaction in the 12 months before your birthday",
+        "Ask for the birthday cake in store and scan your app QR code"
+      ],
+      "purchaseRequired": null,
+      "bring": [
+        "Costa app QR code"
+      ]
+    },
+    {
+      "id": "forest-essentials-in",
+      "brand": "Forest Essentials",
+      "category": "beauty",
+      "offer": "Soundarya Club birthday coupon: 10 to 15% off one bill (capped at ₹500 to ₹1,500 by tier), valid for your birthday month",
+      "howToClaim": "Join Soundarya Club (unlocks after ₹5,000 total spend); add your DOB a week before your birthday month; coupon is issued on the 1st",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.forestessentialsindia.com/soundarya-club-faqs",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "forest essentials"
+      },
+      "rewardItem": "One coupon: 10% off (Bronze, Silver) or 15% off (Gold, Platinum), capped ₹500 to ₹1,500",
+      "steps": [
+        "Reach ₹5,000 total spend to join Soundarya Club",
+        "Add your DOB at least a week before your birthday month starts",
+        "Receive the coupon by email or SMS on the 1st of your birthday month",
+        "Apply it online at payment, or give the code at the store billing desk"
+      ],
+      "purchaseRequired": true,
+      "validFor": "Whole birthday month",
+      "bring": [
+        "Coupon code",
+        "Registered mobile for OTP"
+      ]
+    },
+    {
+      "id": "global-desi-in",
+      "brand": "Global Desi",
+      "category": "fashion",
+      "offer": "RISE Rewards birthday treat on apparel: 10% off (Insider) or 20% off (Trendsetter), plus 5% extra above ₹15,000",
+      "howToClaim": "Reach Insider or Trendsetter tier and add your DOB 30+ days ahead; coupon arrives 14 days before your birthday, valid 30 days",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.globaldesi.in/rise-rewards.html",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "global desi"
+      },
+      "rewardItem": "10% off (Insider) or 20% off (Trendsetter) apparel; extra 5% above ₹15,000",
+      "steps": [
+        "Join RISE Rewards and reach Insider or Trendsetter tier",
+        "Add your DOB at least 30 days before your birthday",
+        "Receive the coupon 14 days before your birthday",
+        "Use it on apparel within 30 days"
+      ],
+      "purchaseRequired": true,
+      "signupLeadDays": 30,
+      "validFor": "30 days from when the coupon is issued"
+    },
+    {
+      "id": "health-and-glow-in",
+      "brand": "Health & Glow",
+      "category": "beauty",
+      "offer": "h&g Club members get a birthday voucher; value not published, check with store",
+      "howToClaim": "Join h&g Club and add your birthday to your profile",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://corporate.healthandglow.com/pages/hg-club",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "nameRegex": "health (&|and) glow"
+      },
+      "steps": [
+        "Join h&g Club",
+        "Add your birthday to your profile"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "hidesign-in",
+      "brand": "Hidesign",
+      "category": "fashion",
+      "offer": "Loyalty members receive a unique birthday coupon in their birthday month; value not stated",
+      "howToClaim": "Give your DOB at billing in store, or email it with your registered mobile and ID to Hidesign customer care",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "month",
+      "sourceUrl": "https://hidesigncustomercare.zohodesk.in/portal/en/kb/articles/loyaltiy-prog",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "nameRegex": "hidesign"
+      },
+      "steps": [
+        "Register for the Hidesign loyalty program",
+        "In store: give your DOB at billing",
+        "Online: email your DOB, registered mobile and ID to customer care",
+        "Receive the coupon in your birthday month"
+      ],
+      "purchaseRequired": null,
+      "bring": [
+        "Govt ID (online registration)"
+      ]
+    },
+    {
+      "id": "imagicaa-in",
+      "brand": "Imagicaa",
+      "category": "retail",
+      "offer": "Birthday person gets a free Express ticket plus a return gift when at least 4 friends or family pre-book regular tickets",
+      "howToClaim": "Your group of 4+ pre-books Regular Theme or Water Park tickets online; claim the free Express upgrade at the park counter",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.imagicaaworld.com/tickets-and-offers/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "imagicaa?|adlabs imagica"
+      },
+      "rewardItem": "Free Express ticket (Theme or Water Park) plus a return gift",
+      "steps": [
+        "Have at least 4 friends or family pre-book Regular tickets online",
+        "Visit Imagicaa with your group",
+        "Claim the free Express upgrade ticket at the park counter"
+      ],
+      "purchaseRequired": true,
+      "minSpend": "4 Regular tickets booked by your group"
+    },
+    {
+      "id": "club-itc-in",
+      "brand": "ITC Hotels (Club ITC)",
+      "category": "restaurant",
+      "offer": "Club ITC Gold and higher members earn double Green Points on food and drink spends during their birthday week",
+      "howToClaim": "Be a Club ITC Gold, Platinum, Platinum Select or Culinaire member and dine at a participating ITC hotel; paying with points or via aggregators doesn't count",
+      "countries": [
+        "IN"
+      ],
+      "channel": "in-store",
+      "claimWindow": "week",
+      "sourceUrl": "https://www.itchotels.com/in/en/clubitc/membership-benefits",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "^itc (grand|maratha|maurya|gardenia|kohenur|sonar|windsor|royal|mughal|narmada)"
+      },
+      "rewardItem": "Double Green Points on food and beverage spends",
+      "steps": [
+        "Hold Club ITC Gold, Platinum, Platinum Select or Culinaire status",
+        "Dine at a participating ITC hotel during your birthday week",
+        "Pay by card or cash, not with Green Points or via aggregators"
+      ],
+      "purchaseRequired": true,
+      "validFor": "Your birthday week"
+    },
+    {
+      "id": "kiehls-in",
+      "brand": "Kiehl's",
+      "category": "beauty",
+      "offer": "Kiehl's Rewards Silver, Gold and Black members get birthday gifts and discounts; details not published",
+      "howToClaim": "Join Kiehl's Rewards in India and add your birthday; ask in store for the current birthday perk",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.kiehls.in/pages/rewards-terms-conditions",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "nameRegex": "kiehl('|’)?s"
+      },
+      "steps": [
+        "Join Kiehl's Rewards in India",
+        "Reach Silver, Gold or Black tier",
+        "Ask in store about your birthday gift or discount"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "loccitane-in",
+      "brand": "L'Occitane",
+      "category": "beauty",
+      "offer": "My L'OCCITANE Club and Gold members get a one-time birthday voucher in store during their birthday month; value not stated",
+      "howToClaim": "Be a Club or Gold member; show your registered mobile number or ID at the store",
+      "countries": [
+        "IN"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://in.loccitane.com/pages/vip-membership-program",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "nameRegex": "l('|’)?occitane"
+      },
+      "steps": [
+        "Become a My L'OCCITANE Club or Gold member",
+        "Visit a store in your birthday month",
+        "Show your registered mobile number or ID to redeem the voucher"
+      ],
+      "purchaseRequired": null,
+      "validFor": "Birthday month",
+      "bring": [
+        "Registered mobile or ID"
+      ]
+    },
+    {
+      "id": "la-pinoz-in",
+      "brand": "La Pino'z Pizza",
+      "category": "restaurant",
+      "offer": "Adding your DOB to La Pino'z rewards unlocks birthday and anniversary treats; details not published",
+      "howToClaim": "Join La Pino'z loyalty on the website or app and add your date of birth",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://lapinozpizza.in/wallet",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "nameRegex": "la pino('|’)?z"
+      },
+      "steps": [
+        "Join La Pino'z loyalty on the website or app",
+        "Add your date of birth"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "lakme-salon-in",
+      "brand": "Lakmé Salon",
+      "category": "beauty",
+      "offer": "Runway Rewards members get 15% off salon services for their birthday (30% for the top Stunning Showstopper tier)",
+      "howToClaim": "Join Runway Rewards (₹1,000+ spend in 12 months) and add your DOB a day ahead; use once, from 15 days before up to your birthday",
+      "countries": [
+        "IN"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.lakmesalon.in/pages/runway-terms-and-conditions",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "lakm(e|é) salon"
+      },
+      "rewardItem": "15% off salon services (30% off for Stunning Showstopper tier)",
+      "steps": [
+        "Spend ₹1,000+ at Lakmé Salon within 12 months to qualify",
+        "Register for Runway Rewards at billing with your name and mobile",
+        "Get your birthday recorded at least 1 day before your birthday",
+        "Use the discount on services once, in the 15 days up to your birthday"
+      ],
+      "purchaseRequired": true,
+      "signupLeadDays": 1,
+      "validFor": "15 days before your birthday through the birthday"
+    },
+    {
+      "id": "marks-and-spencer-in",
+      "brand": "Marks & Spencer",
+      "category": "fashion",
+      "offer": "Sparks birthday-month discount: 10% (Club), 15% (Premier) or 20% (Elite), valid the whole calendar month",
+      "howToClaim": "Join M&S Sparks and register your birthday; redeem in store or on the M&S India website/app",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.marksandspencer.in/loyalty_page.html",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q714491",
+        "nameRegex": "marks (&|and) spencer|^m&s"
+      },
+      "rewardItem": "10% off (Club), 15% off (Premier) or 20% off (Elite)",
+      "steps": [
+        "Join M&S Sparks",
+        "Register your birthday in store or in your online account",
+        "Shop in store or on the M&S India website or app during your birthday month"
+      ],
+      "purchaseRequired": true,
+      "validFor": "Whole calendar month of your birthday"
+    },
+    {
+      "id": "metro-shoes-in",
+      "brand": "Metro Shoes",
+      "category": "fashion",
+      "offer": "ClubMetro members get a birthday offer; details not published, check with store",
+      "howToClaim": "Share your birthday when you enrol in ClubMetro",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.metroshoes.com/loyalty-tc",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "nameRegex": "metro shoes"
+      },
+      "steps": [
+        "Join ClubMetro",
+        "Share your date of birth when you enrol"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "mia-by-tanishq-in",
+      "brand": "Mia by Tanishq",
+      "category": "online",
+      "offer": "Birthday coupon on the Mia website and app, usable during your birthday month; value not stated",
+      "howToClaim": "Add your birthday when registering (it can't be changed later); not valid on items already discounted",
+      "countries": [
+        "IN"
+      ],
+      "channel": "online",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.miabytanishq.com/en_IN/offertnc.html",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "steps": [
+        "Register on the Mia website or app with your birthday (it can't be changed)",
+        "Shop on the Mia website or app in your birthday month",
+        "Apply the coupon to items without a product-level discount"
+      ],
+      "purchaseRequired": true,
+      "validFor": "Birthday month"
+    },
+    {
+      "id": "myntra-insider-in",
+      "brand": "Myntra",
+      "category": "online",
+      "offer": "Myntra Insider members may get special birthday offers depending on their level; check the app",
+      "howToClaim": "Shop enough on Myntra to join Insider and add your birthday to your profile",
+      "countries": [
+        "IN"
+      ],
+      "channel": "online",
+      "claimWindow": "varies",
+      "sourceUrl": "https://blog.myntra.com/celebrating-fans-with-the-myntra-insider-programme/",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "steps": [
+        "Join Myntra Insider in the Myntra app",
+        "Add your birthday to your profile",
+        "Check the app for birthday offers"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "nykaa-in",
+      "brand": "Nykaa",
+      "category": "online",
+      "offer": "Free birthday gift for Privé Gold/Platinum members, plus 1.5x–3x reward points in birthday month for all Privé tiers",
+      "howToClaim": "Add a valid email and birthday to your Nykaa profile and make a purchase in your birthday month",
+      "countries": [
+        "IN"
+      ],
+      "channel": "online",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.nykaa.com/app-nykaa-prive-help",
+      "lastVerified": "2026-10-02",
+      "verified": true
+    },
+    {
+      "id": "plum-in",
+      "brand": "Plum",
+      "category": "online",
+      "offer": "Plum+ members get a birthday-month PlumCash perk; details not published, check the site before ordering",
+      "howToClaim": "Join Plum+ with any purchase on plumgoodness.com and add your birthday; birthday-month PlumCash expires after 3 months",
+      "countries": [
+        "IN"
+      ],
+      "channel": "online",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.plumgoodness.com/pages/plum-rewards",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "steps": [
+        "Join Plum+ by making any purchase on plumgoodness.com",
+        "Add your birthday to your account",
+        "Use birthday-month PlumCash within 3 months"
+      ],
+      "purchaseRequired": null,
+      "validFor": "PlumCash earned in birthday month lasts 3 months"
+    },
+    {
+      "id": "shoppers-stop-in",
+      "brand": "Shoppers Stop",
+      "category": "retail",
+      "offer": "Birthday offer for First Citizen Club members, details not published in text, check with store",
+      "howToClaim": "Be a First Citizen Club member with your birthday on file",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.shoppersstop.com/fc-birthday",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "nameRegex": "shoppers stop"
+      }
+    },
+    {
+      "id": "skechers-in",
+      "brand": "Skechers",
+      "category": "fashion",
+      "offer": "Skechers Plus 'Birthday Delight' offer for members; value not published, can't be combined with other offers",
+      "howToClaim": "Join Skechers Plus free on skechers.in; in-store redemption is currently Mumbai only",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.skechers.in/faq-detail/?fid=skechers-plus",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "nameRegex": "skechers"
+      },
+      "steps": [
+        "Join Skechers Plus free on skechers.in with your mobile number",
+        "Watch for the Birthday Delight offer by SMS, email or WhatsApp",
+        "Redeem online, or in store in Mumbai only"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "swarovski-in",
+      "brand": "Swarovski",
+      "category": "retail",
+      "offer": "Swarovski Club members get a 20% off birthday coupon, starting from the free Bronze tier",
+      "howToClaim": "Join Swarovski Club (online or in a boutique) and share your birthday; check coupon terms before use",
+      "countries": [
+        "IN"
+      ],
+      "channel": "online",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.swarovski.com/en-IN/s-sclanding/Swarovski-Club/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "rewardItem": "20% off birthday coupon",
+      "steps": [
+        "Join Swarovski Club online or in a boutique",
+        "Share your birthday in your profile",
+        "Use the birthday coupon on a purchase"
+      ],
+      "purchaseRequired": true
+    },
+    {
+      "id": "titan-encircle-in",
+      "brand": "Tanishq / Titan (Encircle)",
+      "category": "retail",
+      "offer": "Birthday offer for Encircle members at Titan group stores (Tanishq, Titan, Fastrack, Helios, etc.), one use per brand",
+      "howToClaim": "Be an Encircle member with birthday on file; offer active 15 days before to 15 days after your birthday",
+      "countries": [
+        "IN"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.titaneyeplus.com/titan-encircle",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "tanishq|world of titan|titan eye|fastrack|helios|zoya|taneira"
+      }
+    },
+    {
+      "id": "starbucks-in",
+      "brand": "Tata Starbucks",
+      "category": "cafe",
+      "offer": "Birthday reward for Starbucks Rewards members in India, reward details shown in app, check with store",
+      "howToClaim": "Join Starbucks Rewards in the Tata Starbucks app and add your birthday in your profile",
+      "countries": [
+        "IN"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.starbucks.in/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "wikidata": "Q37158",
+        "nameRegex": "starbucks"
       }
     },
     {
@@ -251,38 +1486,147 @@
       }
     },
     {
-      "id": "nandos-au",
-      "brand": "Nando's",
-      "category": "restaurant",
-      "offer": "$15 Nando's voucher in your birthday month for PERi-Perks members",
-      "howToClaim": "Verified PERi-Perks account with DOB, purchase in the 6 months before birthday month; show barcode + photo ID; valid 30 days",
-      "countries": [
-        "AU"
-      ],
-      "channel": "in-store",
-      "claimWindow": "month",
-      "sourceUrl": "https://www.nandos.com.au/peri-perks-terms-and-conditions",
-      "lastVerified": "2026-10-02",
-      "verified": true,
-      "osm": {
-        "wikidata": "Q3472954",
-        "nameRegex": "nando'?s"
-      }
-    },
-    {
-      "id": "nykaa-in",
-      "brand": "Nykaa",
+      "id": "the-face-shop-in",
+      "brand": "The Face Shop",
       "category": "online",
-      "offer": "Free birthday gift for Privé Gold/Platinum members, plus 1.5x–3x reward points in birthday month for all Privé tiers",
-      "howToClaim": "Add a valid email and birthday to your Nykaa profile and make a purchase in your birthday month",
+      "offer": "Loyalty members get 20 bonus Glow Points to celebrate their birthday",
+      "howToClaim": "Join The Face Shop India loyalty program on thefaceshop.in and add your birthday to your profile",
       "countries": [
         "IN"
       ],
       "channel": "online",
-      "claimWindow": "month",
-      "sourceUrl": "https://www.nykaa.com/app-nykaa-prive-help",
+      "claimWindow": "varies",
+      "sourceUrl": "https://thefaceshop.in/pages/loyalty-page",
       "lastVerified": "2026-10-02",
-      "verified": true
+      "verified": true,
+      "rewardItem": "20 bonus Glow Points",
+      "steps": [
+        "Join The Face Shop India loyalty program on thefaceshop.in",
+        "Add your birthday to your profile"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "theobroma-in",
+      "brand": "Theobroma",
+      "category": "dessert",
+      "offer": "Birthday treat for registered customers, details not published, check with store",
+      "howToClaim": "Add your date of birth to your Theobroma account profile",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://theobroma.in/",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "nameRegex": "theobroma"
+      }
+    },
+    {
+      "id": "third-wave-coffee-in",
+      "brand": "Third Wave Coffee",
+      "category": "cafe",
+      "offer": "Birthday reward reported for Third Wave app members, check app or with store",
+      "howToClaim": "Join via the Third Wave Coffee app and add your date of birth; eligibility conditions may apply",
+      "countries": [
+        "IN"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.thirdwavecoffeeroasters.com/",
+      "lastVerified": "2026-10-02",
+      "verified": false,
+      "osm": {
+        "nameRegex": "third wave coffee"
+      }
+    },
+    {
+      "id": "timezone-in",
+      "brand": "Timezone",
+      "category": "retail",
+      "offer": "Birthday Treat for registered members: 200 tickets (Blue Elite), 500 bonus + 200 tickets (Gold), 1,000 bonus + 1,000 tickets (Platinum)",
+      "howToClaim": "Register your Powercard in the Timezone Fun App and add your DOB 7+ days before the 1st of your birthday month; voucher lasts 1 month",
+      "countries": [
+        "IN"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.timezonegames.com/en-in/rewards/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "^timezone"
+      },
+      "rewardItem": "Blue Elite 200 tickets; Gold 500 bonus + 200 tickets; Platinum 1,000 bonus + 1,000 tickets",
+      "steps": [
+        "Register your Powercard in the Timezone Fun App or Member Portal",
+        "Add your DOB at least 7 days before the 1st of your birthday month",
+        "Find the voucher in the app's Vouchers section",
+        "Show the voucher at a Timezone venue"
+      ],
+      "purchaseRequired": null,
+      "validFor": "1 month from the date the voucher is issued",
+      "bring": [
+        "Fun App voucher"
+      ]
+    },
+    {
+      "id": "us-polo-assn-in",
+      "brand": "U.S. Polo Assn.",
+      "category": "fashion",
+      "offer": "USPA Rewards birthday voucher: 10% (Silver), 15% (Gold) or 20% (Platinum), usable 15 days before to 15 days after",
+      "howToClaim": "Enrol in USPA Rewards with a ₹5,000+ purchase (Silver tier) and add your birthday",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://uspoloassn.in/pages/uspa-rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "u.?s.? polo"
+      },
+      "rewardItem": "Birthday voucher: 10% (Silver), 15% (Gold) or 20% (Platinum)",
+      "steps": [
+        "Enrol in USPA Rewards with a ₹5,000+ purchase",
+        "Add your birthday to your profile",
+        "Use the voucher within 15 days either side of your birthday"
+      ],
+      "purchaseRequired": true,
+      "validFor": "15 days before to 15 days after your birthday"
+    },
+    {
+      "id": "water-kingdom-in",
+      "brand": "Water Kingdom",
+      "category": "retail",
+      "offer": "Free entry for the birthday person on the birthday or up to 3 days after, plus 48% off for 3 to 4 companions",
+      "howToClaim": "Book online with at least 3 companion tickets; show government photo ID with your date of birth at entry",
+      "countries": [
+        "IN"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.waterkingdom.in/offers/birthday-bash-offer.html",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "water kingdom"
+      },
+      "rewardItem": "Free entry for the birthday person; 48% off for 3 or 4 companions",
+      "steps": [
+        "Book online with at least 3 companion tickets",
+        "Visit on your birthday or within 3 days after",
+        "Show government photo ID with your DOB at entry"
+      ],
+      "purchaseRequired": true,
+      "minSpend": "3 companion tickets",
+      "validFor": "Your birthday and up to 3 days after",
+      "bring": [
+        "Govt photo ID with DOB"
+      ]
     },
     {
       "id": "westside-in",
@@ -303,157 +1647,270 @@
       }
     },
     {
-      "id": "titan-encircle-in",
-      "brand": "Tanishq / Titan (Encircle)",
+      "id": "wetnjoy-lonavala-in",
+      "brand": "Wet'nJoy Lonavala",
       "category": "retail",
-      "offer": "Birthday offer for Encircle members at Titan group stores (Tanishq, Titan, Fastrack, Helios, etc.), one use per brand",
-      "howToClaim": "Be an Encircle member with birthday on file; offer active 15 days before to 15 days after your birthday",
+      "offer": "Free water park entry for the birthday person (birthday month, about 5 days either side); 4 to 10 companions get 10% off",
+      "howToClaim": "Book online at least 24 hours ahead with 4+ companions; bring original government ID showing DOB; one free ticket per year",
       "countries": [
         "IN"
       ],
-      "channel": "in-store",
-      "claimWindow": "month",
-      "sourceUrl": "https://www.titaneyeplus.com/titan-encircle",
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.lonavala.wetnjoy.in/offers/birthday-bash/",
       "lastVerified": "2026-10-02",
       "verified": true,
       "osm": {
-        "nameRegex": "tanishq|world of titan|titan eye|fastrack|helios|zoya|taneira"
-      }
-    },
-    {
-      "id": "third-wave-coffee-in",
-      "brand": "Third Wave Coffee",
-      "category": "cafe",
-      "offer": "Birthday reward reported for Third Wave app members — check app or with store",
-      "howToClaim": "Join via the Third Wave Coffee app and add your date of birth; eligibility conditions may apply",
-      "countries": [
-        "IN"
+        "nameRegex": "wet.?n.?joy"
+      },
+      "rewardItem": "Free entry for the birthday person; 10% off tickets for companions",
+      "steps": [
+        "Book online at least 24 hours before your visit",
+        "Include 4 to 10 companions on the booking",
+        "Visit within about 5 days of your birthday, in your birthday month",
+        "Show original government ID with your DOB at entry"
       ],
-      "channel": "in-store",
-      "claimWindow": "varies",
-      "sourceUrl": "https://www.thirdwavecoffeeroasters.com/",
-      "lastVerified": "2026-10-02",
-      "verified": false,
-      "osm": {
-        "nameRegex": "third wave coffee"
-      }
+      "purchaseRequired": true,
+      "minSpend": "4 companion tickets",
+      "validFor": "About 5 days either side of your birthday",
+      "bring": [
+        "Original govt ID with DOB"
+      ]
     },
     {
-      "id": "shoppers-stop-in",
-      "brand": "Shoppers Stop",
+      "id": "wonderla-in",
+      "brand": "Wonderla",
       "category": "retail",
-      "offer": "Birthday offer for First Citizen Club members — details not published in text, check with store",
-      "howToClaim": "Be a First Citizen Club member with your birthday on file",
+      "offer": "Buy 1 Get 1 free park ticket for guests whose birthday falls in the month of the visit (offer listed until 31 Mar 2027)",
+      "howToClaim": "Book online through Wonderla's birthday offer, choose park and date, and add the birthday ticket; tickets are for the chosen date only",
       "countries": [
         "IN"
       ],
       "channel": "both",
-      "claimWindow": "varies",
-      "sourceUrl": "https://www.shoppersstop.com/fc-birthday",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.wonderla.com/offers/birthday-offer-wonderla",
       "lastVerified": "2026-10-02",
-      "verified": false,
+      "verified": true,
       "osm": {
-        "nameRegex": "shoppers stop"
-      }
+        "nameRegex": "wonderla"
+      },
+      "rewardItem": "Second park ticket free with one paid ticket (Buy 1 Get 1)",
+      "steps": [
+        "Open the birthday offer on wonderla.com and choose Avail this offer",
+        "Select the park and visit date",
+        "Add the birthday offer ticket and pay",
+        "Receive tickets by email or WhatsApp"
+      ],
+      "purchaseRequired": true,
+      "validFor": "Visits in your birthday month, offer listed until 31 Mar 2027"
     },
     {
-      "id": "barbeque-nation-in",
-      "brand": "Barbeque Nation",
-      "category": "restaurant",
-      "offer": "Birthday celebrations can be flagged when booking — ask the outlet about any complimentary treat",
-      "howToClaim": "Mention the birthday occasion when reserving; confirm any offer with the outlet",
+      "id": "tealive-my",
+      "brand": "Tealive",
+      "category": "cafe",
+      "offer": "Complimentary voucher in your birthday month for Tealive loyalty members",
+      "howToClaim": "Register before your birthday month (joining during it means next year's voucher)",
       "countries": [
-        "IN"
+        "MY"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.tealive.com.my/support",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "tealive"
+      },
+      "steps": [
+        "Join the Tealive loyalty programme",
+        "Register before your birthday month",
+        "Use the voucher in your birthday month"
+      ],
+      "purchaseRequired": null,
+      "validFor": "Birthday month"
+    },
+    {
+      "id": "burgerfuel-nz",
+      "brand": "BurgerFuel",
+      "category": "restaurant",
+      "offer": "Birthday reward for VIB Club members, valid on your birthday only",
+      "howToClaim": "Be a VIB Club member for 24+ hours before your birthday with correct DOB; excludes specials; ID may be asked",
+      "countries": [
+        "NZ"
       ],
       "channel": "in-store",
       "claimWindow": "day",
-      "sourceUrl": "https://www.barbequenation.com/",
+      "sourceUrl": "https://www.burgerfuel.com/nz/vib-club",
       "lastVerified": "2026-10-02",
-      "verified": false,
+      "verified": true,
       "osm": {
-        "nameRegex": "barbeque nation"
-      }
-    },
-    {
-      "id": "theobroma-in",
-      "brand": "Theobroma",
-      "category": "dessert",
-      "offer": "Birthday treat for registered customers — details not published, check with store",
-      "howToClaim": "Add your date of birth to your Theobroma account profile",
-      "countries": [
-        "IN"
+        "nameRegex": "burger ?fuel"
+      },
+      "steps": [
+        "Join VIB Club with your correct date of birth",
+        "Sign up at least 24 hours before your birthday",
+        "Find the offer in Club Goods on your birthday"
       ],
-      "channel": "both",
-      "claimWindow": "varies",
-      "sourceUrl": "https://theobroma.in/",
-      "lastVerified": "2026-10-02",
-      "verified": false,
-      "osm": {
-        "nameRegex": "theobroma"
-      }
+      "purchaseRequired": null,
+      "validFor": "Your birthday only, until close of business",
+      "signupLeadDays": 1,
+      "bring": [
+        "Valid ID if asked"
+      ]
     },
     {
-      "id": "dennys-us",
-      "brand": "Denny's",
+      "id": "nandos-nz",
+      "brand": "Nando's",
       "category": "restaurant",
-      "offer": "Birthday reward for Denny's Rewards members — check with restaurant",
-      "howToClaim": "Join Denny's Rewards with your birthday saved, ideally a week or more before your birthday",
+      "offer": "NZ$15 birthday voucher emailed on the 1st of your birthday month, valid 30 days",
+      "howToClaim": "Verify your PERi-Perks account with DOB, buy within 6 months before your birthday month; show photo ID",
       "countries": [
-        "US"
+        "NZ"
       ],
       "channel": "in-store",
-      "claimWindow": "varies",
-      "sourceUrl": "https://www.dennys.com/rewards",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.nandos.co.nz/policies-and-terms/peri-perks-terms-and-conditions",
       "lastVerified": "2026-10-02",
-      "verified": false,
+      "verified": true,
       "osm": {
-        "wikidata": "Q1189695",
-        "nameRegex": "denny'?s"
-      }
-    },
-    {
-      "id": "panera-us",
-      "brand": "Panera Bread",
-      "category": "restaurant",
-      "offer": "Birthday reward for MyPanera members — check the app for current item",
-      "howToClaim": "Join MyPanera with your birthday saved in your profile",
-      "countries": [
-        "US"
+        "wikidata": "Q3472954",
+        "nameRegex": "nando'?s"
+      },
+      "rewardItem": "NZ$15 voucher",
+      "steps": [
+        "Join PERi-Perks, verify your account and add your date of birth",
+        "Make a purchase within 6 months before your birthday month",
+        "Voucher is emailed on the 1st of your birthday month",
+        "Show the barcode and photo ID to redeem"
       ],
-      "channel": "both",
-      "claimWindow": "varies",
-      "sourceUrl": "https://www.panerabread.com/en-us/mypanera.html",
-      "lastVerified": "2026-10-02",
-      "verified": false,
-      "osm": {
-        "wikidata": "Q7130852",
-        "nameRegex": "panera"
-      }
+      "purchaseRequired": null,
+      "validFor": "30 days from the email",
+      "bring": [
+        "Voucher barcode",
+        "Photo ID"
+      ]
     },
     {
-      "id": "costa-gb",
-      "brand": "Costa Coffee",
+      "id": "starbucks-nz",
+      "brand": "Starbucks",
       "category": "cafe",
-      "offer": "Birthday cake reward for Costa Club app members — check the app",
-      "howToClaim": "Join Costa Club in the app, opt in to marketing and add your birthday in Settings",
+      "offer": "Birthday reward: free size upgrade (Green) or free tall handcrafted drink (Gold), birthday month only",
+      "howToClaim": "Add your birthday to your Starbucks Rewards account; scan the app or registered card in store",
       "countries": [
-        "GB"
+        "NZ"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.starbucks.co.nz/starbucks-rewards-terms-of-use",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q37158",
+        "nameRegex": "starbucks"
+      },
+      "rewardItem": "Green: free drink size upgrade. Gold: free tall handcrafted drink",
+      "steps": [
+        "Join Starbucks Rewards",
+        "Add your birthday to your account",
+        "Reward issued on the 1st of your birthday month",
+        "Scan the app barcode or registered card"
+      ],
+      "purchaseRequired": null,
+      "validFor": "Birthday month",
+      "bring": [
+        "App barcode or registered card",
+        "Photo ID if asked"
+      ]
+    },
+    {
+      "id": "tank-nz",
+      "brand": "TANK",
+      "category": "cafe",
+      "offer": "Free Full Classic Smoothie in your birthday month for TANK Rewards members",
+      "howToClaim": "Register for TANK Rewards with your birthday; scan the app barcode in store; not via delivery apps",
+      "countries": [
+        "NZ"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.tankjuice.co.nz/terms-of-use",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "^tank"
+      },
+      "rewardItem": "Free Full Classic Smoothie (no extras)",
+      "steps": [
+        "Join TANK Rewards with your birthday",
+        "Show the app barcode in store or use the app",
+        "Not available through delivery apps"
+      ],
+      "purchaseRequired": null,
+      "validFor": "Birthday month",
+      "bring": [
+        "App barcode"
+      ]
+    },
+    {
+      "id": "starbucks-sg",
+      "brand": "Starbucks",
+      "category": "cafe",
+      "offer": "Birthday treats and bonus Stars for Starbucks Rewards members",
+      "howToClaim": "Join Starbucks Rewards Singapore with your birthday on file; check the app in your birthday month",
+      "countries": [
+        "SG"
       ],
       "channel": "in-store",
       "claimWindow": "varies",
-      "sourceUrl": "https://www.costa.co.uk/costa-club",
+      "sourceUrl": "https://www.starbucks.com.sg/rewards",
       "lastVerified": "2026-10-02",
-      "verified": false,
+      "verified": true,
       "osm": {
-        "wikidata": "Q608845",
-        "nameRegex": "costa"
-      }
+        "wikidata": "Q37158",
+        "nameRegex": "starbucks"
+      },
+      "steps": [
+        "Join Starbucks Rewards Singapore",
+        "Add your birthday to your account",
+        "Check the app in your birthday month"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "swensens-sg",
+      "brand": "Swensen's",
+      "category": "dessert",
+      "offer": "Free Firehouse Happy Birthday Sundae on your birthday for Cool Rewards members (dine-in)",
+      "howToClaim": "Join Cool Rewards; show NRIC (or birth certificate for kids) and your eMembership card when ordering",
+      "countries": [
+        "SG"
+      ],
+      "channel": "in-store",
+      "claimWindow": "day",
+      "sourceUrl": "https://swensens.com.sg/complimentary-firehouse-happy-birthday/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "swensen'?s"
+      },
+      "rewardItem": "Free Firehouse Happy Birthday Sundae (dine-in)",
+      "steps": [
+        "Join Swensen's Cool Rewards",
+        "Visit on your birthday and dine in",
+        "Show ID and your eMembership card when ordering"
+      ],
+      "purchaseRequired": null,
+      "validFor": "Your birthday",
+      "bring": [
+        "NRIC (birth certificate for kids)",
+        "eMembership card"
+      ]
     },
     {
       "id": "baskin-robbins-us",
       "brand": "Baskin-Robbins",
       "category": "dessert",
-      "offer": "Birthday coupon for Baskin-Robbins rewards members — check the app",
+      "offer": "Birthday coupon for Baskin-Robbins rewards members, check the app",
       "howToClaim": "Create a Baskin-Robbins account/app profile with your birthday and opt in to emails",
       "countries": [
         "US"
@@ -466,6 +1923,581 @@
       "osm": {
         "wikidata": "Q584601",
         "nameRegex": "baskin.?robbins"
+      }
+    },
+    {
+      "id": "bath-and-body-works-us",
+      "brand": "Bath & Body Works",
+      "category": "beauty",
+      "offer": "One free item (original price up to $9.95) as a Birthday Reward for My Bath & Body Works members",
+      "howToClaim": "Add birth month/day to your Rewards profile; reward appears in app/account Wallet; show barcode in US stores or use code online",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "month",
+      "sourceUrl": "https://customercare.bathandbodyworks.com/hc/en-us/articles/4410658819347-How-do-I-redeem-a-My-Bath-Body-Works-Reward-or-Birthday-Reward",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q810773",
+        "nameRegex": "bath (&|and) body works"
+      }
+    },
+    {
+      "id": "chilis-us",
+      "brand": "Chili's",
+      "category": "restaurant",
+      "offer": "Free birthday dessert for My Chili's Rewards members",
+      "howToClaim": "Join My Chili's Rewards with your birthday on file; the dessert reward expires 10 days after it's issued",
+      "countries": [
+        "US"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.chilis.com/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q1072948",
+        "nameRegex": "chili'?s"
+      },
+      "rewardItem": "Free dessert",
+      "steps": [
+        "Join My Chili's Rewards",
+        "Add your birthday to your account",
+        "Use the birthday dessert reward before it expires"
+      ],
+      "purchaseRequired": null,
+      "validFor": "10 days from when the reward is issued"
+    },
+    {
+      "id": "clinique-us",
+      "brand": "Clinique",
+      "category": "beauty",
+      "offer": "Birthday gift once a year for Clinique Smart Rewards members, with a $55 purchase",
+      "howToClaim": "Join Clinique Smart Rewards with your birthday on file; buy $55+ to claim the gift",
+      "countries": [
+        "US"
+      ],
+      "channel": "online",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.clinique.com/loyalty",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "steps": [
+        "Join Clinique Smart Rewards",
+        "Add your birthday to your account",
+        "Make a $55 purchase to claim the gift"
+      ],
+      "purchaseRequired": true,
+      "validFor": "Once per year",
+      "minSpend": "$55"
+    },
+    {
+      "id": "corner-bakery-us",
+      "brand": "Corner Bakery",
+      "category": "cafe",
+      "offer": "Free treat on your birthday for Corner Bakery Rewards members (all tiers)",
+      "howToClaim": "Join Corner Bakery Rewards and add your birthday to your profile",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.cornerbakerycafe.com/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "corner bakery"
+      },
+      "steps": [
+        "Join Corner Bakery Rewards",
+        "Add your birthday to your account",
+        "Redeem the birthday treat"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "crumbl-us",
+      "brand": "Crumbl",
+      "category": "dessert",
+      "offer": "Free single-cookie voucher on your birthday for Silver-status (and higher) Crumbl Rewards members",
+      "howToClaim": "Reach Silver status (500 Crumbs earned this year) and have your birthday in your Crumbl profile",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://crumblcookies.com/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "crumbl"
+      },
+      "rewardItem": "Free Single cookie voucher",
+      "steps": [
+        "Join Crumbl Rewards",
+        "Reach Silver status (500 Crumbs earned this year)",
+        "Add your birthday in your profile",
+        "Use the voucher on your birthday"
+      ],
+      "purchaseRequired": null,
+      "validFor": "Your birthday"
+    },
+    {
+      "id": "dairy-queen-us",
+      "brand": "Dairy Queen",
+      "category": "dessert",
+      "offer": "Birthday surprise in the DQ app for DQ Rewards members",
+      "howToClaim": "Join DQ Rewards in the DQ app with your birthday on file; check the app's deals around your birthday",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.dairyqueen.com/en-us/rewards/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q1141226",
+        "nameRegex": "dairy queen|^dq$"
+      },
+      "steps": [
+        "Download the DQ app and join DQ Rewards",
+        "Add your birthday to your account",
+        "Look for the birthday surprise in the app"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "dsw-us",
+      "brand": "DSW",
+      "category": "fashion",
+      "offer": "Birthday bonus reward for all DSW VIP members (Club, Gold and Elite)",
+      "howToClaim": "Join DSW VIP for free and add your birthday to your account",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.dsw.com/en/us/vip",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "dsw|designer shoe warehouse"
+      },
+      "steps": [
+        "Join DSW VIP for free",
+        "Add your birthday to your account",
+        "Use the Birthday Bonus Reward"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "duck-donuts-us",
+      "brand": "Duck Donuts",
+      "category": "dessert",
+      "offer": "Free birthday donut, usable all birthday month, for Duck Donuts Rewards members",
+      "howToClaim": "Have a rewards account active within the past 365 days with your birthday on file",
+      "countries": [
+        "US"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.duckdonuts.com/rewards/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "duck donuts"
+      },
+      "rewardItem": "Free donut",
+      "steps": [
+        "Join Duck Donuts Rewards and add your birthday",
+        "Keep your account active (used in the past 365 days)",
+        "Redeem the donut during your birthday month"
+      ],
+      "purchaseRequired": null,
+      "validFor": "Whole birthday month"
+    },
+    {
+      "id": "dutch-bros-us",
+      "brand": "Dutch Bros",
+      "category": "cafe",
+      "offer": "Free birthday drink for Dutch Rewards app members, valid 30 days",
+      "howToClaim": "Have the Dutch Bros app with your birthday set; scan your Dutch Pass and tell the broista you're using the birthday drink",
+      "countries": [
+        "US"
+      ],
+      "channel": "in-store",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.dutchbros.com/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "dutch bros"
+      },
+      "rewardItem": "Free drink",
+      "steps": [
+        "Download the Dutch Bros app and join Dutch Rewards",
+        "Add your birthday (reward arrives on your birthday)",
+        "Scan your Dutch Pass in the shop",
+        "Tell the broista you want your birthday drink"
+      ],
+      "purchaseRequired": null,
+      "validFor": "30 days",
+      "bring": [
+        "Dutch Pass in the app"
+      ]
+    },
+    {
+      "id": "ihop-us",
+      "brand": "IHOP",
+      "category": "restaurant",
+      "offer": "5 bonus PanCoins credited on the first day of your birthday month for IHOP Rewards members",
+      "howToClaim": "Join IHOP Rewards (International Bank of Pancakes) with birthday saved; redeem PanCoins in the app's Stack Market",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.ihop.com/en/about-ihop/faqs/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q1185675",
+        "nameRegex": "ihop"
+      }
+    },
+    {
+      "id": "krispy-kreme-us",
+      "brand": "Krispy Kreme",
+      "category": "dessert",
+      "offer": "Birthday reward for Krispy Kreme Rewards members, issued on your birthday",
+      "howToClaim": "Join Krispy Kreme Rewards and save your birthday in your profile; reward is valid 30 days from issue",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.krispykreme.com/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q1192805",
+        "nameRegex": "krispy kreme"
+      }
+    },
+    {
+      "id": "noodles-us",
+      "brand": "Noodles & Company",
+      "category": "restaurant",
+      "offer": "Birthday reward by tier: free dessert (Classic), small entrée (Signature) or regular entrée (Premier)",
+      "howToClaim": "Join Noodles Rewards and add your birthday; the reward appears in your account",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.noodles.com/rewards/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "noodles (&|and) co"
+      },
+      "rewardItem": "Classic: free dessert. Signature: small entrée. Premier: regular entrée",
+      "steps": [
+        "Join Noodles Rewards",
+        "Add your birthday to your account",
+        "Redeem the birthday reward for your tier"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "nothing-bundt-cakes-us",
+      "brand": "Nothing Bundt Cakes",
+      "category": "dessert",
+      "offer": "Free Bundtlet for your birthday for Bundtastic Rewards members",
+      "howToClaim": "Join Bundtastic Rewards and add your birthday",
+      "countries": [
+        "US"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.nothingbundtcakes.com/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "nothing bundt cakes"
+      },
+      "rewardItem": "Free Bundtlet",
+      "steps": [
+        "Join Bundtastic Rewards",
+        "Add your birthday to your account",
+        "Redeem the Bundtlet for your birthday"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "pf-changs-us",
+      "brand": "P.F. Chang's",
+      "category": "restaurant",
+      "offer": "Free appetizer or dessert as a birthday reward for P.F. Chang's Rewards members",
+      "howToClaim": "Add your birth month and day to your Rewards profile; use once, within 30 days after your birthday; not on catering",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.pfchangs.com/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "p.? ?f.? chang'?s"
+      },
+      "rewardItem": "Free appetizer or dessert (no catering items or dessert cocktails)",
+      "steps": [
+        "Join P.F. Chang's Rewards",
+        "Add your birth month and day to your profile",
+        "Redeem the Birthday Reward once"
+      ],
+      "purchaseRequired": null,
+      "validFor": "Expires 30 days after your birthday"
+    },
+    {
+      "id": "panera-us",
+      "brand": "Panera Bread",
+      "category": "cafe",
+      "offer": "Free bakery treat on your birthday for MyPanera members",
+      "howToClaim": "Join MyPanera for free and add your birthday; the treat shows up in your rewards",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.panerabread.com/en-us/mypanera/meet-mypanera.html",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q7130852",
+        "nameRegex": "panera"
+      },
+      "rewardItem": "Free bakery treat",
+      "steps": [
+        "Join MyPanera for free",
+        "Add your birthday to your account",
+        "Redeem the birthday treat"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "peets-us",
+      "brand": "Peet's Coffee",
+      "category": "cafe",
+      "offer": "Free birthday drink for Peetnik Rewards members",
+      "howToClaim": "Join Peetnik Rewards and add your birthday; redeem via the app or member account",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.peets.com/pages/peetnik-rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "peet'?s"
+      },
+      "rewardItem": "Free drink",
+      "steps": [
+        "Join Peetnik Rewards",
+        "Add your birthday to your account",
+        "Redeem the birthday drink"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "ritas-us",
+      "brand": "Rita's Italian Ice",
+      "category": "dessert",
+      "offer": "Birthday (or half-birthday) reward for Rita's Rewards members at participating US shops",
+      "howToClaim": "Give your birthday when you sign up; the reward expires 6 days after you receive it",
+      "countries": [
+        "US"
+      ],
+      "channel": "in-store",
+      "claimWindow": "week",
+      "sourceUrl": "https://www.ritasice.com/rewards/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "rita'?s"
+      },
+      "steps": [
+        "Join Rita's Rewards and give your birthday when you sign up",
+        "Redeem the reward at a participating US shop"
+      ],
+      "purchaseRequired": null,
+      "validFor": "6 days from when you receive it"
+    },
+    {
+      "id": "sephora-us-ca",
+      "brand": "Sephora",
+      "category": "beauty",
+      "offer": "Free birthday gift (choice of set) for Beauty Insider members, or 250 points instead in store",
+      "howToClaim": "Join Beauty Insider free with birthday saved; redeem free in store or online with a $25 minimum purchase",
+      "countries": [
+        "US",
+        "CA"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://newsroom.sephora.com/sephora-unwraps-another-year-of-beauty-with-its-2026-beauty-insider-birthday-gift-offerings/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q2408041",
+        "nameRegex": "sephora"
+      }
+    },
+    {
+      "id": "smoothie-king-us",
+      "brand": "Smoothie King",
+      "category": "cafe",
+      "offer": "Birthday smoothie: $2 20 oz for Healthy Rewards members, free 20 oz for Champion tier",
+      "howToClaim": "Join Healthy Rewards and add your birthday; the offer loads to your account automatically",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.smoothieking.com/healthy-rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "smoothie king"
+      },
+      "rewardItem": "20 oz smoothie: $2 for members, free for Champion tier",
+      "steps": [
+        "Join Healthy Rewards",
+        "Add your birthday to your account",
+        "The birthday offer loads automatically",
+        "Redeem it in store or in the app"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "starbucks-us",
+      "brand": "Starbucks",
+      "category": "cafe",
+      "offer": "One free handcrafted drink, food item or bottled drink on your birthday for Starbucks Rewards members",
+      "howToClaim": "Join Starbucks Rewards 7+ days before your birthday, add your birthday, make 1 Star-earning purchase first; scan app barcode in store",
+      "countries": [
+        "US"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.starbucks.com/terms/rewards/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q37158",
+        "nameRegex": "starbucks"
+      }
+    },
+    {
+      "id": "target-us",
+      "brand": "Target",
+      "category": "retail",
+      "offer": "A birthday gift every year for Target Circle members",
+      "howToClaim": "Join Target Circle for free, add your birthday, and look for the gift in the Target app wallet",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.target.com/circle",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q1046951",
+        "nameRegex": "^target$"
+      },
+      "steps": [
+        "Join Target Circle for free",
+        "Add your birthday to your account",
+        "Use the birthday gift"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "cheesecake-factory-us",
+      "brand": "The Cheesecake Factory",
+      "category": "restaurant",
+      "offer": "Free slice of cheesecake or layer cake for your birthday when you make a purchase",
+      "howToClaim": "Join Cheesecake Rewards and add your birthday; redeem with any purchase",
+      "countries": [
+        "US"
+      ],
+      "channel": "in-store",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.thecheesecakefactory.com/rewards",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q1045842",
+        "nameRegex": "cheesecake factory"
+      },
+      "rewardItem": "Free slice of any cheesecake or layered cake",
+      "steps": [
+        "Join Cheesecake Rewards",
+        "Add your birthday to your account",
+        "Redeem the slice when you make a purchase"
+      ],
+      "purchaseRequired": true,
+      "minSpend": "Any purchase"
+    },
+    {
+      "id": "tropical-smoothie-cafe-us",
+      "brand": "Tropical Smoothie Cafe",
+      "category": "cafe",
+      "offer": "Free smoothie reward on your birthday for Tropic Rewards members",
+      "howToClaim": "Join Tropic Rewards and keep your birthday up to date in your account",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "varies",
+      "sourceUrl": "https://www.tropicalsmoothiecafe.com/rewards/",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "nameRegex": "tropical smoothie"
+      },
+      "rewardItem": "Free smoothie",
+      "steps": [
+        "Join Tropic Rewards",
+        "Keep your birthday up to date in your account",
+        "Redeem the birthday smoothie reward"
+      ],
+      "purchaseRequired": null
+    },
+    {
+      "id": "ulta-us",
+      "brand": "Ulta Beauty",
+      "category": "beauty",
+      "offer": "Free birthday gift once a year plus 2x points on purchases during your birthday month",
+      "howToClaim": "Ulta Beauty Rewards member with email/app and birthday in profile; no purchase needed in store, $0+ purchase online",
+      "countries": [
+        "US"
+      ],
+      "channel": "both",
+      "claimWindow": "month",
+      "sourceUrl": "https://www.ulta.com/rewards/terms-and-conditions",
+      "lastVerified": "2026-10-02",
+      "verified": true,
+      "osm": {
+        "wikidata": "Q7880076",
+        "nameRegex": "ulta"
       }
     }
   ]

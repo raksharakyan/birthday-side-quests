@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { el, externalLink } from '../../src/render/dom';
-import { _resetDone, liveCard, questCard } from '../../src/render/quests';
+import { _resetDone, formatChecked, liveCard, questCard } from '../../src/render/quests';
+import { icon, initials } from '../../src/render/icons';
 import { questLine, QUEST_TEMPLATES } from '../../src/templates';
 import { validateLiveResults } from '../../src/liveSearch';
 import type { Offer } from '../../src/types';
@@ -82,7 +83,7 @@ describe('liveSearch validation', () => {
   it('live card renders as text', () => {
     const c = liveCard({ title: XSS, url: 'https://e.com', snippet: XSS, source: 'e.com' });
     expect(c.querySelector('img')).toBeNull();
-    expect(c.textContent).toContain('Unverified — check the link');
+    expect(c.textContent).toContain('Unverified: check the link');
   });
 });
 
@@ -93,3 +94,44 @@ describe('templates', () => {
     expect(questLine('cafe', '$& $1')).toContain('$& $1');
   });
 });
+
+describe('soft premium helpers', () => {
+  it('initials: two words → first letters, one word → capitalised pair, junk → letters only', () => {
+    expect(initials('Tata Starbucks')).toBe('TS');
+    expect(initials('Theobroma')).toBe('Th');
+    expect(initials('adidas')).toBe('Ad');
+    expect(initials('Lakmé Salon')).toBe('LS');
+    expect(initials('<img src=x>')).toBe('IS');
+    expect(initials('')).toBe('');
+  });
+  it('formatChecked: "2 Oct 2026" for ISO dates, raw text otherwise', () => {
+    expect(formatChecked('2026-10-02')).toBe('2 Oct 2026');
+    expect(formatChecked('soon')).toBe('soon');
+  });
+  it('icon() builds an aria-hidden inline SVG without innerHTML', () => {
+    const s = icon('pin');
+    expect(s.namespaceURI).toBe('http://www.w3.org/2000/svg');
+    expect(s.getAttribute('aria-hidden')).toBe('true');
+    expect(s.getAttribute('class')).toBe('icon');
+    expect(s.querySelectorAll('path, circle').length).toBe(2);
+  });
+  it('quest card: claim checkbox has a stable, brand-specific name; mono tile and links are safe', () => {
+    const card = questCard({ ...offer, brand: 'Tata Starbucks' }, { now: new Date(Date.UTC(2026, 9, 2)), idPrefix: 't' });
+    const box = card.querySelector<HTMLInputElement>('input[type="checkbox"]');
+    expect(box?.getAttribute('aria-label')).toBe('Mark claimed: Tata Starbucks');
+    expect(card.querySelector('.mono')?.textContent).toBe('TS');
+    expect(card.querySelector('.mono')?.getAttribute('aria-hidden')).toBe('true');
+    expect(card.querySelector('.card__fine')?.textContent).toBe('Last checked 2 Oct 2026 on example.com. On your birthday.');
+  });
+  it('checking one card syncs every card for the same offer (Nearby + Online)', () => {
+    const a = questCard(offer, { now: new Date(), idPrefix: 'nearby' });
+    const b = questCard(offer, { now: new Date(), idPrefix: 'online' });
+    document.body.append(a, b);
+    a.querySelector<HTMLInputElement>('input[type="checkbox"]')?.click();
+    expect(b.classList.contains('is-done')).toBe(true);
+    expect(b.querySelector<HTMLInputElement>('input[type="checkbox"]')?.checked).toBe(true);
+    a.remove();
+    b.remove();
+  });
+});
+

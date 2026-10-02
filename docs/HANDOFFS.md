@@ -391,3 +391,355 @@ These are outside QA's local scope:
 - Smoke-test the live Pages URL: console free of CSP errors while zooming the map.
 - Real Worker: `curl -H 'Origin: https://evil.example'` → 403.
 - First GitHub Actions run green, including the separate `lighthouse` job.
+
+---
+
+## Full-Stack: autocomplete + radius
+
+Branch `feat/autocomplete-more-offers`. Nothing committed. See DECISIONS #16 and #17.
+
+### What changed
+- **Location autocomplete (Photon).**
+  - `src/autocomplete.ts` holds the data side:
+    - `parsePhoton` is a strict parser. Coordinates must be finite and in range (GeoJSON `[lng,lat]`), the country must be ISO-2 (uppercased), and every string goes through `cleanDisplayText`. It caps at 5 and dedupes labels.
+    - `buildPhotonUrl` sends `q`, `limit=5`, `lang=en` and `layer=city|district|locality`, with no coordinates.
+    - `createSuggester` debounces for 300 ms, needs at least 3 characters and accepts at most 120. It aborts the previous request on each keystroke, keeps an in-memory cache of up to 100 entries and times out after 5 s. Errors mean no suggestions.
+  - `src/render/combobox.ts` is the UI, a WAI-ARIA 1.2 combobox with a listbox:
+    - The listbox is built with `el()` only.
+    - ArrowUp and ArrowDown wrap. Enter selects the active option; with none active, the form submits normally. Escape, Tab, blur and an outside pointerdown all close the list.
+    - A `mousedown` preventDefault avoids the blur race.
+    - `#suggest-live` gives polite announcements, deduplicated.
+    - The footer reads "Suggestions by Photon · © OpenStreetMap".
+  - `src/main.ts`:
+    - A picked suggestion goes straight to `runSearch(place)` and **skips Nominatim**.
+    - If no month is set yet, it asks for the month and keeps the picked place until the input text changes.
+    - Free text plus Enter or "Find my quests" uses the Nominatim path as before.
+  - CSS lives in `components.css` (`.combo`, `.ac-*`):
+    - absolute popup, so there is no layout shift; z-index 1100 keeps it above Leaflet;
+    - options at least 48 px tall, with an active option in lavender fill, a focus-coloured ring and ink text;
+    - the pop animation is turned off under reduced motion.
+- **Search radius.**
+  - `#radius` select: 2, 5 (default), 10 or 20 km.
+  - `overpass.ts` adds `clampRadius`, `maxBranchesFor` (60 up to 5 km, 150 above) and `MAX_BRANCHES_WIDE`. The parse cap follows `out center N`, and `fetchBranches(..., fetchImpl, radiusM)` passes the radius through.
+  - Changing the radius re-runs the lookup for the current place.
+  - The map draws a dashed radius circle (`.map-radius`) and fits to it, then to the pins.
+- **Nearby ordering.** `renderNearbyList` puts quests with a branch first, sorted by distance, each with "x km away" (`.quest-card__distance`). The rest go under `h3.quest-group__heading` "More quests in <Country> (no branch found within N km)". Nothing is hidden.
+- **Security and privacy.**
+  - `csp.config.ts` adds `https://photon.komoot.io` to connect-src only, and `public/_headers` is updated to match. A unit test asserts that the `_headers` CSP equals `buildCsp()` and that Photon appears only in connect-src.
+  - PRIVACY.md (table row, komoot privacy link), SECURITY.md (diagram, STRIDE S2/T1/I1/D2/D3, CSP, limitations) and the footer attribution are updated.
+
+### Tests
+- **Unit:** new `tests/unit/autocomplete.test.ts` covers:
+  - the parser: valid, malformed, XSS, bidi, range, country code, caps, dedupe;
+  - the URL;
+  - the suggester with fake timers: debounce, min length, abort and stale drop, cache, cancel, 500/bad JSON/network errors, timeout.
+  - `overpass.test.ts` adds radius, cap and request-body tests.
+- **E2E:** new `tests/e2e/autocomplete.spec.ts`. The fixtures mock `photon.komoot.io`. The harness privacy check now allows typed text only to Nominatim or Photon, and Photon may get only `q/limit/lang/layer` over GET. Tests:
+  - suggestions with axe on the open listbox;
+  - ArrowDown+Enter picks with no Nominatim call;
+  - click or tap, with tap targets of at least 44 px;
+  - picking before the month is set;
+  - Escape, Tab and outside click, then free text plus Enter uses Nominatim;
+  - XSS through Photon;
+  - Photon 500 falls back to Nominatim;
+  - radius `around:10000` / `around:20000` plus distance sorting and grouping, with axe.
+  - The keyboard test in `qa.spec.ts` now tabs month → radius → submit. The CSP e2e regex includes Photon.
+
+### Results
+- `npm run build`: OK.
+- `npm test`: 406 passed.
+- `npm run test:e2e`: 46 passed, 4 skipped (desktop-only keyboard tests on mobile). The autocomplete spec was also run with `--repeat-each 3` and was green.
+- `npm run lhci`: performance, a11y, best practices and SEO all 1.00 on all 3 runs.
+- `npm audit --audit-level=high`: 0 vulnerabilities.
+
+### Manual check against the real services (`npm run preview`, built-in browser)
+- **Typing "Koraman":** one Photon request (`…?q=Koraman&limit=5&lang=en&layer=city&layer=district&layer=locality`, 0.5 s), no CSP errors. It returned 5 options, including "Koramangala · Bangalore South, Karnataka, India", and the live region announced "5 suggestions available".
+- **Pick with 10 km radius:** ArrowDown×4 + Enter picked Koramangala. There was no Nominatim request. Overpass took 4.6 s. Result: 8 quests and 121 shop pins within 10 km. Cards were sorted from Tanishq at 170 m to The Body Shop at 4.2 km.
+- **Switch to 20 km:** 9.1 s, 146 pins.
+- **Console:** empty.
+- **375 px:** no horizontal overflow, the popup is full width, and options are 57–74 px tall.
+
+### For Security / QA
+- New origin `photon.komoot.io` (connect-src only). Please review `src/autocomplete.ts`, `src/render/combobox.ts` and the `I1`/`D2` rows.
+- **The branch cap is not distance-sorted.** At 20 km in central Bengaluru the 150 cap is nearly reached (146 pins), and Overpass output order is by OSM id. Far-off branches can therefore displace nearer ones, so "nearest" is nearest among those returned.
+- Photon results ignore `lang=en` for some local names (for example Japanese POIs). That is cosmetic.
+- `aria-controls="city-suggestions"` is in the static HTML. The listbox is created by JS at startup, and axe was clean.
+
+---
+
+## Full-Stack: city-only, all countries, session persistence, claim details (2026-10-02)
+
+Branch `feat/autocomplete-more-offers`. Nothing committed. See DECISIONS #18, #19 and #20. I didn't touch `research/`, `public/offers.json` or `docs/design/`.
+
+### What changed
+- **City-only input (#19).**
+  - The label is now "Your city", with placeholder "e.g. Bengaluru".
+  - Photon is called with `layer=city` only, and `parsePhoton` also drops any feature whose `type` isn't `city`.
+  - Nominatim free text gets `featureType=city`.
+  - Live probe results:
+    - `layer=city` gives good results for Beng, Manch, Pune and Kyo.
+    - `osm_tag=place:*` loses Manchester, UK, so it's not used.
+    - NYC's Brooklyn is `place=suburb`, so autocomplete shows the US towns called Brooklyn instead. Enter on "Brooklyn" still resolves to Brooklyn, NY through Nominatim.
+- **All countries (#20).**
+  - New `src/countries.ts` lists all 249 ISO 3166-1 alpha-2 codes, named with `Intl.DisplayNames`.
+  - The Online select puts countries with online quests first, in an optgroup with a count, e.g. "India (28)". Every other country follows. Worldwide `"*"` offers are still included for any selection.
+  - `onlineCounts()` is in `src/offers.ts`.
+  - `el()` now allows the plain-text `label` attribute, for `<optgroup>`.
+- **Auto-sync.**
+  - Picking or searching a city sets the Online country and immediately re-renders Online. Found online also refreshes when that tab is open.
+  - The Online tab shows a count pill (`#online-count`). Its accessible name is "Online 28 quests".
+- **Session persistence (#18).**
+  - New `src/session.ts` is the only module that touches storage, and a unit test enforces this.
+  - It uses one `sessionStorage` key, `bsq-session`, holding `{v, city, lat, lng, countryCode, month, radius, tab, done}`. The record is validated strictly on load and on save.
+  - A record is only written once the user does something (search, month, radius, tab, country or done).
+  - A reload restores the inputs, tab and done state, then re-runs Overpass from the stored coordinates without calling Nominatim or Photon.
+  - The **Clear search** button wipes the record and resets the page. `MapView.reset()` was added for this.
+  - Done-state API in `render/quests.ts`: `doneIds`, `setDoneIds`, `onDoneChange`.
+- **Claim details.**
+  - New optional `Offer` fields: `rewardItem`, `steps`, `purchaseRequired`, `minSpend`, `signupLeadDays`, `validFor`, `bring`.
+  - They are validated strictly. A present but invalid field rejects the whole entry.
+  - Cards show "You get: …", an `<ol>` of steps inside the "How to claim" `dd` (instead of `howToClaim`), and a chip list (`ul.claim-chips`, labelled "Before you go to <brand>").
+  - Old entries render as before.
+  - All 102 entries in the current `offers.json` validate.
+- **No em dashes.**
+  - Removed from `src/` (strings, templates and comments), `index.html`, README, SECURITY, DECISIONS, PLAN, OFFER_RESEARCH, `_headers`, `csp.config.ts`, `check-links.mjs` and the Worker header comment.
+  - Copy changes include "Unverified: check the link" and "Varies (check the terms)".
+  - Older HANDOFFS entries are left as historical.
+- **Docs.**
+  - PRIVACY has a new "Your search in this tab" section.
+  - The new UI privacy note is in index.html, PRIVACY and README.
+  - SECURITY: intro and I1 row.
+  - CONTRIBUTING: the storage rule, plus documentation for the new offer fields.
+  - DECISIONS #18 to #20.
+- **CSS.** Minimal and token-only: `.session-row`, `.btn--small`, `.tab__count`, `.quest-card__reward`, `.quest-card__steps`, `.claim-chips`.
+
+### Tests
+- **New unit tests:**
+  - `session.test.ts`: schema rejections, including HTML, bidi, extra keys and `__proto__`, plus blocked storage.
+  - `countries.test.ts`.
+  - `claim-details.test.ts`: validation, chips, rendering and XSS in every new field.
+  - `copy.test.ts`: em dash and spaced en dash in `src/` and `index.html`. It also has **"PENDING DATA CLEANUP (orchestrator): public/offers.json…"**, which currently **passes**, because offers.json is already clean.
+- **Updated unit tests:**
+  - autocomplete: city layer, and the city-type filter.
+  - geocode: `featureType`.
+  - security: `sessionStorage` is allowed only in `src/session.ts`; localStorage, IndexedDB and cookies are still banned everywhere.
+  - render: copy.
+- **E2E:**
+  - New `session.spec.ts` covers the label, picking Pune, auto-sync and count, `page.reload()` restore with no geocoder calls, Clear search, `featureType=city` plus Found online sync, the all-countries list (Japan), tampered storage being rejected, and claim details from real data.
+  - The harness has a new contract helper, `expectOnlySessionRecord`. The happy path now checks that a refresh restores and that Clear search wipes.
+  - The no-offers test moved from Paris to Kyoto, because FR now has an offer.
+  - The Photon fixtures are city-only now (Pune and Benguela replace Koramangala and Bengkulu).
+
+### Results
+- `npm run build`: OK.
+- `npm test`: 554 passed.
+- `npm run test:e2e`: 58 passed, 4 skipped (desktop-only keyboard tests). The reload tests were green with `--repeat-each 3`.
+- `npm run lhci`: assertions pass. Performance was 0.99 and a11y, best practices and SEO were all 1.00.
+- `npm audit --audit-level=high`: 0 vulnerabilities.
+
+### Manual check against the real services (`npm run preview`, built-in browser)
+- **Pick:** typing "Pune" gave 5 city suggestions. I picked Pune, Maharashtra. Online switched to IN and showed "28 quests". The search found 31 quests and 19 pins within 5 km. I ticked adidas-in.
+- **Reload:** the city, month, IN and the done tick were all restored. There were 0 Nominatim or Photon requests and 1 Overpass request, and the console was clean.
+- **Clear search:** emptied sessionStorage.
+- **Free text:** typing "Kyoto" + Enter sent a Nominatim request with `featureType=city`, set the Online country to JP and showed the no-quests status.
+
+### For Security / QA / UI-UX
+- **Security:** please review `src/session.ts`, the `label` attribute added to the `el()` allowlist, and the I1 row.
+- **UI/UX:**
+  - The Online `<select>` now has 250 options, so axe takes about 8 s on it.
+  - The new pieces are styled minimally and need the planned restyle: count pill, Clear search button, claim chips and steps list.
+
+---
+
+## UI/UX: soft premium port (2026-10-02)
+
+Branch `feat/autocomplete-more-offers`, not committed by me (a "WIP: port soft premium redesign" snapshot commit already exists; everything after it is in the working tree). Ports the approved prototype in `docs/design/` with the **plum** accent. See DECISIONS #21.
+
+### What changed
+| Area | Change |
+|---|---|
+| Fonts | `@fontsource-variable/bricolage-grotesque@5.3.0` + `@fontsource-variable/plus-jakarta-sans@5.3.0` (exact pins, lockfile updated); Fredoka and Nunito removed. `src/styles/fonts.css` declares only latin + latin-ext faces (Bricolage "opsz" build, Jakarta "wght" build), `font-display: swap`, self-hosted, `assetsInlineLimit` still 0. Shipped woff2: 77 + 31 KB (Bricolage), 27 + 22 KB (Jakarta); a page with Latin text only downloads the two latin files. No preload (not needed for perf). |
+| Tokens / CSS | `tokens.css`, `base.css`, `components.css` rewritten from `prototype.css`: porcelain neutrals, plum accent block, radius rule, tinted shadows, motion tokens. Map tile tint via the DESIGN.md filter recipe on `.leaflet-tile-pane`; Leaflet zoom + new recenter control styled as one white pill (44px buttons); popups restyled (`.bsq-popup`). |
+| Icons | `src/render/icons.ts`: the prototype's SVG set (pin, calendar, radius, search, arrow, check, lock, alert, clock, bag, gift, qr, sparkle, plus, minus, locate, close, chevron, globe, refresh, id) plus candle logo, toast candle, empty-state art, pin teardrop, claim tick, and `initials()`. All via `svg()` / `createElementNS`, `aria-hidden`, no innerHTML. |
+| Emoji / copy | Every emoji removed (index.html, templates, status lines, badges, empty states, toast, tabs, combobox, map popup). Quest templates rewritten as plain "where to claim" lines used as the card meta when there's no nearby branch. `monthInfo` labels: "It's your birthday month" / "Your birthday month starts next month" / "...in N months". No em dashes, no exclamation marks. New unit test fails on any emoji in `src/` or `index.html`. |
+| Header | Line-art candle logo (`#site-mark`); flame is a dashed outline until the first claim, then fills plum with glow + 3.2 s flicker (`body.is-lit`), with a 700 ms ignite on each claim. "How it works" / "Privacy" in-page links (desktop) to new footer sections. h1 is still "Birthday Side Quests". |
+| Search panel | City (pin icon, combobox), Birthday month (calendar + chevron), **Search radius as a radio group** (`fieldset`/`legend`, 4 radios 2/5/10/20 km styled as a segmented pill, arrow keys work natively, same re-run behaviour), Find my quests (orb), Clear search, privacy line with lock. `#status` (the single `role=status`) sits under the form: errors in warn colour with an alert icon, loading with a pulsing dot, success **visually hidden** (spoken; the results header shows the summary). Invalid city sets `aria-invalid` + `aria-describedby="status"` and a warn edge. Changing month or radius cancels pending suggestions. |
+| Autocomplete | Floating 18px-radius list, 52px options, pin icon (accent when active), typed prefix in bold (`<b>` text node), region line in ink-3, 180 ms fade/drop. Footer text unchanged. |
+| Results header | Birthday-month pill (`#month-info`, accent tint + sparkle in the birthday month, neutral + calendar otherwise), h2 "Your October quests", summary "37 quests in total. 18 within 5 km of Bengaluru." (or why pins are missing), progress ring "N of M claimed" (`#progress`, plain text, ring is `aria-hidden`; M = unique offers listed in Nearby + Online). |
+| Tabs | Segmented track with a sliding white thumb (`--tab-index`/`--tab-count` set with `style.setProperty`), count chips on all three tabs (`#nearby-count`, `#online-count`, `#found-count`; accessible names like "Nearby 31 quests", "Found online 2 results"). WAI-ARIA tablist + arrows/Home/End unchanged. |
+| Quest card | Mono initials tile, brand h3, meta (branch name · "1.2 km away", or a plain where-to-claim line), badges (Verified / Check with store / May be outdated), "You get" tint panel (rewardItem as headline, full offer text under it), condition chips with icons, numbered steps with connector line, footer (Get directions pill with orb, Verify offer link, round claim checkbox), fine print "Last checked 2 Oct 2026 on starbucks.in". Claim checkbox: `aria-label="Mark claimed: <brand>"`; visible text switches "Mark claimed" → "Claimed". Checking one card syncs every card of that offer (Nearby + Online) and the map pins. Mobile: full-width 52px claim row. |
+| Celebration | `render/confetti.ts`: check draw (CSS) + 0.82→1.08→1 spring (WAAPI), 12 deterministic paper strips (`.confetti__piece`) fanned over 136° via WAAPI, ring fill (900 ms), candle ignite, card wash, dark toast "X claimed. N of M done." (aria-hidden; the same text goes to `#celebrate-live`). Reduced motion: no strips, no movement, states and toast text still appear. |
+| Map | White teardrop pins with plum initials, active pin filled + scaled 1.18, claimed pin tint + check, searched place = ink dot with halo, dotted plum radius circle, recenter control, "Map couldn't load" notice with Try again when no tile loads. Clicking a pin marks the matching card active (and scrolls it into view on desktop). |
+| States | Empty (candle-in-ring art + title + actions, e.g. "See online quests"), error (warn icon), loading skeletons matching the card, "No shops within 2 km yet" notice with "Widen to 5 km". Online tab country select (globe + chevron, optgroups kept), Found online cards with globe tile and "Unverified: check the link" badge. |
+| Layout | Mobile first: search → results head → map → tabs → cards; ≥1100px two columns with a sticky map. No horizontal scroll at 375/390px. |
+
+### Tests changed (equivalent or more coverage)
+- `getByLabel('Quest complete!')` → `getByLabel('Mark claimed')`; celebration test now also checks 12 strips, the toast text, `body.is-lit` and `#progress-count`; reduced-motion test checks end states (toast, ring, candle) and no strips.
+- Radius: `getByLabel('Search radius').selectOption(...)` → `getByRole('radio', { name: '10 km' }).check()`; keyboard flow now Tabs over the two header links and checks ArrowRight/ArrowLeft inside the radio group.
+- XSS tests: `svg` → `svg:not(.icon)` in `#found-list` / `#city-suggestions` (our own aria-hidden icons are allowed; the autocomplete test also asserts every icon is aria-hidden with no `onload`). Option text no longer starts with 📍. Branch name check no longer has the "Nearest: " prefix.
+- `smoke.spec.ts` waits for finite animations before axe (cards fade in now).
+- Overpass 504 test asserts the header explains missing pins.
+- Unit: claim-details (structure of "You get", no emoji, icons aria-hidden), render (initials, date format, `icon()`, claim label, card sync), copy (no emoji), monthInfo labels.
+
+### Results
+- `npm run build`: OK. `npm test`: 561 passed. `npm run test:e2e`: 58 passed, 4 skipped (desktop-only keyboard tests on mobile). axe: 0 violations in every axe step.
+- `npm run lhci` (3 runs): Performance 0.99, Accessibility 1.0, Best Practices 1.0, SEO 1.0; LCP 2.0 s, CLS ≤ 0.01, TBT 0 ms.
+- `npm audit --audit-level=high`: 0 vulnerabilities.
+
+### Screenshots (real app, `vite preview` of the e2e build; Nominatim/Overpass/Worker mocked like `tests/e2e/fixtures.ts` with a few extra Bengaluru branches; real OSM tiles allowed for realism)
+- `docs/screenshots/desktop.png` (1440×900): results, 2 claimed, Starbucks pin active with popup. Compare `docs/design/proto-accent-plum.png`.
+- `docs/screenshots/claimed.png` (1440×900): celebration frozen mid-flight (strips, toast, ring). Compare `docs/design/proto-done.png`.
+- `docs/screenshots/online-tab.png` (1440×900): Online tab with the country select.
+- `docs/screenshots/mobile.png` (390 wide @2x, top 3200 CSS px). Compare `docs/design/proto-mobile.png`.
+Known differences from the prototype: label "Your city" (DECISIONS #19), four radius options, real OSM tiles instead of the hand-drawn map art, cards show branch names instead of street addresses (Overpass gives no address).
+
+### Manual check against the real services (`npm run preview`, built-in browser)
+Typed "Beng" → 5 Photon suggestions with bold prefix; picked Bengaluru (October). First Overpass call returned 504 twice (upstream overload) → status and header said pins didn't load, quests still listed. Reload restored city, month, radius, tab and claimed quest from sessionStorage and re-ran Overpass from coordinates: 31 quests, 60 pins, 18 within 5 km. Claim → 12 strips, toast "Third Wave Coffee claimed. 2 of 37 done.", candle lit, 9 Third Wave pins switched to the check. Pin click opened the popup and highlighted the Tata Starbucks card. Console: only the browser's own "Failed to load resource: 504" lines from Overpass; no app errors, no CSP violations.
+
+### Contrast (WCAG 2.x, relative-luminance formula)
+| Foreground | Background | Ratio | Use |
+|---|---|---|---|
+| `--ink` #221B1F | `--bg` #FAF7F5 / white | 15.82 / 16.87 | body text |
+| `--ink-2` #5E5459 | bg / white / `--sunken` #F3EEEB / `--accent-tint` #F2E7F0 | 6.82 / 7.27 / 6.32 / 6.05 | labels, secondary, "You get" detail |
+| `--ink-3` #71666B | bg / white / sunken / accent-tint | 5.16 / 5.50 / 4.78 / 4.58 | meta, fine print, claimed steps/chips |
+| white | `--accent` #6B2D5E / hover #5A2450 / active #4A1D42 | 9.71 / 11.65 / 13.59 | buttons, count chips, active pin |
+| `--accent` | white / bg / sunken / accent-tint | 9.71 / 9.11 / 8.44 / 8.08 | links, pin initials, icons |
+| `--accent-ink` #5A2450 | accent-tint / accent-tint-2 #E6D2E2 | 9.69 / 8.14 | "You get" label, birthday pill, "Claimed" |
+| `--ok` #2E6A4C | `--ok-tint` #E8F1EB | 5.55 | Verified |
+| `--warn` #82560F | `--warn-tint` #FBF0DA / white / bg | 5.65 / 6.39 / 5.99 | Check with store, Unverified, field errors |
+| bg #FAF7F5 | `--ink` | 15.82 | toast |
+| UI: `--line-control` #958A8F | white / bg | 3.33 / 3.12 | input, checkbox, ghost button edges |
+| UI: selected thumb edge `--ink-3` | track `--sunken` / thumb white | 4.78 / 5.50 | radius + tabs selected state (DESIGN.md open point; `--line-control` would be only 2.89 on the track) |
+| UI: focus ring `--accent` | bg / white | 9.11 / 9.71 | all focusable elements (2px gap + 2px ring) |
+| UI: pin stroke `--accent` | map land #F1ECE9 | 8.29 | pins |
+Claimed cards dim chips and steps by switching to `--ink-3` (not opacity), so they stay AA.
+
+### For Security
+- No new origins; CSP unchanged. No `style=""` in markup, no innerHTML. Dynamic styling only via `style.setProperty` (`--tab-index`, `--tab-count`, `--progress`, `--enter-delay`) and WAAPI keyframes (strips, toast, checkbox spring).
+- New DOM built only with `el()` / `svg()`. The combobox bolds the typed prefix with an `el('b')` text node. Leaflet gets DOM nodes for icons/popups and a new `L.Control` built with `el()`.
+- `el()`/`svg()` allow-lists unchanged.
+- Fonts are referenced from `node_modules` by relative path in `fonts.css` and emitted as hashed same-origin assets (`font-src 'self'`).
+
+### For QA
+- The radius is now a radio group (`input[name=radius]`, ids `radius-2000` … `radius-20000`); tests use `getByRole('radio', { name: 'N km' })`.
+- `#status` success text is visually hidden but still in the accessibility tree (tests unchanged).
+- Watch: the tile-failure notice (`.map-notice`) has no e2e test yet (tiles are always mocked as success); it was checked manually by forcing tile 503s.
+
+---
+
+## Security review: PR #3 (2026-10-02)
+Scope: `git diff origin/main...HEAD` (autocomplete + radius, city/countries/session/claim details, soft premium port) plus working tree. Reviewed `src/**`, `csp.config.ts`, `public/_headers`, `public/offers.json`, `package.json`/lockfile, built `dist/index.html`, PRIVACY.md and SECURITY.md. `.github/` and `vite.config.ts` are unchanged since main.
+
+### Findings
+| ID | Severity | File:line | Issue | Fix | Status |
+|---|---|---|---|---|---|
+| PR3-1 | Low | `src/offers.ts:55-79,90` | The `nameRegex` charset blocks `*`, `+`, `{}` but not stacked `?` or alternation groups, e.g. `a?a?…a?aaa…` (≤100 chars) backtracks exponentially in `RegExp.test` on every Overpass branch name. SECURITY.md D3 claimed ReDoS was avoided. Needs a malicious `offers.json` PR to pass review; all 87 shipped patterns are linear (max bound 16). | New `nameRegexBranching()` bound (2 per `?` × alternatives per group, top level included); `validateOsm` rejects anything over 1024. | Fixed + tested |
+| PR3-2 | Low (defence in depth) | `src/render/dom.ts:85-101` | `svg()` checked attributes but accepted any tag name, so `svg('script' / 'a' / 'use' / 'foreignObject' / 'animate' / 'set')` would build. Only constant callers today, so not exploitable. | Tag allowlist: `svg g path circle ellipse rect line polyline polygon`. | Fixed + tested |
+| PR3-3 | Info | `src/autocomplete.ts` | Photon receives partial typed text before submit; a user typing a street address discloses it to komoot. Documented in PRIVACY.md (partial text) and now in SECURITY.md I1 residual risk. | Docs only. | Accepted |
+| PR3-4 | Info | SECURITY.md T1/T4/I1/D3 | Rows did not mention `svg()`, the `label` attribute, exact-pinned `@fontsource-variable` packages, fixed Photon params, or the regex bound. | Rows updated. | Fixed |
+
+### Verified OK (no change needed)
+- **Photon:** `connect-src` only (no img/script/font); params fixed to `q`, `limit=5`, `lang=en`, `layer=city`; no coordinates/bias; `credentials: 'omit'`, `strict-origin` referrer, CORS-safelisted `Accept` only; `parsePhoton` validates finite in-range coords, ISO-2 country, `type === 'city'`, cleans and caps every label part.
+- **Session storage:** only `src/session.ts` touches storage (grep + new unit scan over `src/**`); no localStorage/IndexedDB/cookies/URL/history writes. Load is size-capped (16 KB) before `JSON.parse`, exact key set (so `__proto__`/extra keys fail), version, ranges, ISO-2, radius from the list, tab enum, unique offer ids, no `<>`/control/bidi in the city; invalid records are removed. Restored values go to `input.value`, `textContent`, numeric Overpass params and an ISO-2 select; no injection path.
+- **Claim-detail fields** (`rewardItem`, `steps`, `minSpend`, `validFor`, `bring`, `signupLeadDays`, `purchaseRequired`): strict types, list/length caps, control/bidi rejection; rendered only as text via `el()`. `offers.json`: 102 offers, all `sourceUrl` https without credentials, no `<`, `>`, `javascript:` or invisible characters.
+- **`el()` `label` attribute:** set with `setAttribute` as an inert string; safe.
+- **Combobox prefix bolding:** `el('b', {}, [text])` + text node; no HTML.
+- **CSP/build:** `dist/index.html` has one external module script, one stylesheet link, no inline `<script>`/`<style>`/`style=`/`on*=`; meta CSP matches `csp.config.ts` (Photon in connect-src only); `_headers` regenerated identically plus `frame-ancestors`. Dynamic styling is `style.setProperty` with numeric values and WAAPI (CSSOM, allowed under `style-src 'self'`). Leaflet `L.Control`, divIcons and popups are DOM nodes from `el()`/`svg()`; radius ring uses SVG attributes + class.
+- **Fonts:** four hashed same-origin `.woff2` assets; no external URLs in built CSS.
+- **Overpass:** still built only from validated wikidata ids, escaped regexes and `toFixed` coordinates; radius clamped (100 m to 20 km) and UI/session limited to 2/5/10/20 km; branch cap clamped to ≤150.
+- **Supply chain:** `@fontsource-variable/bricolage-grotesque` and `plus-jakarta-sans` pinned to exactly 5.3.0, lockfile integrity equals the registry `dist.integrity`, no install scripts; `npm ci --dry-run` OK; `npm audit --audit-level=high`: 0 vulnerabilities.
+- **PRIVACY.md** matches behaviour (session record fields, Clear search, Photon after 3 chars/300 ms, Nominatim skipped after a pick or refresh, nothing in the URL).
+
+### Tests
+- New `tests/unit/security-pr3.test.ts` (54 tests): `svg()` tag/attr rejection, `label` inertness, ReDoS bound (hostile patterns rejected, shipped file validates with no drops), claim-detail strictness, Photon URL params and parser rejection, hostile session records (markup, `__proto__`, extra keys, bad tab/radius/country/ids, oversize), and a storage/cookie/URL-state scan of `src/**`.
+- `npm run build` (typecheck + vite): OK. `npm test`: 17 files, 624 passed. `npm audit --audit-level=high`: 0. `npm run test:e2e`: 58 passed, 4 skipped (pre-existing skips).
+
+### Sign-off
+No high or medium issues. The two low findings are fixed and covered by tests. **Security approves PR #3 for merge and deploy.** Not committed (orchestrator owns git).
+
+---
+
+## QA: PR #3 (2026-10-02)
+
+Branch `feat/autocomplete-more-offers`, working tree including Security's PR3-1/PR3-2 fixes. Nothing committed. QA only touched `tests/e2e/qa-pr3.spec.ts` (new) and `tests/unit/qa-offers-data.test.ts` (new). No `src/` edits.
+
+### Results
+| Command | Result |
+|---|---|
+| `npm run build` | ✅ pass |
+| `npm test` | ✅ **625/625** in 17 files (10 new from QA) |
+| `npm run test:e2e` (run 4 times in a row after the last change: 2 full runs here, earlier runs before a timing fix) | ✅ **74 passed, 8 skipped** in both final runs (82 = 41 tests × 2 projects). The 2 known-bug tests use `test.fail()` and count as passed. The journey test was also run `--repeat-each=6 --workers=4`: 12/12. |
+| `npm run lhci` (3 runs) | ✅ Performance **0.99**, Accessibility **1.00**, Best Practices **1.00**, SEO **1.00** in all 3 runs. **LCP 1.8 to 2.0 s**, FCP 1.7 s, CLS ≤ 0.01, TBT 0 ms |
+| `npm audit --audit-level=high` | ✅ 0 vulnerabilities |
+
+One flake was found and fixed in QA's own test: in an early version of the journey, a full-page axe scan under 4 parallel workers outlasted the 3.2 s toast. The toast now gets its own scoped axe scan straight after the claim. It was not a product issue.
+
+### New tests
+| File | Tests | Covers |
+|---|---|---|
+| `tests/e2e/qa-pr3.spec.ts` | 10 (× 2 projects; 4 are single-project by design) | **Journey (desktop + Pixel 7):** month, then type "Beng" and pick a Photon suggestion (no Nominatim). Nearby is sorted nearest first with "x m/km away" and the "More quests in India (no branch found within 5 km)" group. Switching to 20 km sends `around:20000` for the same coordinates and `out center 150`, with no geocoding; the list re-sorts (the mocked Starbucks moves about 14 km away and drops to last), and the header reads "N quests in total. 4 within 20 km of Bengaluru.". Claiming 2 quests checks the ring text `2 of 37`, the `--progress` ratio, `body.is-lit`, the "Claimed" label, the toast text (aria-hidden) and live region, and the claimed pins (2) versus unclaimed (2). Online: country auto-set to IN, the count chip and accessible name match offers.json, and the "both" offer is claimed there too. The session record is exact. Refresh restores city, month, 20 km, the Online tab, country, done ids, ring, candle and claimed pins; Overpass re-runs at 20 km with 0 Nominatim/Photon calls and no replayed toast. Clear search empties sessionStorage, resets inputs, radius, ring, candle, pins, circle, counts and month pill, and puts focus on the city. axe runs with the listbox open (existing), the toast (scoped), the claimed state, Online with the 250-option select, the restored state and after Clear. **Claim details:** Chili's (US) shows You get = rewardItem, the offer text as detail, steps `<ol>` = 3 items with no free-text howToClaim, chips = 1 ("Valid: …", `purchaseRequired: null` gives no chip), and aria-hidden icons. A legacy entry with no fields shows the offer as the headline and `howToClaim` as `<p>`. Every US card is checked against offers.json (steps count, chip count, headline). **Map tiles 503** shows the `.map-notice` (`role=note`, copy), quests and pins are unaffected, axe passes, and "Try again" hides it once tiles load. **Overpass 504 then 200** gives exactly 2 identical queries ≥ 1.9 s apart, with pins and distances shown. **Overpass 429 ×2** gives up after one retry with quests still listed. **Reduced motion:** no strips, no ignite, no WAAPI on the toast or checkbox, and every end state (toast, live region, ring, candle, claimed pin) is present; axe passes. **Keyboard only (desktop):** autocomplete ArrowDown+Enter, month prompt and focus, type-ahead "Oct", radius arrows 5→20, Enter submits the picked place, then Shift+Tab back to the radius and ArrowLeft re-runs at 10 km. Tablist arrows work. Space claims, with a visible focus ring on the claim row. Enter on Clear search. **No horizontal scroll** at 360/375/390/768/1024/1440 at start, with autocomplete open, with results + claimed + toast, and on Online; the toast stays inside the viewport. **Mobile toast** (2 `test.fail` tests, see QA-PR3-01/02). |
+| `tests/unit/qa-offers-data.test.ts` | 10 | 102 entries and the app validator keeps all of them. Ids are unique and kebab-case. No duplicate brand+country. Every `sourceUrl` is https with no credentials, port or fragment. Countries are valid ISO-2 (from `src/countries.ts`), non-empty and unique. The id suffix matches the country. No em dash, spaced en dash or emoji in any string. `lastVerified` is a real date and not in the future. **Domain plausibility (warnings only):** the host must contain a brand token (≥4 chars) or be on a reviewed allowlist (`andindia.com`, `itchotels.com`, `dsw.com`, `ihop.com`); third-party platforms and news/blog subdomains are flagged. |
+
+### Data warnings (not failures)
+- `hidesign-in` → `hidesigncustomercare.zohodesk.in`: a Zoho Desk helpdesk, not the brand's domain. Prefer a page on `hidesign.com`.
+- `myntra-insider-in` → `blog.myntra.com`: a blog post, not the Insider T&C.
+- `sephora-us-ca` → `newsroom.sephora.com`: a press release, not the Beauty Insider terms.
+- Manual note: `titan-encircle-in` ("Tanishq / Titan (Encircle)") points to `www.titaneyeplus.com`, a sister brand's page. It passes the token check ("titan"), but the Encircle/Tanishq page would be the better source.
+
+### Bugs
+| ID | Severity | Owner | Repro | Expected | Actual | Exact fix | Status |
+|---|---|---|---|---|---|---|---|
+| QA-PR3-01 | Medium (mobile UX) | UI/UX | Pixel 7 (412×839) or 375 px. Search Bengaluru. Scroll so a card's claim row sits in the bottom ~100 px. Tap it, then tap the same row again within 3 s to undo a mis-tap. | The second tap toggles the claim. | The toast (`position:fixed; bottom:24px; z-index:3001`, no `pointer-events` rule) sits over the row; `elementFromPoint` hits `.toast` at 3 of 5 sample points, so the tap is swallowed for 3.2 s. | `src/styles/components.css` `.toast { …; pointer-events: none; }`. The toast is aria-hidden and has no controls. | Open. Test: `qa-pr3.spec.ts` "mobile: the claim toast does not block…" (`test.fail`; remove that line after the fix) |
+| QA-PR3-02 | Low (visual) | UI/UX | Same setup. Claim "The Body Shop". Seen live on 375 px London too ("Starbucks claimed. 3 of 11 done." on 3 lines). | One-line pill, about 300 px wide. | The toast is 206 px wide and 77 px tall (3 lines). `left: 50%` on a fixed shrink-to-fit box limits its width to 50vw before `translate(-50%)`. | Same rule: add `width: max-content;` (the existing `max-width: calc(100vw - 32px)` still caps it). Verified in a throwaway run: 302×56 px. | Open. Test: "toast is one line on phones" (`test.fail`) |
+| QA-PR3-03 | Medium (content UX) | Orchestrator (data) / Full-Stack | Search London (March) or Mumbai (October). Read the cards. | Claim details add information. | **31** entries have `rewardItem: "Not published by the brand, varies by member"`, shown as the large "You get" headline (e.g. adidas, Wagamama, Target). **39** entries have `validFor: "Not stated"`, shown as a "Valid: Not stated" chip. Both are placeholders that read as broken. | Preferred (data): drop `rewardItem` and `validFor` where unknown; the card then falls back to the offer text and shows no chip. Alternative (code, `src/render/quests.ts`): in `claimChips` skip `validFor` matching `/^not stated$/i`, and in `questCard` treat a `rewardItem` starting with "Not published" as absent. | Open |
+| QA-PR3-04 | Info | Full-Stack | On the Online tab, click Clear search. | Maybe back to Nearby. | Inputs, ring and map reset, but the Online tab stays selected (now "Pick your country"). After a refresh it would be Nearby. | Optional: `selectTab(tabs[0])` inside `clearSearch()` (restoring=true already suppresses the write). | Open (product call) |
+| QA-PR3-05 | Info | Full-Stack | Live, central London at 5 km returned exactly **60** pins (the cap), with Costa alone 13. | n/a | The nearest-first order is only "nearest among the 60 returned" (Overpass order is by OSM id), as Full-Stack noted for 20 km. | Optional: sort by distance before capping in `parseOverpass`, or ask for more than the cap and trim client-side. | Open |
+| QA-PR3-06 | Info (upstream) | none | Live Mumbai at 5 km and 2 km: 4 of 5 Overpass calls failed with 504 `Dispatcher_Client::request_read_and_idx::timeout … server is probably too busy` (reproduced with curl, about 9 s each). London's first try returned 504 and the retry returned 200. | n/a | Handled gracefully: quests listed, header explains, retry works. | None in-app (DECISIONS #15 rejected mirrors). Monitor after deploy. | Accepted |
+
+### Live smoke test (real Photon, Overpass, OSM tiles; `npm run preview`, built-in browser)
+- **Mumbai, October:**
+  - "Mumb" sent 1 Photon request (1.4 s) and returned 5 city options. Mumbai was 2nd, after "Mumbué" (Photon ranking).
+  - ArrowDown×2 + Enter picked Mumbai with no Nominatim call. Online auto-set to IN ("Online 28 quests"), with 31 Nearby cards.
+  - Overpass returned 504 on both tries at 5 km, then again at 2 km. The fallback copy was correct ("Shop pins for Mumbai didn't load, so distances are missing").
+  - Claimed adidas and AND: 12 strips, toast "AND claimed. 2 of 37 done.", ring "2 of 37", candle lit.
+  - **Refresh** restored city, month, 2 km and both claims, with 0 Nominatim/Photon calls. That Overpass call succeeded: Starbucks 810 m and La Pino'z 1.6 km, 2 pins, the rest grouped.
+- **London, March:**
+  - "Lond" put London, England first. The month pill read "Your birthday month starts in 5 months", the title "Your March quests", and Online synced to GB ("Online 2").
+  - Overpass returned 504 and then 200 on the retry (10 s): 60 pins, 8 near cards sorted from Costa 70 m to Space NK 3.9 km, header "11 quests in total. 8 within 5 km of London."
+  - Claimed Costa and Greggs: ring "2 of 11", 16 claimed pins (13 Costa + 3 Greggs).
+  - **Refresh** restored everything, with only 1 Overpass call (200).
+  - At 375 px: no horizontal scroll. The toast wraps to 3 lines (QA-PR3-02).
+- **Clear search** emptied sessionStorage, reset the ring and candle, and removed all markers.
+- **Console:** only the browser's own "Failed to load resource: 504" lines from Overpass. No app errors and no CSP violations.
+
+### Sign-off
+| Feature | QA |
+|---|---|
+| Photon city autocomplete (combobox, keyboard, a11y, privacy) | ✅ |
+| Radius radio group 2/5/10/20 (re-run, arrows, query) | ✅ |
+| Nearby-first sorting with distance + grouping | ✅ (cap caveat QA-PR3-05) |
+| All 249 countries in Online + auto-sync + count chip | ✅ |
+| sessionStorage restore + Clear search | ✅ (QA-PR3-04 info) |
+| 102 offers, claim details rendering | ✅ rendering / ⚠️ content placeholders (QA-PR3-03) |
+| Data integrity (ids, https, countries, dashes, emoji) | ✅ (3 domain warnings) |
+| Soft premium redesign: celebration, ring, candle, pins, reduced motion | ✅ |
+| Toast on mobile | ❌ QA-PR3-01/02 (one-line CSS fix, not blocking data or privacy) |
+| Map tile failure notice | ✅ |
+| Overpass retry once on 504/429 | ✅ |
+| Accessibility (axe 0 in every state, keyboard flow) | ✅ |
+| No horizontal scroll 360 to 1440 | ✅ |
+| Performance (Lighthouse) | ✅ 0.99 / 1.00 / 1.00, LCP ≤ 2.0 s |
+
+**Recommendation:** OK to merge once QA-PR3-01/02 are fixed; that is a two-property CSS change in `.toast`, after which the two `test.fail()` lines come out. QA-PR3-03 is strongly recommended before deploy, because about a third of the cards show placeholder text.
+
+## Orchestrator: PR #3 close-out (2026-10-02)
+I applied QA-PR3-01, -02, -03 and -04 (DECISIONS #22) and removed the two `test.fail` markers.
+
+| Check | Result |
+|---|---|
+| `npm run build` | OK |
+| `npm test` | 625 passed |
+| `npm run test:e2e` | 74 passed, 8 skipped (skips are by design) |
+
+- **Sign-offs:** Security ✅ (Security review: PR #3) and QA ✅ (all blocking items fixed). PR #3 is cleared to merge.
+- **Docs:** added `CLAUDE.md` and the root `DESIGN.md`, and updated the README.

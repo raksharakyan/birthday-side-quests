@@ -2,7 +2,7 @@ import { safeHttpsUrl } from '../urls';
 
 /**
  * Tiny DOM builder. SECURITY RULES (do not relax):
- *  - text only via text nodes / textContent — never innerHTML, outerHTML, insertAdjacentHTML or document.write;
+ *  - text only via text nodes / textContent, never innerHTML, outerHTML, insertAdjacentHTML or document.write;
  *  - tags: script/style/iframe/frame/object/embed/base/link/meta/template/svg/math are rejected (SVG icons use svg());
  *  - attributes only from an allow-list; on* handlers, style, src, srcset, srcdoc, formaction, xlink:href are rejected;
  *  - href only via safeHttpsUrl (https, no credentials).
@@ -16,6 +16,8 @@ const ALLOWED_ATTRS = new Set([
   'hidden', 'disabled', 'checked', 'selected', 'required', 'readonly', 'placeholder', 'autocomplete',
   'maxlength', 'minlength', 'min', 'max', 'inputmode', 'spellcheck', 'enterkeyhint', 'autocapitalize',
   'href', 'target', 'rel', 'datetime', 'alt', 'width', 'height', 'open', 'scope', 'colspan', 'novalidate',
+  // Plain-text label of an <optgroup> (Online tab country groups).
+  'label',
 ]);
 
 // Elements that can run script, load active content, re-point relative URLs or change document policy.
@@ -44,7 +46,7 @@ function applyAttrs(node: Element, attrs: Attrs | undefined): void {
     }
     node.setAttribute(name, value === true ? '' : String(value));
   }
-  // Any link that targets another browsing context (not just _blank — a named target opens a new
+  // Any link that targets another browsing context (not just _blank: a named target opens a new
   // window too) must not get window.opener or a referrer.
   if (node.hasAttribute('target')) node.setAttribute('rel', 'noopener noreferrer');
 }
@@ -78,13 +80,17 @@ export function externalLink(href: string, text: string, attrs: Attrs = {}): HTM
 }
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
+// Shape-only SVG elements. No <script>, <a>, <foreignObject>, <use>, <image>, <style> or animation
+// elements (<animate>/<set> can rewrite attributes such as href at runtime).
+const SVG_TAGS = new Set(['svg', 'g', 'path', 'circle', 'ellipse', 'rect', 'line', 'polyline', 'polygon']);
 const SVG_ATTRS = new Set([
   'viewbox', 'd', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'width', 'height',
   'cx', 'cy', 'r', 'x', 'y', 'rx', 'ry', 'points', 'class', 'aria-hidden', 'focusable', 'role', 'transform',
 ]);
 
-/** Static SVG builder (icons only — never pass external data in here). */
+/** Static SVG builder (icons only; never pass external data in here). */
 export function svg(tag: string, attrs: Record<string, string> = {}, children: readonly SVGElement[] = []): SVGElement {
+  if (!SVG_TAGS.has(tag)) throw new Error(`svg(): <${tag}> is not allowed`);
   const node = document.createElementNS(SVG_NS, tag) as SVGElement;
   for (const [k, v] of Object.entries(attrs)) {
     if (!SVG_ATTRS.has(k.toLowerCase())) throw new Error(`svg(): attribute "${k}" is not allowed`);

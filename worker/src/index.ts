@@ -1,5 +1,5 @@
 /**
- * Birthday Side Quests — "Found online" search proxy.
+ * Birthday Side Quests: "Found online" search proxy.
  *
  * GET /search?month=1..12&country=XX
  *  - accepts ONLY a month number and an ISO-2 country code; the search query is built from a

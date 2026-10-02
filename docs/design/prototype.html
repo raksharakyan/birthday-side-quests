@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Birthday Side Quests, soft premium prototype</title>
+<link rel="stylesheet" href="prototype.css">
+<script src="prototype.js" defer></script>
+</head>
+<body>
+
+<!-- Icon sprite: hand-authored, 24px grid, 1.5 stroke, round caps -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M8 3.5v4M16 3.5v4M4 10h16"/></symbol>
+  <symbol id="i-radius" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="1.4"/><path d="M12 12l5.2-3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.2"/><path d="M15.6 15.6L20 20"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M8 16L16 8M9.5 8H16v6.5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5.5 12.5l4 4 9-9"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2.6"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4.5l8.5 15h-17z"/><path d="M12 10v4M12 16.8v.1"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.3l2.8 1.7"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5.5 8.5h13l-1 11.5h-11z"/><path d="M9 8.5V7a3 3 0 0 1 6 0v1.5"/></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><rect x="4.5" y="9" width="15" height="11" rx="1.8"/><path d="M3.5 9h17M12 9v11M12 9c-1.5-3.5-5.5-4-5.5-1.5S10 9 12 9zM12 9c1.5-3.5 5.5-4 5.5-1.5S14 9 12 9z"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1.2"/><rect x="14" y="4" width="6" height="6" rx="1.2"/><rect x="4" y="14" width="6" height="6" rx="1.2"/><path d="M14 14h2.5v2.5H14zM18 18h2M20 14v2M14 20h2"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3.5c.6 4.2 2.3 5.9 6.5 6.5-4.2.6-5.9 2.3-6.5 6.5-.6-4.2-2.3-5.9-6.5-6.5 4.2-.6 5.9-2.3 6.5-6.5z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M6 12h12"/></symbol>
+  <symbol id="i-locate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5.5"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M7.5 10l4.5 4.5 4.5-4.5"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.4 2.4 3.4 5 3.4 8s-1 5.6-3.4 8c-2.4-2.4-3.4-5-3.4-8s1-5.6 3.4-8z"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2.1-5"/><path d="M17.5 3.8v3.6h-3.6"/></symbol>
+</svg>
+
+<a class="skip" href="#results">Skip to results</a>
+
+<div class="page">
+
+  <!-- ===== TOP BAR ===== -->
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Birthday Side Quests, home">
+      <span class="mark-tile" aria-hidden="true"><svg class="mark" viewBox="0 0 40 40">
+        <circle class="mark__glow" cx="20" cy="11" r="7"/>
+        <path class="mark__flame" d="M20 5c2.4 2.8 3.3 4.7 3.3 6.3a3.3 3.3 0 0 1-6.6 0c0-1.6.9-3.5 3.3-6.3z"/>
+        <path class="mark__wick" d="M20 14.6v2.6"/>
+        <rect class="mark__candle" x="15.5" y="17.2" width="9" height="15" rx="2"/>
+        <path class="mark__stripe" d="M15.7 22.6l8.6-3.2M15.7 27.8l8.6-3.2"/>
+        <path class="mark__plate" d="M10.5 35.2h19"/>
+      </svg></span>
+      <span class="brand__name">Birthday Side Quests</span>
+    </a>
+    <nav class="topnav" aria-label="Secondary">
+      <a href="#">How it works</a>
+      <a href="#">Privacy</a>
+    </nav>
+  </header>
+
+  <!-- ===== SEARCH BAR (compact, results mode) ===== -->
+  <section class="search" aria-label="Search">
+    <form class="search__form" action="#" role="search">
+      <div class="field field--city">
+        <label for="city">City or area</label>
+        <div class="field__control">
+          <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+          <input id="city" name="city" autocomplete="off" value="Indiranagar, Bengaluru" role="combobox" aria-expanded="false" aria-controls="city-list" aria-autocomplete="list">
+        </div>
+      </div>
+      <div class="field field--month">
+        <label for="month">Birthday month</label>
+        <div class="field__control">
+          <svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>
+          <select id="month" name="month">
+            <option>September</option><option selected>October</option><option>November</option>
+          </select>
+          <svg class="icon icon--chev" aria-hidden="true"><use href="#i-chevron"/></svg>
+        </div>
+      </div>
+      <fieldset class="field field--radius">
+        <legend>Radius</legend>
+        <div class="seg seg--radius">
+          <input type="radio" name="radius" id="r2" value="2"><label for="r2">2 km</label>
+          <input type="radio" name="radius" id="r5" value="5" checked><label for="r5">5 km</label>
+          <input type="radio" name="radius" id="r10" value="10"><label for="r10">10 km</label>
+        </div>
+      </fieldset>
+      <div class="search__actions">
+        <button class="btn btn--primary" type="submit">
+          <span>Find my quests</span>
+          <span class="btn__orb"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></span>
+        </button>
+        <button class="btn btn--quiet" type="reset">Clear search</button>
+      </div>
+    </form>
+    <p class="privacy">
+      <svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>
+      We don't store anything on our servers. Your search stays in this browser tab and clears when you close it.
+    </p>
+  </section>
+
+  <!-- ===== RESULTS ===== -->
+  <main id="results" class="results">
+    <div class="results__list">
+      <div class="results__head">
+        <div>
+          <p class="bday-flag"><svg class="icon" aria-hidden="true"><use href="#i-sparkle"/></svg>It's your birthday month</p>
+          <h1 class="results__title">Your October quests</h1>
+          <p class="results__sub">18 quests in total. 8 within 5 km of Indiranagar, Bengaluru.</p>
+        </div>
+        <div class="progress" role="img" aria-label="3 of 18 quests claimed" data-claimed="3" data-total="18">
+          <svg class="ring" viewBox="0 0 56 56" aria-hidden="true">
+            <circle class="ring__track" cx="28" cy="28" r="24"/>
+            <circle class="ring__fill" cx="28" cy="28" r="24" pathLength="100"/>
+          </svg>
+          <div class="progress__text">
+            <strong class="progress__count"><span class="js-claimed">3</span> of 18</strong>
+            <span>claimed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Quest type">
+        <button class="tab" role="tab" aria-selected="true" id="tab-near" aria-controls="panel-near">Nearby <span class="tab__count">8</span></button>
+        <button class="tab" role="tab" aria-selected="false" id="tab-online" tabindex="-1">Online <span class="tab__count">6</span></button>
+        <button class="tab" role="tab" aria-selected="false" id="tab-found" tabindex="-1">Found online <span class="tab__count">4</span></button>
+        <span class="tabs__thumb" aria-hidden="true"></span>
+      </div>
+
+      <div class="cards" id="panel-near" role="tabpanel" aria-labelledby="tab-near">
+
+        <!-- Card 1: Starbucks, verified, full steps -->
+        <article class="card is-active" data-pin="1">
+          <header class="card__head">
+            <div class="mono" aria-hidden="true">SB</div>
+            <div class="card__title">
+              <h2>Tata Starbucks</h2>
+              <p class="card__meta">100 Feet Road, Indiranagar <span class="dot" aria-hidden="true"></span> 1.2 km</p>
+            </div>
+            <span class="badge badge--ok"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Verified</span>
+          </header>
+
+          <div class="get">
+            <span class="get__label">You get</span>
+            <p class="get__value">One handcrafted beverage of your choice, any size</p>
+          </div>
+
+          <ul class="chips" aria-label="Conditions">
+            <li class="chip chip--good"><svg class="icon" aria-hidden="true"><use href="#i-gift"/></svg>No purchase needed</li>
+            <li class="chip"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Join 7+ days before</li>
+            <li class="chip"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Valid: birthday month</li>
+            <li class="chip"><svg class="icon" aria-hidden="true"><use href="#i-qr"/></svg>Bring: App QR</li>
+          </ul>
+
+          <ol class="steps">
+            <li>Download the Tata Starbucks app and join Starbucks Rewards.</li>
+            <li>Add your date of birth under Profile, at least 7 days before your birthday.</li>
+            <li>Watch for the birthday reward in the Rewards tab once your month starts.</li>
+            <li>At the counter, open the reward and show the QR before you pay.</li>
+            <li>Pick any handcrafted drink, any size. One per member.</li>
+          </ol>
+
+          <footer class="card__foot">
+            <a class="btn btn--primary btn--sm" href="#">
+              <span>Get directions</span>
+              <span class="btn__orb"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+            </a>
+            <a class="link" href="#">Verify offer<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <label class="claim">
+              <input type="checkbox" class="claim__input">
+              <span class="claim__box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4 4 9-9"/></svg></span>
+              <span class="claim__label">Mark claimed</span>
+            </label>
+          </footer>
+          <p class="card__fine">Last checked 28 Sep 2026 on starbucks.in</p>
+        </article>
+
+        <!-- Card 2: Lakmé Salon, % discount, may be outdated -->
+        <article class="card" data-pin="2">
+          <header class="card__head">
+            <div class="mono" aria-hidden="true">LS</div>
+            <div class="card__title">
+              <h2>Lakmé Salon</h2>
+              <p class="card__meta">12th Main, HAL 2nd Stage <span class="dot" aria-hidden="true"></span> 2.4 km</p>
+            </div>
+            <span class="badge badge--old"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>May be outdated</span>
+          </header>
+
+          <div class="get">
+            <span class="get__label">You get</span>
+            <p class="get__value">20% off any hair or skin service</p>
+          </div>
+
+          <ul class="chips" aria-label="Conditions">
+            <li class="chip"><svg class="icon" aria-hidden="true"><use href="#i-bag"/></svg>Purchase needed, min ₹1,500</li>
+            <li class="chip"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Valid: birthday week</li>
+            <li class="chip"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Bring: Photo ID</li>
+          </ul>
+
+          <ol class="steps">
+            <li>Book a slot by phone or walk in during your birthday week.</li>
+            <li>Tell the front desk it's your birthday before the service starts.</li>
+            <li>Show a photo ID with your date of birth at billing.</li>
+          </ol>
+
+          <footer class="card__foot">
+            <a class="btn btn--primary btn--sm" href="#">
+              <span>Get directions</span>
+              <span class="btn__orb"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+            </a>
+            <a class="link" href="#">Verify offer<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <label class="claim">
+              <input type="checkbox" class="claim__input">
+              <span class="claim__box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4 4 9-9"/></svg></span>
+              <span class="claim__label">Mark claimed</span>
+            </label>
+          </footer>
+          <p class="card__fine">Last checked 14 Mar 2026. Offers at franchise salons vary.</p>
+        </article>
+
+        <!-- Card 3: check with store -->
+        <article class="card" data-pin="3">
+          <header class="card__head">
+            <div class="mono" aria-hidden="true">Th</div>
+            <div class="card__title">
+              <h2>Theobroma</h2>
+              <p class="card__meta">CMH Road, Indiranagar <span class="dot" aria-hidden="true"></span> 0.8 km</p>
+            </div>
+            <span class="badge badge--warn"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>Check with store</span>
+          </header>
+
+          <div class="get">
+            <span class="get__label">You get</span>
+            <p class="get__value">A birthday brownie, at some outlets</p>
+          </div>
+
+          <ul class="chips" aria-label="Conditions">
+            <li class="chip chip--good"><svg class="icon" aria-hidden="true"><use href="#i-gift"/></svg>No purchase needed</li>
+            <li class="chip"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>Valid: birthday only</li>
+          </ul>
+
+          <ol class="steps">
+            <li>Call the outlet first and ask if they run a birthday treat this month.</li>
+            <li>Visit on your birthday and mention it at the counter.</li>
+          </ol>
+
+          <footer class="card__foot">
+            <a class="btn btn--primary btn--sm" href="#">
+              <span>Get directions</span>
+              <span class="btn__orb"><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+            </a>
+            <a class="link" href="#">Verify offer<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <label class="claim">
+              <input type="checkbox" class="claim__input">
+              <span class="claim__box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4 4 9-9"/></svg></span>
+              <span class="claim__label">Mark claimed</span>
+            </label>
+          </footer>
+          <p class="card__fine">Reported by shoppers, not an official program.</p>
+        </article>
+      </div>
+    </div>
+
+    <!-- ===== MAP ===== -->
+    <aside class="mapwrap" aria-label="Map of nearby quests">
+      <div class="map">
+        <svg class="map__art" viewBox="0 0 600 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <rect class="m-land" width="600" height="760"/>
+          <defs><clipPath id="d0"><circle cx="150" cy="170" r="190"/></clipPath><clipPath id="d1"><circle cx="440" cy="230" r="200"/></clipPath><clipPath id="d2"><circle cx="300" cy="430" r="170"/></clipPath><clipPath id="d3"><circle cx="110" cy="560" r="180"/></clipPath><clipPath id="d4"><circle cx="470" cy="640" r="190"/></clipPath></defs>
+<g class="m-minor"><g clip-path="url(#d0)"><path transform="translate(150 170) rotate(12)" d="M-285 -285h570M-285 -259h570M-285 -226h570M-285 -198h570M-285 -170h570M-285 -138h570M-285 -108h570M-285 -79h570M-285 -47h570M-285 -15h570M-285 15h570M-285 46h570M-285 77h570M-285 110h570M-285 138h570M-285 167h570M-285 199h570M-285 231h570M-285 257h570M-285 -285v570M-236 -285v570M-182 -285v570M-129 -285v570M-86 -285v570M-37 -285v570M18 -285v570M69 -285v570M120 -285v570M169 -285v570M224 -285v570M279 -285v570"/></g><g clip-path="url(#d1)"><path transform="translate(440 230) rotate(-18)" d="M-300 -300h600M-300 -275h600M-300 -246h600M-300 -221h600M-300 -198h600M-300 -174h600M-300 -149h600M-300 -125h600M-300 -96h600M-300 -70h600M-300 -42h600M-300 -13h600M-300 9h600M-300 33h600M-300 59h600M-300 85h600M-300 110h600M-300 134h600M-300 163h600M-300 185h600M-300 210h600M-300 235h600M-300 262h600M-300 291h600M-300 -300v600M-263 -300v600M-222 -300v600M-182 -300v600M-142 -300v600M-101 -300v600M-61 -300v600M-19 -300v600M26 -300v600M64 -300v600M112 -300v600M153 -300v600M200 -300v600M245 -300v600M289 -300v600"/></g><g clip-path="url(#d2)"><path transform="translate(300 430) rotate(4)" d="M-255 -255h510M-255 -221h510M-255 -185h510M-255 -147h510M-255 -114h510M-255 -78h510M-255 -46h510M-255 -11h510M-255 22h510M-255 55h510M-255 88h510M-255 124h510M-255 161h510M-255 192h510M-255 229h510M-255 -255v510M-201 -255v510M-151 -255v510M-102 -255v510M-40 -255v510M11 -255v510M68 -255v510M118 -255v510M172 -255v510M228 -255v510"/></g><g clip-path="url(#d3)"><path transform="translate(110 560) rotate(33)" d="M-270 -270h540M-270 -239h540M-270 -208h540M-270 -177h540M-270 -146h540M-270 -115h540M-270 -85h540M-270 -59h540M-270 -35h540M-270 -9h540M-270 16h540M-270 40h540M-270 69h540M-270 95h540M-270 125h540M-270 153h540M-270 183h540M-270 209h540M-270 240h540M-270 266h540M-270 -270v540M-219 -270v540M-178 -270v540M-133 -270v540M-94 -270v540M-43 -270v540M4 -270v540M56 -270v540M94 -270v540M146 -270v540M187 -270v540M239 -270v540"/></g><g clip-path="url(#d4)"><path transform="translate(470 640) rotate(-6)" d="M-285 -285h570M-285 -252h570M-285 -222h570M-285 -192h570M-285 -162h570M-285 -129h570M-285 -101h570M-285 -67h570M-285 -33h570M-285 1h570M-285 33h570M-285 61h570M-285 90h570M-285 125h570M-285 154h570M-285 188h570M-285 223h570M-285 251h570M-285 -285v570M-228 -285v570M-169 -285v570M-112 -285v570M-56 -285v570M-5 -285v570M43 -285v570M98 -285v570M154 -285v570M205 -285v570M253 -285v570"/></g></g>
+          <path class="m-park" d="M58 455c38-26 104-22 132 8s12 84-34 96-126-6-118-56 12-36 20-48z"/>
+          <path class="m-park" d="M430 96c46-8 98 18 98 62s-54 62-100 46-44-100 2-108z"/>
+          <path class="m-park" d="M226 250c16-8 40-4 46 10s-8 30-26 30-34-32-20-40z"/>
+          <path class="m-water" d="M340 572c36-18 112-8 140 28s2 92-56 98-122-28-112-70 8-46 28-56z"/>
+          <path class="m-river" d="M-20 96c70 14 104 52 122 104s58 74 110 78"/>
+          <g class="m-major-case">
+            <path id="r1" d="M-20 392c90-10 170 18 250 0s150-58 230-62 110 8 160 22"/>
+            <path d="M246 -20c-6 120 18 210 4 300s30 170 66 250 22 150 10 250"/>
+            <path d="M-20 650c120-36 230-18 330-50s200-80 310-90"/>
+            <path d="M620 300c-90 30-150 110-200 170s-90 90-150 120"/>
+          </g>
+          <g class="m-major">
+            <path d="M-20 392c90-10 170 18 250 0s150-58 230-62 110 8 160 22"/>
+            <path d="M246 -20c-6 120 18 210 4 300s30 170 66 250 22 150 10 250"/>
+            <path d="M-20 650c120-36 230-18 330-50s200-80 310-90"/>
+            <path d="M620 300c-90 30-150 110-200 170s-90 90-150 120"/>
+          </g>
+          <path class="m-metro" d="M-20 300c140 10 260 40 360 30s180-70 280-90"/>
+          <circle class="m-radius" cx="288" cy="372" r="210"/>
+          <g class="m-labels">
+            <text x="318" y="452">INDIRANAGAR</text>
+            <text x="40" y="372">MG ROAD</text>
+            <text x="420" y="540">DOMLUR</text>
+            <text x="96" y="720">KORAMANGALA</text>
+            <text x="300" y="150">HAL 2ND STAGE</text>
+            <text x="368" y="640" class="m-label--water">Ulsoor lake</text>
+          </g>
+        </svg>
+
+        <!-- pins -->
+        <button class="pin pin--brand pin--1 is-active" type="button" aria-label="Tata Starbucks, 1.2 km">
+          <svg viewBox="0 0 40 50" aria-hidden="true"><path class="pin__shape" d="M20 48c-1.2-6-14-15.4-14-27a14 14 0 0 1 28 0c0 11.6-12.8 21-14 27z"/></svg>
+          <span class="pin__mono">SB</span>
+        </button>
+        <button class="pin pin--brand pin--2" type="button" aria-label="Lakmé Salon, 2.4 km">
+          <svg viewBox="0 0 40 50" aria-hidden="true"><path class="pin__shape" d="M20 48c-1.2-6-14-15.4-14-27a14 14 0 0 1 28 0c0 11.6-12.8 21-14 27z"/></svg>
+          <span class="pin__mono">LS</span>
+        </button>
+        <button class="pin pin--brand pin--3" type="button" aria-label="Theobroma, 0.8 km">
+          <svg viewBox="0 0 40 50" aria-hidden="true"><path class="pin__shape" d="M20 48c-1.2-6-14-15.4-14-27a14 14 0 0 1 28 0c0 11.6-12.8 21-14 27z"/></svg>
+          <span class="pin__mono">Th</span>
+        </button>
+        <button class="pin pin--brand pin--4 is-claimed" type="button" aria-label="The Body Shop, claimed, 1.9 km">
+          <svg viewBox="0 0 40 50" aria-hidden="true"><path class="pin__shape" d="M20 48c-1.2-6-14-15.4-14-27a14 14 0 0 1 28 0c0 11.6-12.8 21-14 27z"/></svg>
+          <span class="pin__mono"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>
+        </button>
+        <button class="pin pin--brand pin--5" type="button" aria-label="Baskin Robbins, 3.1 km">
+          <svg viewBox="0 0 40 50" aria-hidden="true"><path class="pin__shape" d="M20 48c-1.2-6-14-15.4-14-27a14 14 0 0 1 28 0c0 11.6-12.8 21-14 27z"/></svg>
+          <span class="pin__mono">BR</span>
+        </button>
+        <span class="pin pin--me" role="img" aria-label="Your search area: Indiranagar"><span class="pin__halo"></span><span class="pin__core"></span></span>
+
+        <div class="popup" role="dialog" aria-label="Tata Starbucks">
+          <p class="popup__name">Tata Starbucks</p>
+          <p class="popup__meta">100 Feet Road <span class="dot" aria-hidden="true"></span> 1.2 km</p>
+          <a class="link link--sm" href="#">Get directions<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        </div>
+
+        <div class="map__ctrl">
+          <button type="button" aria-label="Zoom in"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
+          <button type="button" aria-label="Zoom out"><svg class="icon" aria-hidden="true"><use href="#i-minus"/></svg></button>
+          <button type="button" aria-label="Recenter on search area"><svg class="icon" aria-hidden="true"><use href="#i-locate"/></svg></button>
+        </div>
+        <p class="map__attr">Leaflet <span aria-hidden="true">|</span> © OpenStreetMap contributors</p>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ===== STATES BOARD ===== -->
+  <section class="states" aria-labelledby="states-title">
+    <h2 id="states-title" class="states__title">Other states</h2>
+
+    <div class="states__grid">
+      <!-- Autocomplete open -->
+      <figure class="frame frame--ac">
+        <figcaption class="frame__cap">City autocomplete, open</figcaption>
+        <div class="panel">
+          <div class="field field--city is-open">
+            <label for="city2">City or area</label>
+            <div class="field__control">
+              <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+              <input id="city2" value="Beng" role="combobox" aria-expanded="true" aria-controls="city-list2" aria-activedescendant="opt-1" autocomplete="off">
+              <button class="field__clear" type="button" aria-label="Clear city"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+            </div>
+            <ul class="ac" id="city-list2" role="listbox" aria-label="Suggested places">
+              <li role="option" id="opt-1" aria-selected="true" class="ac__opt">
+                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                <span class="ac__text"><span><b>Beng</b>aluru</span><small>Karnataka, India</small></span>
+              </li>
+              <li role="option" id="opt-2" aria-selected="false" class="ac__opt">
+                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                <span class="ac__text"><span><b>Beng</b>aluru Rural</span><small>Karnataka, India</small></span>
+              </li>
+              <li role="option" id="opt-3" aria-selected="false" class="ac__opt">
+                <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+                <span class="ac__text"><span><b>Beng</b>aluru Airport Road</span><small>Devanahalli, Karnataka</small></span>
+              </li>
+              <li class="ac__foot" aria-hidden="true">Place search by OpenStreetMap</li>
+            </ul>
+          </div>
+        </div>
+      </figure>
+
+      <!-- Empty state -->
+      <figure class="frame">
+        <figcaption class="frame__cap">Empty, nothing within radius</figcaption>
+        <div class="panel empty">
+          <svg class="empty__art" viewBox="0 0 120 96" aria-hidden="true">
+            <circle class="empty__ring" cx="60" cy="52" r="38"/>
+            <circle class="empty__ring empty__ring--in" cx="60" cy="52" r="22"/>
+            <path class="empty__flame" d="M60 22c3 3.4 4 5.8 4 7.8a4 4 0 0 1-8 0c0-2 1-4.4 4-7.8z"/>
+            <path class="empty__stroke" d="M60 34v4"/>
+            <rect class="empty__stroke" x="55" y="38" width="10" height="26" rx="3"/>
+            <path class="empty__stroke" d="M44 70h32"/>
+          </svg>
+          <h3>No quests within 2 km yet</h3>
+          <p>Shops near Whitefield haven't shared a birthday offer we can verify. A wider radius usually finds a few.</p>
+          <div class="empty__actions">
+            <button class="btn btn--primary btn--sm" type="button"><span>Widen to 5 km</span><span class="btn__orb"><svg class="icon" aria-hidden="true"><use href="#i-radius"/></svg></span></button>
+            <button class="btn btn--ghost btn--sm" type="button">See online quests</button>
+          </div>
+        </div>
+      </figure>
+
+      <!-- Error state -->
+      <figure class="frame">
+        <figcaption class="frame__cap">Error, place search unreachable</figcaption>
+        <div class="panel">
+          <div class="field field--city has-error">
+            <label for="city3">City or area</label>
+            <div class="field__control">
+              <svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>
+              <input id="city3" value="Indranagar" aria-invalid="true" aria-describedby="city3-err">
+            </div>
+            <p class="field__err" id="city3-err"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg>We couldn't find that place. Try a nearby area or a bigger city name.</p>
+          </div>
+          <div class="notice">
+            <svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg>
+            <div>
+              <p class="notice__title">Map couldn't load</p>
+              <p>Your connection dropped while loading map tiles. Your quests are still listed.</p>
+            </div>
+            <button class="btn btn--ghost btn--sm" type="button"><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg>Try again</button>
+          </div>
+        </div>
+      </figure>
+
+      <!-- Loading skeleton -->
+      <figure class="frame">
+        <figcaption class="frame__cap">Loading</figcaption>
+        <div class="panel skel" aria-busy="true" aria-label="Loading quests">
+          <div class="skel__row"><span class="skel__mono"></span><span class="skel__lines"><span></span><span></span></span></div>
+          <span class="skel__block"></span>
+          <span class="skel__line"></span>
+          <span class="skel__line skel__line--short"></span>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>Offers change often. Always confirm with the brand before you go.</p>
+    <p>Map data © OpenStreetMap contributors</p>
+  </footer>
+</div>
+
+<!-- celebration layer, filled by JS -->
+<div class="confetti" aria-hidden="true"></div>
+<p class="sr-only" role="status" aria-live="polite" id="live"></p>
+</body>
+</html>

@@ -20,6 +20,8 @@ export function buildCsp(opts: { workerOrigin: string | null; forHeader: boolean
     "'self'",
     'https://nominatim.openstreetmap.org',
     'https://overpass-api.de',
+    // Location autocomplete (typed text only, debounced, ≥3 chars), DECISIONS #16.
+    'https://photon.komoot.io',
   ];
   if (opts.workerOrigin) connect.push(opts.workerOrigin);
   const directives = [

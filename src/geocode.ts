@@ -2,7 +2,7 @@ import { cleanDisplayText } from './text';
 import type { Place } from './types';
 
 /**
- * Nominatim geocoding. Text input only — this app never uses navigator geolocation.
+ * Nominatim geocoding of a typed city. Text input only: this app never uses navigator geolocation.
  * Policy: https://operations.osmfoundation.org/policies/nominatim/ (max 1 req/s, cache results,
  * identify the app → we send our origin via referrerPolicy 'strict-origin', see DECISIONS #6).
  */
@@ -33,7 +33,7 @@ export class UpstreamError extends GeocodeError {
   constructor(status: number) { super('Upstream', `Geocoder error (HTTP ${status})`); }
 }
 export class InvalidQueryError extends GeocodeError {
-  constructor() { super('Invalid', 'Please type a city or area'); }
+  constructor() { super('Invalid', 'Please type a city'); }
 }
 
 function isObj(v: unknown): v is Record<string, unknown> {
@@ -123,6 +123,8 @@ export async function geocode(query: string, fetchImpl: typeof fetch = fetch): P
   url.searchParams.set('format', 'jsonv2');
   url.searchParams.set('addressdetails', '1');
   url.searchParams.set('limit', '1');
+  // City-level results only (city, town, village; DECISIONS #19). The search centre is the city centre.
+  url.searchParams.set('featureType', 'city');
   url.searchParams.set('q', q);
 
   let res: Response;

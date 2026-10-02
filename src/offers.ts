@@ -14,9 +14,17 @@ export const LIMITS = {
   nameRegex: 100,
   countries: 250,
   offers: 500,
+  rewardItem: 140,
+  steps: 6,
+  step: 100,
+  minSpend: 60,
+  signupLeadDays: 90,
+  validFor: 80,
+  bring: 5,
+  bringItem: 40,
 } as const;
 
-const ID_RE = /^[a-z0-9][a-z0-9-]*$/;
+export const ID_RE = /^[a-z0-9][a-z0-9-]*$/;
 const COUNTRY_RE = /^[A-Z]{2}$/;
 const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const WIKIDATA_RE = /^Q[1-9]\d{0,11}$/;
@@ -45,6 +53,29 @@ export function isValidIsoDate(s: unknown): s is string {
   return dt.getUTCFullYear() === y && dt.getUTCMonth() === mo - 1 && dt.getUTCDate() === d;
 }
 
+/** Worst-case backtracking paths a nameRegex may have (see nameRegexBranching). */
+export const NAME_REGEX_MAX_BRANCHING = 1024;
+
+/**
+ * Upper bound on the number of ways a nameRegex can try to match at one position: 2 per `?` times
+ * the number of alternatives of every group (and of the top level). The charset already excludes
+ * `*`, `+` and `{}`, but stacked `?` (e.g. `a?a?a?…aaa`) or many alternation groups still backtrack
+ * exponentially in JS's RegExp engine, so this keeps every pattern linear in practice.
+ */
+export function nameRegexBranching(re: string): number {
+  let total = 1;
+  const stack: number[] = [1];
+  for (const ch of re) {
+    if (ch === '?') total *= 2;
+    else if (ch === '|') stack[stack.length - 1] = (stack[stack.length - 1] ?? 1) + 1;
+    else if (ch === '(') stack.push(1);
+    else if (ch === ')' && stack.length > 1) total *= stack.pop() ?? 1;
+    if (total > NAME_REGEX_MAX_BRANCHING) return Infinity;
+  }
+  for (const n of stack) total *= n;
+  return total;
+}
+
 function validateOsm(v: unknown): OsmHint | undefined | null {
   if (v === undefined) return undefined;
   if (!isObj(v)) return null;
@@ -56,6 +87,7 @@ function validateOsm(v: unknown): OsmHint | undefined | null {
   if (v.nameRegex !== undefined) {
     if (typeof v.nameRegex !== 'string' || v.nameRegex.length === 0 || v.nameRegex.length > LIMITS.nameRegex) return null;
     if (!NAME_REGEX_RE.test(v.nameRegex)) return null;
+    if (nameRegexBranching(v.nameRegex) > NAME_REGEX_MAX_BRANCHING) return null;
     try {
       new RegExp(v.nameRegex, 'i');
     } catch {
@@ -64,6 +96,60 @@ function validateOsm(v: unknown): OsmHint | undefined | null {
     out.nameRegex = v.nameRegex;
   }
   return out.wikidata || out.nameRegex ? out : undefined;
+}
+
+/** Optional string list: 1..maxItems entries, each a clean non-empty string ≤ maxLen. null = invalid. */
+function cleanList(v: unknown, maxItems: number, maxLen: number): string[] | null {
+  if (!Array.isArray(v) || v.length === 0 || v.length > maxItems) return null;
+  const out: string[] = [];
+  for (const item of v) {
+    const s = cleanText(item, maxLen);
+    if (!s) return null;
+    out.push(s);
+  }
+  return out;
+}
+
+type ClaimDetails = Pick<Offer, 'rewardItem' | 'steps' | 'purchaseRequired' | 'minSpend' | 'signupLeadDays' | 'validFor' | 'bring'>;
+
+/** Validates the optional claim-detail fields. Absent fields stay absent; a present but bad field fails. */
+function validateClaimDetails(raw: Record<string, unknown>): ClaimDetails | string {
+  const out: ClaimDetails = {};
+  if (raw.rewardItem !== undefined) {
+    const v = cleanText(raw.rewardItem, LIMITS.rewardItem);
+    if (!v) return 'bad rewardItem';
+    out.rewardItem = v;
+  }
+  if (raw.steps !== undefined) {
+    const v = cleanList(raw.steps, LIMITS.steps, LIMITS.step);
+    if (!v) return 'bad steps';
+    out.steps = v;
+  }
+  if (raw.purchaseRequired !== undefined) {
+    if (raw.purchaseRequired !== null && typeof raw.purchaseRequired !== 'boolean') return 'bad purchaseRequired';
+    out.purchaseRequired = raw.purchaseRequired;
+  }
+  if (raw.minSpend !== undefined) {
+    const v = cleanText(raw.minSpend, LIMITS.minSpend);
+    if (!v) return 'bad minSpend';
+    out.minSpend = v;
+  }
+  if (raw.signupLeadDays !== undefined) {
+    const n = raw.signupLeadDays;
+    if (typeof n !== 'number' || !Number.isInteger(n) || n < 0 || n > LIMITS.signupLeadDays) return 'bad signupLeadDays';
+    out.signupLeadDays = n;
+  }
+  if (raw.validFor !== undefined) {
+    const v = cleanText(raw.validFor, LIMITS.validFor);
+    if (!v) return 'bad validFor';
+    out.validFor = v;
+  }
+  if (raw.bring !== undefined) {
+    const v = cleanList(raw.bring, LIMITS.bring, LIMITS.bringItem);
+    if (!v) return 'bad bring';
+    out.bring = v;
+  }
+  return out;
 }
 
 export type ValidationResult = { ok: true; offer: Offer } | { ok: false; reason: string };
@@ -103,6 +189,8 @@ export function validateOffer(raw: unknown): ValidationResult {
 
   const osm = validateOsm(raw.osm);
   if (osm === null) return fail(`${id}: bad osm hint`);
+  const details = validateClaimDetails(raw);
+  if (typeof details === 'string') return fail(`${id}: ${details}`);
 
   const result: Offer = {
     id,
@@ -118,6 +206,7 @@ export function validateOffer(raw: unknown): ValidationResult {
     verified: raw.verified === true,
   };
   if (osm) result.osm = osm;
+  Object.assign(result, details);
   return { ok: true, offer: result };
 }
 
@@ -167,6 +256,24 @@ export function filterOffers(args: { offers: readonly Offer[]; country: string |
   );
 }
 
+/**
+ * Online-tab counts per country: offers with an online/both channel that list the country explicitly
+ * (worldwide "*" offers are counted separately in `worldwide`).
+ */
+export function onlineCounts(offers: readonly Offer[]): { byCountry: Map<string, number>; worldwide: number } {
+  const byCountry = new Map<string, number>();
+  let worldwide = 0;
+  for (const o of offers) {
+    if (o.channel !== 'online' && o.channel !== 'both') continue;
+    if (o.countries.includes('*')) {
+      worldwide += 1;
+      continue;
+    }
+    for (const c of o.countries) byCountry.set(c, (byCountry.get(c) ?? 0) + 1);
+  }
+  return { byCountry, worldwide };
+}
+
 export const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
@@ -185,9 +292,9 @@ export function monthInfo(birthMonth: number, now: Date = new Date()): MonthInfo
   const current = now.getMonth() + 1;
   const monthsAway = (birthMonth - current + 12) % 12;
   let label: string;
-  if (monthsAway === 0) label = "It's your birthday month — your quests are live! 🎉";
-  else if (monthsAway === 1) label = 'Your quest window opens next month 🎀';
-  else label = `Your quest window opens in ${monthsAway} months 🎀`;
+  if (monthsAway === 0) label = "It's your birthday month";
+  else if (monthsAway === 1) label = 'Your birthday month starts next month';
+  else label = `Your birthday month starts in ${monthsAway} months`;
   return { isBirthdayMonth: monthsAway === 0, monthsAway, label };
 }
 

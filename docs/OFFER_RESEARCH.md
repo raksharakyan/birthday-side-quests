@@ -1,4 +1,4 @@
-# Offer Research — Birthday Side Quests
+# Offer Research: Birthday Side Quests
 
 Last research pass: **2026-10-02**. Data file: `research/offers.draft.json` (25 entries: 16 verified, 9 unverified; 9 relevant to India).
 
@@ -62,3 +62,12 @@ Last research pass: **2026-10-02**. Data file: `research/offers.draft.json` (25 
 - Several "verified" entries confirm that a reward **exists** but not what it is: Krispy Kreme US, Tim Hortons, Titan Encircle and IHOP (points, not a free item). The offer text was kept generic on purpose.
 - Westside and The Body Shop IN (higher tiers) are discounts with conditions, not freebies.
 - The IHOP, Titan and Bath & Body Works sources were read on alternate official hosts or APIs; see the notes column.
+
+## Round 2 (2026-10-02)
+More brands were researched after users said there were too few results. The detailed notes are in [research/OFFER_RESEARCH_INDIA.md](../research/OFFER_RESEARCH_INDIA.md) and [research/OFFER_RESEARCH_GLOBAL.md](../research/OFFER_RESEARCH_GLOBAL.md).
+
+- **Totals:** `offers.json` now has 102 offers (82 verified) across 11 countries, 37 of them for India.
+- **Updated:** Panera, Costa UK and Barbeque Nation are now verified.
+- **Removed:** Denny's, because its official rewards pages describe points only and no birthday reward.
+- **Spot-checks** by the Orchestrator against the official pages: Chili's (free dessert, expires 10 days after issue) and Wonderla (birthday Buy 1 Get 1 ticket) both matched.
+- **New claim fields:** new entries carry `rewardItem`, `steps`, `purchaseRequired`, `minSpend`, `signupLeadDays`, `validFor` and `bring`.

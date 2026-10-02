@@ -96,8 +96,8 @@ describe('monthInfo', () => {
     expect(monthInfo(10, oct)).toMatchObject({ isBirthdayMonth: true, monthsAway: 0 });
   });
   it('counts months away with wrap-around', () => {
-    expect(monthInfo(1, oct)).toMatchObject({ isBirthdayMonth: false, monthsAway: 3, label: 'Your quest window opens in 3 months 🎀' });
-    expect(monthInfo(11, oct).label).toBe('Your quest window opens next month 🎀');
+    expect(monthInfo(1, oct)).toMatchObject({ isBirthdayMonth: false, monthsAway: 3, label: 'Your birthday month starts in 3 months' });
+    expect(monthInfo(11, oct).label).toBe('Your birthday month starts next month');
     expect(monthInfo(9, oct).monthsAway).toBe(11);
   });
   it('rejects invalid months', () => {

@@ -49,7 +49,7 @@ describe('parseNominatim edge cases', () => {
     ['Infinity lon', [{ lat: '1', lon: 'Infinity', address: { country_code: 'in' } }]],
     ['lon out of range', [{ lat: '1', lon: '180.5', address: { country_code: 'in' } }]],
     ['lat out of range (negative)', [{ lat: '-90.01', lon: '1', address: { country_code: 'in' } }]],
-    // Number('') / Number(null) / Number(' ') are 0 — must not silently become "Null Island" (QA-01).
+    // Number('') / Number(null) / Number(' ') are 0 and must not silently become "Null Island" (QA-01).
     ['empty-string lat', [{ lat: '', lon: '2', address: { country_code: 'in' } }]],
     ['whitespace lon', [{ lat: '1', lon: '  ', address: { country_code: 'in' } }]],
     ['null lat', [{ lat: null, lon: '2', address: { country_code: 'in' } }]],
@@ -234,7 +234,9 @@ describe('error mapping', () => {
     const u = new URL(url);
     expect(u.origin + u.pathname).toBe('https://nominatim.openstreetmap.org/search');
     expect(u.searchParams.get('q')).toBe('"><img src=x onerror=alert(1)>');
-    expect([...u.searchParams.keys()].sort()).toEqual(['addressdetails', 'format', 'limit', 'q']);
+    expect([...u.searchParams.keys()].sort()).toEqual(['addressdetails', 'featureType', 'format', 'limit', 'q']);
+    // City-only free-text search (DECISIONS #19).
+    expect(u.searchParams.get('featureType')).toBe('city');
     expect(init.credentials).toBe('omit');
     expect(init.method).toBe('GET');
   });

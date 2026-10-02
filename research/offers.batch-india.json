@@ -1,0 +1,777 @@
+[
+  {
+    "id": "lakme-salon-in",
+    "brand": "Lakmé Salon",
+    "category": "beauty",
+    "offer": "Runway Rewards members get 15% off salon services for their birthday (30% for the top Stunning Showstopper tier)",
+    "howToClaim": "Join Runway Rewards (₹1,000+ spend in 12 months) and add your DOB a day ahead; use once, from 15 days before up to your birthday",
+    "countries": [
+      "IN"
+    ],
+    "channel": "in-store",
+    "claimWindow": "varies",
+    "sourceUrl": "https://www.lakmesalon.in/pages/runway-terms-and-conditions",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "osm": {
+      "nameRegex": "lakm(e|é) salon"
+    },
+    "rewardItem": "15% off salon services (30% off for Stunning Showstopper tier)",
+    "steps": [
+      "Spend ₹1,000+ at Lakmé Salon within 12 months to qualify",
+      "Register for Runway Rewards at billing with your name and mobile",
+      "Get your birthday recorded at least 1 day before your birthday",
+      "Use the discount on services once, in the 15 days up to your birthday"
+    ],
+    "purchaseRequired": true,
+    "signupLeadDays": 1,
+    "validFor": "15 days before your birthday through the birthday"
+  },
+  {
+    "id": "forest-essentials-in",
+    "brand": "Forest Essentials",
+    "category": "beauty",
+    "offer": "Soundarya Club birthday coupon: 10 to 15% off one bill (capped at ₹500 to ₹1,500 by tier), valid for your birthday month",
+    "howToClaim": "Join Soundarya Club (unlocks after ₹5,000 total spend); add your DOB a week before your birthday month; coupon is issued on the 1st",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "month",
+    "sourceUrl": "https://www.forestessentialsindia.com/soundarya-club-faqs",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "osm": {
+      "nameRegex": "forest essentials"
+    },
+    "rewardItem": "One coupon: 10% off (Bronze, Silver) or 15% off (Gold, Platinum), capped ₹500 to ₹1,500",
+    "steps": [
+      "Reach ₹5,000 total spend to join Soundarya Club",
+      "Add your DOB at least a week before your birthday month starts",
+      "Receive the coupon by email or SMS on the 1st of your birthday month",
+      "Apply it online at payment, or give the code at the store billing desk"
+    ],
+    "purchaseRequired": true,
+    "validFor": "Whole birthday month",
+    "bring": [
+      "Coupon code",
+      "Registered mobile for OTP"
+    ]
+  },
+  {
+    "id": "wonderla-in",
+    "brand": "Wonderla",
+    "category": "retail",
+    "offer": "Buy 1 Get 1 free park ticket for guests whose birthday falls in the month of the visit (offer listed until 31 Mar 2027)",
+    "howToClaim": "Book online through Wonderla's birthday offer, choose park and date, and add the birthday ticket; tickets are for the chosen date only",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "month",
+    "sourceUrl": "https://www.wonderla.com/offers/birthday-offer-wonderla",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "osm": {
+      "nameRegex": "wonderla"
+    },
+    "rewardItem": "Second park ticket free with one paid ticket (Buy 1 Get 1)",
+    "steps": [
+      "Open the birthday offer on wonderla.com and choose Avail this offer",
+      "Select the park and visit date",
+      "Add the birthday offer ticket and pay",
+      "Receive tickets by email or WhatsApp"
+    ],
+    "purchaseRequired": true,
+    "validFor": "Visits in your birthday month, offer listed until 31 Mar 2027"
+  },
+  {
+    "id": "club-itc-in",
+    "brand": "ITC Hotels (Club ITC)",
+    "category": "restaurant",
+    "offer": "Club ITC Gold and higher members earn double Green Points on food and drink spends during their birthday week",
+    "howToClaim": "Be a Club ITC Gold, Platinum, Platinum Select or Culinaire member and dine at a participating ITC hotel; paying with points or via aggregators doesn't count",
+    "countries": [
+      "IN"
+    ],
+    "channel": "in-store",
+    "claimWindow": "week",
+    "sourceUrl": "https://www.itchotels.com/in/en/clubitc/membership-benefits",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "osm": {
+      "nameRegex": "itc (grand|maratha|maurya|gardenia|kakatiya|kohenur|sonar|windsor|royal bengal|mughal|rajputana|narmada)"
+    },
+    "rewardItem": "Double Green Points on food and beverage spends",
+    "steps": [
+      "Hold Club ITC Gold, Platinum, Platinum Select or Culinaire status",
+      "Dine at a participating ITC hotel during your birthday week",
+      "Pay by card or cash, not with Green Points or via aggregators"
+    ],
+    "purchaseRequired": true,
+    "validFor": "Your birthday week"
+  },
+  {
+    "id": "imagicaa-in",
+    "brand": "Imagicaa",
+    "category": "retail",
+    "offer": "Birthday person gets a free Express ticket plus a return gift when at least 4 friends or family pre-book regular tickets",
+    "howToClaim": "Your group of 4+ pre-books Regular Theme or Water Park tickets online; claim the free Express upgrade at the park counter",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "varies",
+    "sourceUrl": "https://www.imagicaaworld.com/tickets-and-offers/",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "osm": {
+      "nameRegex": "imagicaa?|adlabs imagica"
+    },
+    "rewardItem": "Free Express ticket (Theme or Water Park) plus a return gift",
+    "steps": [
+      "Have at least 4 friends or family pre-book Regular tickets online",
+      "Visit Imagicaa with your group",
+      "Claim the free Express upgrade ticket at the park counter"
+    ],
+    "purchaseRequired": true,
+    "minSpend": "4 Regular tickets booked by your group",
+    "validFor": "Not stated"
+  },
+  {
+    "id": "timezone-in",
+    "brand": "Timezone",
+    "category": "retail",
+    "offer": "Birthday Treat for registered members: 200 tickets (Blue Elite), 500 bonus + 200 tickets (Gold), 1,000 bonus + 1,000 tickets (Platinum)",
+    "howToClaim": "Register your Powercard in the Timezone Fun App and add your DOB 7+ days before the 1st of your birthday month; voucher lasts 1 month",
+    "countries": [
+      "IN"
+    ],
+    "channel": "in-store",
+    "claimWindow": "month",
+    "sourceUrl": "https://www.timezonegames.com/en-in/rewards/",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "osm": {
+      "nameRegex": "^timezone"
+    },
+    "rewardItem": "Blue Elite 200 tickets; Gold 500 bonus + 200 tickets; Platinum 1,000 bonus + 1,000 tickets",
+    "steps": [
+      "Register your Powercard in the Timezone Fun App or Member Portal",
+      "Add your DOB at least 7 days before the 1st of your birthday month",
+      "Find the voucher in the app's Vouchers section",
+      "Show the voucher at a Timezone venue"
+    ],
+    "purchaseRequired": null,
+    "validFor": "1 month from the date the voucher is issued",
+    "bring": [
+      "Fun App voucher"
+    ]
+  },
+  {
+    "id": "costa-coffee-in",
+    "brand": "Costa Coffee",
+    "category": "cafe",
+    "offer": "Free birthday cake for Costa Club members in India",
+    "howToClaim": "Join Costa Club in the Costa Coffee India app; you need at least one transaction in the past 12 months to qualify",
+    "countries": [
+      "IN"
+    ],
+    "channel": "in-store",
+    "claimWindow": "varies",
+    "sourceUrl": "https://www.costacoffee.in/legal-and-data-privacy/costa-club-terms",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "osm": {
+      "wikidata": "Q608845",
+      "nameRegex": "costa coffee|^costa$"
+    },
+    "rewardItem": "Free birthday cake",
+    "steps": [
+      "Download the Costa Coffee India app and join Costa Club",
+      "Make at least one transaction in the 12 months before your birthday",
+      "Ask for the birthday cake in store and scan your app QR code"
+    ],
+    "purchaseRequired": null,
+    "validFor": "Not stated",
+    "bring": [
+      "Costa app QR code"
+    ]
+  },
+  {
+    "id": "bata-in",
+    "brand": "Bata",
+    "category": "fashion",
+    "offer": "Bata Club birthday surprise: a gift voucher worth up to ₹750 in your birthday month, sent by SMS",
+    "howToClaim": "Join Bata Club and add your birthday to your profile; use the SMS code in store or online",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "month",
+    "sourceUrl": "https://www.bata.com/in/bata_club.html",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "osm": {
+      "nameRegex": "^bata$|^bata "
+    },
+    "rewardItem": "Gift voucher worth up to ₹750",
+    "steps": [
+      "Join Bata Club",
+      "Add your birthday to your profile",
+      "Receive the voucher code by SMS in your birthday month",
+      "Use the code when you shop"
+    ],
+    "purchaseRequired": null,
+    "validFor": "Birthday month",
+    "bring": [
+      "SMS voucher code"
+    ]
+  },
+  {
+    "id": "marks-and-spencer-in",
+    "brand": "Marks & Spencer",
+    "category": "fashion",
+    "offer": "Sparks birthday-month discount: 10% (Club), 15% (Premier) or 20% (Elite), valid the whole calendar month",
+    "howToClaim": "Join M&S Sparks and register your birthday; redeem in store or on the M&S India website/app",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "month",
+    "sourceUrl": "https://www.marksandspencer.in/loyalty_page.html",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "osm": {
+      "wikidata": "Q714491",
+      "nameRegex": "marks (&|and) spencer|^m&s"
+    },
+    "rewardItem": "10% off (Club), 15% off (Premier) or 20% off (Elite)",
+    "steps": [
+      "Join M&S Sparks",
+      "Register your birthday in store or in your online account",
+      "Shop in store or on the M&S India website or app during your birthday month"
+    ],
+    "purchaseRequired": true,
+    "validFor": "Whole calendar month of your birthday"
+  },
+  {
+    "id": "swarovski-in",
+    "brand": "Swarovski",
+    "category": "retail",
+    "offer": "Swarovski Club members get a 20% off birthday coupon, starting from the free Bronze tier",
+    "howToClaim": "Join Swarovski Club (online or in a boutique) and share your birthday; check coupon terms before use",
+    "countries": [
+      "IN"
+    ],
+    "channel": "online",
+    "claimWindow": "varies",
+    "sourceUrl": "https://www.swarovski.com/en-IN/s-sclanding/Swarovski-Club/",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "rewardItem": "20% off birthday coupon",
+    "steps": [
+      "Join Swarovski Club online or in a boutique",
+      "Share your birthday in your profile",
+      "Use the birthday coupon on a purchase"
+    ],
+    "purchaseRequired": true,
+    "validFor": "Not stated"
+  },
+  {
+    "id": "wetnjoy-lonavala-in",
+    "brand": "Wet'nJoy Lonavala",
+    "category": "retail",
+    "offer": "Free water park entry for the birthday person (birthday month, about 5 days either side); 4 to 10 companions get 10% off",
+    "howToClaim": "Book online at least 24 hours ahead with 4+ companions; bring original government ID showing DOB; one free ticket per year",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "varies",
+    "sourceUrl": "https://www.lonavala.wetnjoy.in/offers/birthday-bash/",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "osm": {
+      "nameRegex": "wet.?n.?joy"
+    },
+    "rewardItem": "Free entry for the birthday person; 10% off tickets for companions",
+    "steps": [
+      "Book online at least 24 hours before your visit",
+      "Include 4 to 10 companions on the booking",
+      "Visit within about 5 days of your birthday, in your birthday month",
+      "Show original government ID with your DOB at entry"
+    ],
+    "purchaseRequired": true,
+    "minSpend": "4 companion tickets",
+    "validFor": "About 5 days either side of your birthday",
+    "bring": [
+      "Original govt ID with DOB"
+    ]
+  },
+  {
+    "id": "global-desi-in",
+    "brand": "Global Desi",
+    "category": "fashion",
+    "offer": "RISE Rewards birthday treat on apparel: 10% off (Insider) or 20% off (Trendsetter), plus 5% extra above ₹15,000",
+    "howToClaim": "Reach Insider or Trendsetter tier and add your DOB 30+ days ahead; coupon arrives 14 days before your birthday, valid 30 days",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "varies",
+    "sourceUrl": "https://www.globaldesi.in/rise-rewards.html",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "osm": {
+      "nameRegex": "global desi"
+    },
+    "rewardItem": "10% off (Insider) or 20% off (Trendsetter) apparel; extra 5% above ₹15,000",
+    "steps": [
+      "Join RISE Rewards and reach Insider or Trendsetter tier",
+      "Add your DOB at least 30 days before your birthday",
+      "Receive the coupon 14 days before your birthday",
+      "Use it on apparel within 30 days"
+    ],
+    "purchaseRequired": true,
+    "signupLeadDays": 30,
+    "validFor": "30 days from when the coupon is issued"
+  },
+  {
+    "id": "and-in",
+    "brand": "AND",
+    "category": "fashion",
+    "offer": "RISE Rewards birthday treat on apparel: 10% off (Insider) or 20% off (Trendsetter), plus 5% extra above ₹15,000",
+    "howToClaim": "Reach Insider or Trendsetter tier and add your DOB 30+ days ahead; coupon arrives 14 days before your birthday, valid 30 days",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "varies",
+    "sourceUrl": "https://www.andindia.com/rise-rewards.html",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "rewardItem": "10% off (Insider) or 20% off (Trendsetter) apparel; extra 5% above ₹15,000",
+    "steps": [
+      "Join RISE Rewards and reach Insider or Trendsetter tier",
+      "Add your DOB at least 30 days before your birthday",
+      "Receive the coupon 14 days before your birthday",
+      "Use it on apparel within 30 days"
+    ],
+    "purchaseRequired": true,
+    "signupLeadDays": 30,
+    "validFor": "30 days from when the coupon is issued"
+  },
+  {
+    "id": "water-kingdom-in",
+    "brand": "Water Kingdom",
+    "category": "retail",
+    "offer": "Free entry for the birthday person on the birthday or up to 3 days after, plus 48% off for 3 to 4 companions",
+    "howToClaim": "Book online with at least 3 companion tickets; show government photo ID with your date of birth at entry",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "varies",
+    "sourceUrl": "https://www.waterkingdom.in/offers/birthday-bash-offer.html",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "osm": {
+      "nameRegex": "water kingdom"
+    },
+    "rewardItem": "Free entry for the birthday person; 48% off for 3 or 4 companions",
+    "steps": [
+      "Book online with at least 3 companion tickets",
+      "Visit on your birthday or within 3 days after",
+      "Show government photo ID with your DOB at entry"
+    ],
+    "purchaseRequired": true,
+    "minSpend": "3 companion tickets",
+    "validFor": "Your birthday and up to 3 days after",
+    "bring": [
+      "Govt photo ID with DOB"
+    ]
+  },
+  {
+    "id": "the-face-shop-in",
+    "brand": "The Face Shop",
+    "category": "online",
+    "offer": "Loyalty members get 20 bonus Glow Points to celebrate their birthday",
+    "howToClaim": "Join The Face Shop India loyalty program on thefaceshop.in and add your birthday to your profile",
+    "countries": [
+      "IN"
+    ],
+    "channel": "online",
+    "claimWindow": "varies",
+    "sourceUrl": "https://thefaceshop.in/pages/loyalty-page",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "rewardItem": "20 bonus Glow Points",
+    "steps": [
+      "Join The Face Shop India loyalty program on thefaceshop.in",
+      "Add your birthday to your profile"
+    ],
+    "purchaseRequired": null,
+    "validFor": "Not stated"
+  },
+  {
+    "id": "us-polo-assn-in",
+    "brand": "U.S. Polo Assn.",
+    "category": "fashion",
+    "offer": "USPA Rewards birthday voucher: 10% (Silver), 15% (Gold) or 20% (Platinum), usable 15 days before to 15 days after",
+    "howToClaim": "Enrol in USPA Rewards with a ₹5,000+ purchase (Silver tier) and add your birthday",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "varies",
+    "sourceUrl": "https://uspoloassn.in/pages/uspa-rewards",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "osm": {
+      "nameRegex": "u.?s.? polo"
+    },
+    "rewardItem": "Birthday voucher: 10% (Silver), 15% (Gold) or 20% (Platinum)",
+    "steps": [
+      "Enrol in USPA Rewards with a ₹5,000+ purchase",
+      "Add your birthday to your profile",
+      "Use the voucher within 15 days either side of your birthday"
+    ],
+    "purchaseRequired": true,
+    "validFor": "15 days before to 15 days after your birthday"
+  },
+  {
+    "id": "plum-in",
+    "brand": "Plum",
+    "category": "online",
+    "offer": "Plum+ members get a birthday-month PlumCash perk; details not published, check the site before ordering",
+    "howToClaim": "Join Plum+ with any purchase on plumgoodness.com and add your birthday; birthday-month PlumCash expires after 3 months",
+    "countries": [
+      "IN"
+    ],
+    "channel": "online",
+    "claimWindow": "month",
+    "sourceUrl": "https://www.plumgoodness.com/pages/plum-rewards",
+    "lastVerified": "2026-10-02",
+    "verified": false,
+    "rewardItem": "Not published by the brand, varies by member",
+    "steps": [
+      "Join Plum+ by making any purchase on plumgoodness.com",
+      "Add your birthday to your account",
+      "Use birthday-month PlumCash within 3 months"
+    ],
+    "purchaseRequired": null,
+    "validFor": "PlumCash earned in birthday month lasts 3 months"
+  },
+  {
+    "id": "metro-shoes-in",
+    "brand": "Metro Shoes",
+    "category": "fashion",
+    "offer": "ClubMetro members get a birthday offer; details not published, check with store",
+    "howToClaim": "Share your birthday when you enrol in ClubMetro",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "varies",
+    "sourceUrl": "https://www.metroshoes.com/loyalty-tc",
+    "lastVerified": "2026-10-02",
+    "verified": false,
+    "osm": {
+      "nameRegex": "metro shoes"
+    },
+    "rewardItem": "Not published by the brand, varies by member",
+    "steps": [
+      "Join ClubMetro",
+      "Share your date of birth when you enrol"
+    ],
+    "purchaseRequired": null,
+    "validFor": "Not stated"
+  },
+  {
+    "id": "skechers-in",
+    "brand": "Skechers",
+    "category": "fashion",
+    "offer": "Skechers Plus 'Birthday Delight' offer for members; value not published, can't be combined with other offers",
+    "howToClaim": "Join Skechers Plus free on skechers.in; in-store redemption is currently Mumbai only",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "varies",
+    "sourceUrl": "https://www.skechers.in/faq-detail/?fid=skechers-plus",
+    "lastVerified": "2026-10-02",
+    "verified": false,
+    "osm": {
+      "nameRegex": "skechers"
+    },
+    "rewardItem": "Not published by the brand, varies by member",
+    "steps": [
+      "Join Skechers Plus free on skechers.in with your mobile number",
+      "Watch for the Birthday Delight offer by SMS, email or WhatsApp",
+      "Redeem online, or in store in Mumbai only"
+    ],
+    "purchaseRequired": null,
+    "validFor": "Not stated"
+  },
+  {
+    "id": "kiehls-in",
+    "brand": "Kiehl's",
+    "category": "beauty",
+    "offer": "Kiehl's Rewards Silver, Gold and Black members get birthday gifts and discounts; details not published",
+    "howToClaim": "Join Kiehl's Rewards in India and add your birthday; ask in store for the current birthday perk",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "varies",
+    "sourceUrl": "https://www.kiehls.in/pages/rewards-terms-conditions",
+    "lastVerified": "2026-10-02",
+    "verified": false,
+    "osm": {
+      "nameRegex": "kiehl('|’)?s"
+    },
+    "rewardItem": "Not published by the brand, varies by member",
+    "steps": [
+      "Join Kiehl's Rewards in India",
+      "Reach Silver, Gold or Black tier",
+      "Ask in store about your birthday gift or discount"
+    ],
+    "purchaseRequired": null,
+    "validFor": "Not stated"
+  },
+  {
+    "id": "health-and-glow-in",
+    "brand": "Health & Glow",
+    "category": "beauty",
+    "offer": "h&g Club members get a birthday voucher; value not published, check with store",
+    "howToClaim": "Join h&g Club and add your birthday to your profile",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "varies",
+    "sourceUrl": "https://corporate.healthandglow.com/pages/hg-club",
+    "lastVerified": "2026-10-02",
+    "verified": false,
+    "osm": {
+      "nameRegex": "health (&|and) glow"
+    },
+    "rewardItem": "Not published by the brand, varies by member",
+    "steps": [
+      "Join h&g Club",
+      "Add your birthday to your profile"
+    ],
+    "purchaseRequired": null,
+    "validFor": "Not stated"
+  },
+  {
+    "id": "myntra-insider-in",
+    "brand": "Myntra",
+    "category": "online",
+    "offer": "Myntra Insider members may get special birthday offers depending on their level; check the app",
+    "howToClaim": "Shop enough on Myntra to join Insider and add your birthday to your profile",
+    "countries": [
+      "IN"
+    ],
+    "channel": "online",
+    "claimWindow": "varies",
+    "sourceUrl": "https://blog.myntra.com/celebrating-fans-with-the-myntra-insider-programme/",
+    "lastVerified": "2026-10-02",
+    "verified": false,
+    "rewardItem": "Not published by the brand, varies by member",
+    "steps": [
+      "Join Myntra Insider in the Myntra app",
+      "Add your birthday to your profile",
+      "Check the app for birthday offers"
+    ],
+    "purchaseRequired": null,
+    "validFor": "Not stated"
+  },
+  {
+    "id": "loccitane-in",
+    "brand": "L'Occitane",
+    "category": "beauty",
+    "offer": "My L'OCCITANE Club and Gold members get a one-time birthday voucher in store during their birthday month; value not stated",
+    "howToClaim": "Be a Club or Gold member; show your registered mobile number or ID at the store",
+    "countries": [
+      "IN"
+    ],
+    "channel": "in-store",
+    "claimWindow": "month",
+    "sourceUrl": "https://in.loccitane.com/pages/vip-membership-program",
+    "lastVerified": "2026-10-02",
+    "verified": false,
+    "osm": {
+      "nameRegex": "l('|’)?occitane"
+    },
+    "rewardItem": "Not published by the brand, varies by member",
+    "steps": [
+      "Become a My L'OCCITANE Club or Gold member",
+      "Visit a store in your birthday month",
+      "Show your registered mobile number or ID to redeem the voucher"
+    ],
+    "purchaseRequired": null,
+    "validFor": "Birthday month",
+    "bring": [
+      "Registered mobile or ID"
+    ]
+  },
+  {
+    "id": "la-pinoz-in",
+    "brand": "La Pino'z Pizza",
+    "category": "restaurant",
+    "offer": "Adding your DOB to La Pino'z rewards unlocks birthday and anniversary treats; details not published",
+    "howToClaim": "Join La Pino'z loyalty on the website or app and add your date of birth",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "varies",
+    "sourceUrl": "https://lapinozpizza.in/wallet",
+    "lastVerified": "2026-10-02",
+    "verified": false,
+    "osm": {
+      "nameRegex": "la pino('|’)?z"
+    },
+    "rewardItem": "Not published by the brand, varies by member",
+    "steps": [
+      "Join La Pino'z loyalty on the website or app",
+      "Add your date of birth"
+    ],
+    "purchaseRequired": null,
+    "validFor": "Not stated"
+  },
+  {
+    "id": "hidesign-in",
+    "brand": "Hidesign",
+    "category": "fashion",
+    "offer": "Loyalty members receive a unique birthday coupon in their birthday month; value not stated",
+    "howToClaim": "Give your DOB at billing in store, or email it with your registered mobile and ID to Hidesign customer care",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "month",
+    "sourceUrl": "https://hidesigncustomercare.zohodesk.in/portal/en/kb/articles/loyaltiy-prog",
+    "lastVerified": "2026-10-02",
+    "verified": false,
+    "osm": {
+      "nameRegex": "hidesign"
+    },
+    "rewardItem": "Not published by the brand, varies by member",
+    "steps": [
+      "Register for the Hidesign loyalty program",
+      "In store: give your DOB at billing",
+      "Online: email your DOB, registered mobile and ID to customer care",
+      "Receive the coupon in your birthday month"
+    ],
+    "purchaseRequired": null,
+    "validFor": "Not stated",
+    "bring": [
+      "Govt ID (online registration)"
+    ]
+  },
+  {
+    "id": "mia-by-tanishq-in",
+    "brand": "Mia by Tanishq",
+    "category": "online",
+    "offer": "Birthday coupon on the Mia website and app, usable during your birthday month; value not stated",
+    "howToClaim": "Add your birthday when registering (it can't be changed later); not valid on items already discounted",
+    "countries": [
+      "IN"
+    ],
+    "channel": "online",
+    "claimWindow": "month",
+    "sourceUrl": "https://www.miabytanishq.com/en_IN/offertnc.html",
+    "lastVerified": "2026-10-02",
+    "verified": false,
+    "rewardItem": "Not published by the brand, varies by member",
+    "steps": [
+      "Register on the Mia website or app with your birthday (it can't be changed)",
+      "Shop on the Mia website or app in your birthday month",
+      "Apply the coupon to items without a product-level discount"
+    ],
+    "purchaseRequired": true,
+    "validFor": "Birthday month"
+  },
+  {
+    "id": "caratlane-in",
+    "brand": "CaratLane",
+    "category": "retail",
+    "offer": "CaratLane issues birthday and anniversary coupons; value not published, check the app or store",
+    "howToClaim": "Add your birthday to your CaratLane profile; the coupon can be combined with a Treasure Chest redemption",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "varies",
+    "sourceUrl": "https://www.caratlane.com/treasure-chest-gold-scheme",
+    "lastVerified": "2026-10-02",
+    "verified": false,
+    "osm": {
+      "nameRegex": "caratlane"
+    },
+    "rewardItem": "Not published by the brand, varies by member",
+    "steps": [
+      "Create a CaratLane account and add your birthday",
+      "Use the birthday coupon on a purchase, optionally with Treasure Chest"
+    ],
+    "purchaseRequired": null,
+    "validFor": "Not stated"
+  },
+  {
+    "id": "adidas-in",
+    "brand": "adidas",
+    "category": "fashion",
+    "offer": "adiClub Level 2+ members (1,000+ points) get a birthday gift; details shown in the adidas app",
+    "howToClaim": "Join adiClub free in the adidas app or website, reach Level 2 and add your birthday",
+    "countries": [
+      "IN"
+    ],
+    "channel": "both",
+    "claimWindow": "varies",
+    "sourceUrl": "https://www.adidas.co.in/adiClub",
+    "lastVerified": "2026-10-02",
+    "verified": false,
+    "osm": {
+      "wikidata": "Q3895",
+      "nameRegex": "^adidas"
+    },
+    "rewardItem": "Not published by the brand, varies by member",
+    "steps": [
+      "Join adiClub free in the adidas app or website",
+      "Reach Level 2 (1,000+ adiClub points)",
+      "Add your birthday and check the app for the gift"
+    ],
+    "purchaseRequired": null,
+    "validFor": "Not stated"
+  },
+  {
+    "id": "barbeque-nation-in",
+    "brand": "Barbeque Nation",
+    "category": "restaurant",
+    "offer": "Gold and Platinum Smiles members get 100 Smile Coins (₹1 each) once a year for their birthday",
+    "howToClaim": "Reach Gold or Platinum in the Barbeque Nation Smiles program before your birthday; redeem coins when booking or paying the bill",
+    "countries": [
+      "IN"
+    ],
+    "channel": "in-store",
+    "claimWindow": "varies",
+    "sourceUrl": "https://www.barbequenation.com/smiles",
+    "lastVerified": "2026-10-02",
+    "verified": true,
+    "osm": {
+      "nameRegex": "barbeque nation"
+    },
+    "rewardItem": "100 Smile Coins (1 coin = ₹1)",
+    "steps": [
+      "Join Barbeque Nation Smiles",
+      "Reach Gold (2+ visits in 120 days) or Platinum before your birthday",
+      "Get coins credited for your birthday",
+      "Redeem coins in the app when booking or at bill payment"
+    ],
+    "purchaseRequired": null,
+    "validFor": "Coins valid 90 days"
+  }
+]

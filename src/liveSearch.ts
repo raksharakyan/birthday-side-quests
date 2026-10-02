@@ -3,7 +3,7 @@ import { cleanDisplayText } from './text';
 import { displayHost, safeHttpsUrl } from './urls';
 
 /**
- * "Found online" — calls our Cloudflare Worker with ONLY {month, country}.
+ * "Found online": calls our Cloudflare Worker with ONLY {month, country}.
  * Results are untrusted: strictly validated here and rendered as plain text.
  */
 
