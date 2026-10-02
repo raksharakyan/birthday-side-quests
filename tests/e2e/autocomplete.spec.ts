@@ -220,7 +220,7 @@ test('radius select changes the Overpass radius; nearby cards are sorted by dist
   expect([...metres].sort((a, b) => a - b)).toEqual(metres);
   const total = expectedNearbyCount('IN');
   if (total > withBranch) {
-    await expect(page.getByRole('heading', { name: 'More quests in India (no branch found within 10 km)' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Also in India: find your nearest branch' })).toBeVisible();
     await expect(page.locator('#nearby-list .quest-group .quest-card')).toHaveCount(total - withBranch);
     await expect(page.locator('#nearby-list .quest-group .quest-card__distance')).toHaveCount(0);
   }

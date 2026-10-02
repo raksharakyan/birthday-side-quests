@@ -743,3 +743,33 @@ I applied QA-PR3-01, -02, -03 and -04 (DECISIONS #22) and removed the two `test.
 
 - **Sign-offs:** Security ✅ (Security review: PR #3) and QA ✅ (all blocking items fixed). PR #3 is cleared to merge.
 - **Docs:** added `CLAUDE.md` and the root `DESIGN.md`, and updated the README.
+
+## Full-Stack: venues for single-location offers + "Verified only" (2026-10-02, branch `fix/venues-verified-filter`)
+User bug: searching Kolkata showed Imagicaa (one park near Mumbai) in Nearby. User request: a "Verified only" filter. DECISIONS #24 and #25.
+
+**Venues (#24)**
+- `Offer.venues` (1 to 20 `{name ≤80, lat, lng, exact? = true}`), strictly validated in `validateOffer` (bad name/coords/`exact` type rejects the whole offer).
+- `src/offers.ts`: `VENUE_MAX_M = 150_000`, `nearestVenue(offer, lat, lng)`, `nearbyOffers({offers, country, lat, lng})` (drops venue offers with no venue within 150 km; returns the kept venue hits).
+- `src/urls.ts`: `directionsUrlByName(name)` (1 to 120 clean chars, throws otherwise; `'()!*` percent-encoded as well).
+- Nearby: venue hits are merged into a render-time branch map (never into `state.branches`), sort with the shop branches by distance, show "Wonderla Bengaluru · 26 km away" (or "about N km away" for `exact: false`). Venue offers are not sent to Overpass. Venue pins only when exact and inside the search circle (see #24 for why). Rest heading: "Also in <Country>: find your nearest branch". Header "N within X km" counts listed offers within the circle.
+- `public/offers.json`: `wonderla-in` (5 parks), `imagicaa-in`, `water-kingdom-in`, `wetnjoy-lonavala-in` (`exact: false`) got venues, lost `osm`, channel `both` → `in-store`.
+- Other single-location destination offers in the file: **none found**. Scanned all 102 for parks, resorts, zoos, museums, aquariums and attractions. `club-itc-in` (ITC hotels) and `timezone-in` (arcade chain) are multi-site chains and keep `osm`.
+
+**Verified only (#25)**
+- `<button role="switch" id="verified-only">` above the tabs (`index.html`, `.switch` in `components.css`, documented in DESIGN.md). Filters Nearby and Online, counts, header summary and ring, and pins; Found online shows `#found-verified-note`. Empty state "No verified quests here yet" + "Show all quests". Announced via `#status`.
+- `src/session.ts` version 2 with `verifiedOnly`; exact version 1 records migrate to `verifiedOnly: false`. Clear search resets it. SECURITY.md I1 updated.
+
+**Tests**
+- Unit: new `tests/unit/venues.test.ts` (venue validation incl. 19 rejects, `nearestVenue`, `nearbyOffers` for Kolkata/Bengaluru/Mumbai on the shipped data, 150 km boundary, `applyVerifiedFilter`, `directionsUrlByName` encoding/XSS/length, approximate distance text). `session.test.ts` / `security-pr3.test.ts` moved to v2 (+ migration, `verifiedOnly` tampering).
+- E2E: new `tests/e2e/venues-verified.spec.ts` (Kolkata no parks; Bengaluru Wonderla name/km/href/no pin; Mumbai Wet'nJoy "about" + by-name href + no pin, Water Kingdom pin at 20 km; Verified only counts/cards/pins/announcement/Space/reload/Clear/axe; all-unverified empty state; v1 migration). Existing specs updated: `expectedNearbyCount` now takes the searched point, session records are v2, the Wonderla card joins the "with a branch" group in Bengaluru, Overpass 504 keeps the venue's directions, new rest heading.
+
+| Check | Result |
+|---|---|
+| `npm run build` | OK |
+| `npm test` | 686 passed |
+| `npm run test:e2e` | 86 passed, 8 skipped (by design) |
+| `npm run lhci` | 0.99 / 1.00 / 1.00 (perf / a11y / best practices) |
+| `npm audit --audit-level=high` | 0 vulnerabilities |
+| Manual, `npm run preview` + real services (built-in browser) | Kolkata: 27 Nearby quests, no park (Overpass was 504 at the time, quests still listed). Bengaluru: 28 quests, 60 pins, Wonderla Bengaluru 26 km last in the near group with directions to 12.8346,77.4; Verified only → 15 Nearby / 11 Online, 29 pins, "Showing verified quests only, 18 of 34", plum switch. |
+
+Needs: Security review (new `venues` input, `directionsUrlByName`, session v2) and QA sign-off. Not committed.

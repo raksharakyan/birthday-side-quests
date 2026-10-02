@@ -1,7 +1,7 @@
 import type { Branch, ClaimWindow, LiveResult, Offer } from '../types';
 import { isStale } from '../offers';
 import { questLine } from '../templates';
-import { directionsUrl, displayHost } from '../urls';
+import { directionsUrl, directionsUrlByName, displayHost } from '../urls';
 import { el, externalLink } from './dom';
 import { claimTick, emptyArt, icon, initials, type IconName } from './icons';
 
@@ -118,6 +118,17 @@ export function formatDistance(m: number): string {
   return `${(m / 1000).toFixed(m < 10_000 ? 1 : 0)} km away`;
 }
 
+/** "about 47 km away" for an approximate venue location (whole km; never metres). */
+export function formatApproxDistance(m: number): string {
+  if (!Number.isFinite(m) || m < 0) return '';
+  return `about ${Math.max(1, Math.round(m / 1000))} km away`;
+}
+
+/** Directions for a branch or venue: by coordinates, or by name when the location is approximate. */
+export function branchDirectionsUrl(branch: Branch): string {
+  return branch.approximate ? directionsUrlByName(branch.name) : directionsUrl(branch.lat, branch.lng);
+}
+
 export interface ClaimChip {
   kind: 'free' | 'purchase' | 'lead' | 'valid' | 'bring';
   icon: IconName;
@@ -178,7 +189,12 @@ function withArrow(link: HTMLElement): HTMLElement {
 }
 
 function metaLine(offer: Offer, opts: { branch?: Branch | undefined; distanceM?: number | undefined; online: boolean }): HTMLElement {
-  const dist = opts.branch && opts.distanceM !== undefined ? formatDistance(opts.distanceM) : '';
+  const dist =
+    opts.branch && opts.distanceM !== undefined
+      ? opts.branch.approximate
+        ? formatApproxDistance(opts.distanceM)
+        : formatDistance(opts.distanceM)
+      : '';
   if (opts.branch) {
     return el('p', { class: 'card__meta quest-card__meta' }, [
       el('span', { class: 'quest-card__branch' }, [opts.branch.name || offer.brand]),
@@ -200,7 +216,7 @@ export function questCard(
   const host = displayHost(offer.sourceUrl);
 
   const directions = opts.branch
-    ? externalLink(directionsUrl(opts.branch.lat, opts.branch.lng), '', {
+    ? externalLink(branchDirectionsUrl(opts.branch), '', {
         class: 'btn btn--primary btn--sm btn--directions',
         'aria-label': `${directionsLabel(offer.brand, opts.branch.name)} (opens in a new tab)`,
       })

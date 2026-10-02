@@ -10,7 +10,7 @@ This describes the live design system as shipped. Tokens live in [`src/styles/to
 3. **Plain, specific, warm copy.** Write "You get", "Mark claimed", "Get directions". No "mission" wording, no exclamation-mark spam, **no em dashes** (a test enforces this; use commas, colons, periods or parentheses).
 4. **The offer is the hero.** Cards lead with what you get and exactly how to claim it.
 5. **Motion is feedback.** Only `transform`, `opacity` and small `stroke-dashoffset` animate. Never `linear` or the default `ease`. Everything respects `prefers-reduced-motion`.
-6. **Accessible by default.** WCAG AA text contrast, 3:1 for control edges and focus, tap targets of 44px or more, a visible focus ring, and correct ARIA patterns (combobox, tablist, radio group).
+6. **Accessible by default.** WCAG AA text contrast, 3:1 for control edges and focus, tap targets of 44px or more, a visible focus ring, and correct ARIA patterns (combobox, tablist, radio group, switch).
 
 ## Colour tokens
 | Token | Hex | Use | Contrast |
@@ -87,9 +87,15 @@ Both fonts are self-hosted through Fontsource and pinned to exactly `5.3.0`. Onl
   - A "It's your birthday month" pill (only in the birthday month).
   - "Your October quests" and a summary line.
   - A progress ring showing "N of M claimed".
+- **"Verified only" switch:** a `<button role="switch" aria-checked>` right-aligned above the tabs (DECISIONS #25).
+  - Pill, 44px tall, label "Verified only" next to a 34 by 20px track with a 14px thumb.
+  - Off: white pill with a 1px `--line-control` edge (3.33:1), `--ink-2` text, `--sunken` track, `--ink-3` thumb.
+  - On: plum pill (`--accent`, hover `--accent-hover`), white text (9.71:1), white track, plum thumb slid right with `--ease-spring`. No accent shadow (that stays on the primary button).
+  - Focus: the standard `--focus` ring. Space and Enter toggle it (native button). Changes are announced in the status live region ("Showing verified quests only, 18 of 34").
+  - When it hides every quest in a list: empty state "No verified quests here yet" with a "Show all quests" action. Found online shows a note instead, because live results are never verified.
 - **Tabs:** Nearby, Online and Found online, as a segmented track with a white sliding thumb and count chips (the selected chip turns plum). It's an ARIA tablist with arrow-key support.
 - **Quest card:**
-  - Header: brand initials tile, brand name, branch and distance, and a status badge (Verified / Check with store / May be outdated / Claimed).
+  - Header: brand initials tile, brand name, branch (or venue, e.g. "Wonderla Bengaluru") and distance ("about 47 km away" for approximate venues), and a status badge (Verified / Check with store / May be outdated / Claimed).
   - "You get" tint panel (shown only when `rewardItem` is known).
   - Condition chips: No purchase needed, Purchase needed (min X), Join N+ days before, Valid: X, Bring: X.
   - Numbered steps joined by a connector line.

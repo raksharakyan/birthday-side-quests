@@ -4,7 +4,7 @@ import {
 } from '../../src/session';
 
 const good: SessionData = {
-  v: 1,
+  v: 2,
   city: 'Pune',
   lat: 18.5204,
   lng: 73.8567,
@@ -13,7 +13,10 @@ const good: SessionData = {
   radius: 5000,
   tab: 'online',
   done: ['starbucks-in', 'nykaa-in'],
+  verifiedOnly: true,
 };
+const { verifiedOnly: _vo, ...v1Shape } = good;
+const goodV1 = { ...v1Shape, v: 1 };
 
 /** Minimal in-memory Storage. */
 function memStore(): Storage & { data: Map<string, string> } {
@@ -38,13 +41,28 @@ describe('validateSession (strict schema)', () => {
     expect(validateSession({ ...good, city: null, lat: null, lng: null, countryCode: 'JP' })?.countryCode).toBe('JP');
   });
   it('has exactly the documented fields', () => {
-    expect([...SESSION_FIELDS].sort()).toEqual(['city', 'countryCode', 'done', 'lat', 'lng', 'month', 'radius', 'tab', 'v']);
+    expect([...SESSION_FIELDS].sort()).toEqual(['city', 'countryCode', 'done', 'lat', 'lng', 'month', 'radius', 'tab', 'v', 'verifiedOnly']);
+  });
+  it('keeps verifiedOnly on and off', () => {
+    expect(validateSession({ ...good, verifiedOnly: false })?.verifiedOnly).toBe(false);
+    expect(validateSession({ ...good, verifiedOnly: true })?.verifiedOnly).toBe(true);
+  });
+  it('migrates an exact version 1 record to version 2 with verifiedOnly off', () => {
+    expect(validateSession(goodV1)).toEqual({ ...good, verifiedOnly: false });
   });
   it.each([
     ['extra field', { ...good, email: 'a@b.c' }],
     ['missing field', (({ done: _d, ...rest }) => rest)(good)],
-    ['wrong version', { ...good, v: 2 }],
-    ['version as string', { ...good, v: '1' }],
+    ['wrong version', { ...good, v: 3 }],
+    ['version as string', { ...good, v: '2' }],
+    ['version 0', { ...good, v: 0 }],
+    ['verifiedOnly missing (v2)', (({ verifiedOnly: _x, ...rest }) => rest)(good)],
+    ['verifiedOnly as string', { ...good, verifiedOnly: 'true' }],
+    ['verifiedOnly as number', { ...good, verifiedOnly: 1 }],
+    ['verifiedOnly null', { ...good, verifiedOnly: null }],
+    ['v1 record with verifiedOnly', { ...goodV1, verifiedOnly: true }],
+    ['v1 record with an extra field', { ...goodV1, extra: 1 }],
+    ['v1 record with bad city', { ...goodV1, city: '<b>' }],
     ['HTML in city', { ...good, city: '<img src=x onerror=alert(1)>' }],
     ['angle bracket in city', { ...good, city: 'Pune >' }],
     ['bidi override in city', { ...good, city: `Pune${String.fromCodePoint(0x202e)}` }],
@@ -101,6 +119,17 @@ describe('load / save / clear', () => {
     saveSession(good, store);
     expect(saveSession({ ...good, city: '<b>x</b>' }, store)).toBe(false);
     expect(store.length).toBe(0);
+  });
+  it('loads a version 1 record as version 2 (verifiedOnly off)', () => {
+    const store = memStore();
+    store.setItem(SESSION_KEY, JSON.stringify(goodV1));
+    expect(loadSession(store)).toEqual({ ...good, verifiedOnly: false });
+  });
+  it('removes a record whose verifiedOnly was tampered with', () => {
+    const store = memStore();
+    store.setItem(SESSION_KEY, JSON.stringify({ ...good, verifiedOnly: 'yes' }));
+    expect(loadSession(store)).toBeNull();
+    expect(store.getItem(SESSION_KEY)).toBeNull();
   });
   it('removes a tampered record on load', () => {
     const store = memStore();

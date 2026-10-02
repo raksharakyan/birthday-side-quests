@@ -52,16 +52,45 @@ export const PHOTON_FIRST_LABEL = 'Bengaluru, Bangalore North, Karnataka, India'
 export const PHOTON_PUNE_LABEL = 'Pune, Pune City, Maharashtra, India';
 
 interface SeedOffer {
+  id: string;
   channel: string;
   countries: string[];
+  verified?: boolean;
+  venues?: Array<{ name: string; lat: number; lng: number; exact?: boolean }>;
 }
 
-/** Expected Nearby card count for a country, derived from the shipped public/offers.json (in-store or both). */
-export function expectedNearbyCount(country: string): number {
-  const file = JSON.parse(readFileSync(resolve(process.cwd(), 'public/offers.json'), 'utf8')) as { offers: SeedOffer[] };
-  return file.offers.filter(
-    (o) => (o.channel === 'in-store' || o.channel === 'both') && (o.countries.includes('*') || o.countries.includes(country)),
-  ).length;
+/** Coordinates the default mocks resolve to (Nominatim Bengaluru). */
+export const BENGALURU = { lat: 12.9767936, lng: 77.590082 };
+/** Venue offers (theme parks) are listed only within this distance of the searched point (DECISIONS #24). */
+export const VENUE_MAX_M = 150_000;
+
+export function haversineM(aLat: number, aLng: number, bLat: number, bLng: number): number {
+  const R = 6_371_000;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const h = Math.sin(toRad(bLat - aLat) / 2) ** 2 + Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) * Math.sin(toRad(bLng - aLng) / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+export function seedOffers(): SeedOffer[] {
+  return (JSON.parse(readFileSync(resolve(process.cwd(), 'public/offers.json'), 'utf8')) as { offers: SeedOffer[] }).offers;
+}
+
+/**
+ * Nearby offers for a country at a searched point, from the shipped public/offers.json: in-store or
+ * both, minus venue offers whose nearest venue is further than VENUE_MAX_M.
+ */
+export function expectedNearbyOffers(country: string, at: { lat: number; lng: number } = BENGALURU): SeedOffer[] {
+  return seedOffers().filter((o) => {
+    if (!(o.channel === 'in-store' || o.channel === 'both')) return false;
+    if (!(o.countries.includes('*') || o.countries.includes(country))) return false;
+    if (!o.venues) return true;
+    return Math.min(...o.venues.map((v) => haversineM(at.lat, at.lng, v.lat, v.lng))) <= VENUE_MAX_M;
+  });
+}
+
+/** Expected Nearby card count (see expectedNearbyOffers). Defaults to the mocked Bengaluru point. */
+export function expectedNearbyCount(country: string, at: { lat: number; lng: number } = BENGALURU): number {
+  return expectedNearbyOffers(country, at).length;
 }
 
 export const WORKER_RESULTS = [

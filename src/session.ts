@@ -10,12 +10,14 @@ import { hasUnsafeText } from './text';
  * - One key, one versioned record with a fixed set of fields. Anything else on load (bad JSON,
  *   unknown/missing fields, wrong types, HTML-ish text, out-of-range numbers) is rejected and the
  *   key is removed.
+ * - Version 2 added `verifiedOnly` (DECISIONS #25). A version 1 record with exactly the version 1
+ *   fields is migrated (verifiedOnly: false); any other version is rejected.
  * - Every access is wrapped in try/catch: storage can be blocked (private mode, sandboxing) and the
  *   app then simply works without persistence.
  */
 
 export const SESSION_KEY = 'bsq-session';
-export const SESSION_VERSION = 1;
+export const SESSION_VERSION = 2;
 export const SESSION_TABS = ['nearby', 'online', 'found'] as const;
 export type SessionTab = (typeof SESSION_TABS)[number];
 
@@ -32,9 +34,12 @@ export interface SessionData {
   tab: SessionTab;
   /** Offer ids marked "Quest complete!". */
   done: string[];
+  /** "Verified only" switch in the results header. */
+  verifiedOnly: boolean;
 }
 
-const FIELDS = ['city', 'countryCode', 'done', 'lat', 'lng', 'month', 'radius', 'tab', 'v'] as const;
+const FIELDS = ['city', 'countryCode', 'done', 'lat', 'lng', 'month', 'radius', 'tab', 'v', 'verifiedOnly'] as const;
+const FIELDS_V1 = ['city', 'countryCode', 'done', 'lat', 'lng', 'month', 'radius', 'tab', 'v'] as const;
 export const SESSION_FIELDS: readonly string[] = FIELDS;
 const MAX_RAW = 16_384;
 const CITY_MAX = 200;
@@ -51,8 +56,16 @@ function isCoord(v: unknown, limit: number): v is number {
 export function validateSession(raw: unknown): SessionData | null {
   if (!isPlainObject(raw)) return null;
   const keys = Object.keys(raw).sort();
-  if (keys.length !== FIELDS.length || keys.some((k, i) => k !== FIELDS[i])) return null;
-  if (raw.v !== SESSION_VERSION) return null;
+  const sameKeys = (want: readonly string[]) => keys.length === want.length && keys.every((k, i) => k === want[i]);
+  let verifiedOnly: boolean;
+  if (raw.v === SESSION_VERSION && sameKeys(FIELDS)) {
+    if (typeof raw.verifiedOnly !== 'boolean') return null;
+    verifiedOnly = raw.verifiedOnly;
+  } else if (raw.v === 1 && sameKeys(FIELDS_V1)) {
+    verifiedOnly = false; // migrated from version 1
+  } else {
+    return null;
+  }
 
   const { city, lat, lng, countryCode, month, radius, tab, done } = raw;
   if (city === null) {
@@ -85,6 +98,7 @@ export function validateSession(raw: unknown): SessionData | null {
     radius,
     tab: tab as SessionTab,
     done: [...seen],
+    verifiedOnly,
   };
 }
 

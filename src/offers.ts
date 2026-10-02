@@ -1,4 +1,5 @@
-import type { Category, Channel, ClaimWindow, Offer, OffersFile, OsmHint } from './types';
+import type { Category, Channel, ClaimWindow, Offer, OffersFile, OsmHint, Venue } from './types';
+import { distanceM } from './overpass';
 import { hasUnsafeText } from './text';
 import { safeHttpsUrl } from './urls';
 
@@ -22,7 +23,12 @@ export const LIMITS = {
   validFor: 80,
   bring: 5,
   bringItem: 40,
+  venues: 20,
+  venueName: 80,
 } as const;
+
+/** A venue offer shows in Nearby only when its nearest venue is within this distance (DECISIONS #24). */
+export const VENUE_MAX_M = 150_000;
 
 export const ID_RE = /^[a-z0-9][a-z0-9-]*$/;
 const COUNTRY_RE = /^[A-Z]{2}$/;
@@ -96,6 +102,26 @@ function validateOsm(v: unknown): OsmHint | undefined | null {
     out.nameRegex = v.nameRegex;
   }
   return out.wikidata || out.nameRegex ? out : undefined;
+}
+
+function isCoord(v: unknown, limit: number): v is number {
+  return typeof v === 'number' && Number.isFinite(v) && Math.abs(v) <= limit;
+}
+
+/** Optional venues: 1..20 entries of {name, lat, lng, exact?}. undefined = absent, null = invalid. */
+function validateVenues(v: unknown): Venue[] | undefined | null {
+  if (v === undefined) return undefined;
+  if (!Array.isArray(v) || v.length === 0 || v.length > LIMITS.venues) return null;
+  const out: Venue[] = [];
+  for (const item of v) {
+    if (!isObj(item)) return null;
+    const name = cleanText(item.name, LIMITS.venueName);
+    if (!name) return null;
+    if (!isCoord(item.lat, 90) || !isCoord(item.lng, 180)) return null;
+    if (item.exact !== undefined && typeof item.exact !== 'boolean') return null;
+    out.push({ name, lat: item.lat, lng: item.lng, exact: item.exact !== false });
+  }
+  return out;
 }
 
 /** Optional string list: 1..maxItems entries, each a clean non-empty string ≤ maxLen. null = invalid. */
@@ -189,6 +215,8 @@ export function validateOffer(raw: unknown): ValidationResult {
 
   const osm = validateOsm(raw.osm);
   if (osm === null) return fail(`${id}: bad osm hint`);
+  const venues = validateVenues(raw.venues);
+  if (venues === null) return fail(`${id}: bad venues`);
   const details = validateClaimDetails(raw);
   if (typeof details === 'string') return fail(`${id}: ${details}`);
 
@@ -206,6 +234,7 @@ export function validateOffer(raw: unknown): ValidationResult {
     verified: raw.verified === true,
   };
   if (osm) result.osm = osm;
+  if (venues) result.venues = venues;
   Object.assign(result, details);
   return { ok: true, offer: result };
 }
@@ -254,6 +283,47 @@ export function filterOffers(args: { offers: readonly Offer[]; country: string |
   return offers.filter(
     (o) => channelOk(o.channel) && (o.countries.includes('*') || (country !== null && o.countries.includes(country))),
   );
+}
+
+export interface VenueHit {
+  venue: Venue;
+  distanceM: number;
+}
+
+/** The offer's venue nearest to (lat, lng), or null when it has no venues (or the point is invalid). */
+export function nearestVenue(offer: Pick<Offer, 'venues'>, lat: number, lng: number): VenueHit | null {
+  if (!offer.venues?.length || !isCoord(lat, 90) || !isCoord(lng, 180)) return null;
+  let best: VenueHit | null = null;
+  for (const venue of offer.venues) {
+    const d = distanceM(lat, lng, venue.lat, venue.lng);
+    if (!best || d < best.distanceM) best = { venue, distanceM: d };
+  }
+  return best;
+}
+
+/**
+ * Nearby tab list for a searched point: the country's in-store/both offers, except that an offer with
+ * venues is kept only when its nearest venue is within VENUE_MAX_M (a single theme park near Mumbai
+ * must not show up for Kolkata). `venues` maps the kept venue offers to that nearest venue.
+ */
+export function nearbyOffers(args: { offers: readonly Offer[]; country: string | null; lat: number; lng: number }): {
+  offers: Offer[];
+  venues: Map<string, VenueHit>;
+} {
+  const venues = new Map<string, VenueHit>();
+  const offers = filterOffers({ offers: args.offers, country: args.country, channel: 'nearby' }).filter((o) => {
+    if (!o.venues) return true;
+    const hit = nearestVenue(o, args.lat, args.lng);
+    if (!hit || hit.distanceM > VENUE_MAX_M) return false;
+    venues.set(o.id, hit);
+    return true;
+  });
+  return { offers, venues };
+}
+
+/** "Verified only" filter (DECISIONS #25): unverified offers are dropped when `verifiedOnly` is on. */
+export function applyVerifiedFilter<T extends Pick<Offer, 'verified'>>(offers: readonly T[], verifiedOnly: boolean): T[] {
+  return verifiedOnly ? offers.filter((o) => o.verified) : [...offers];
 }
 
 /**

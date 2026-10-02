@@ -7,6 +7,18 @@ export interface OsmHint {
   nameRegex?: string;
 }
 
+/**
+ * A fixed place where a single-location (or few-location) offer is claimed, e.g. a theme park
+ * (DECISIONS #24). `exact: false` means the coordinates are approximate: they are used only for the
+ * distance check, directions go by name and no map pin is drawn.
+ */
+export interface Venue {
+  name: string;
+  lat: number;
+  lng: number;
+  exact: boolean;
+}
+
 export interface Offer {
   id: string;
   brand: string;
@@ -20,6 +32,8 @@ export interface Offer {
   lastVerified: string;
   verified: boolean;
   osm?: OsmHint;
+  /** Fixed venues (1 to 20). When present, Nearby uses them instead of an Overpass lookup. */
+  venues?: Venue[];
   /** Optional structured claim details (all validated in src/offers.ts). */
   /** The concrete thing you get, e.g. "A free tall drink of your choice". */
   rewardItem?: string;
@@ -55,6 +69,8 @@ export interface Branch {
   name: string;
   lat: number;
   lng: number;
+  /** Approximate location (a venue with `exact: false`): no pin, directions by name. */
+  approximate?: boolean;
 }
 
 export interface LiveResult {

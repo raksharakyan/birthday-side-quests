@@ -95,7 +95,8 @@ test.describe('happy path', () => {
     // Session record: exactly the allowed fields, nothing else anywhere.
     const doneId = (await card.getAttribute('data-offer-id')) ?? '';
     expect(await expectOnlySessionRecord(page, context, startUrl)).toEqual({
-      v: 1, city: 'Bengaluru', lat: 12.9767936, lng: 77.590082, countryCode: 'IN', month: 10, radius: 5000, tab: 'nearby', done: [doneId],
+      v: 2, city: 'Bengaluru', lat: 12.9767936, lng: 77.590082, countryCode: 'IN', month: 10, radius: 5000, tab: 'nearby', done: [doneId],
+      verifiedOnly: false,
     });
 
     // Refresh → the search is restored from sessionStorage (inputs, results, done state), no new geocoding.
@@ -200,7 +201,7 @@ test.describe('error states', () => {
     await expect(page.getByRole('status')).toContainText("You're offline. Reconnect to the internet and try again.");
   });
 
-  test('Overpass 504 → quests still listed, no pins, no directions', async ({ page, guard }) => {
+  test('Overpass 504 → quests still listed, no shop pins, only venue directions', async ({ page, guard }) => {
     guard.allowConsole(/Failed to load resource: the server responded with a status of 504/);
     await guard.mock({ overpass: (route) => route.fulfill({ status: 504, body: 'Gateway Timeout', headers: CORS }) });
     await page.goto('./');
@@ -209,7 +210,9 @@ test.describe('error states', () => {
     await expect(page.locator('#nearby-list .quest-card')).toHaveCount(expectedNearbyCount('IN'));
     await expect(page.locator('.map-marker--branch')).toHaveCount(0);
     await expect(page.locator('.map-marker--center')).toHaveCount(1);
-    await expect(page.locator('#nearby-list .btn--directions')).toHaveCount(0);
+    // Shop directions need Overpass; only the venue offer (Wonderla Bengaluru, fixed coordinates) keeps them.
+    await expect(page.locator('#nearby-list .btn--directions')).toHaveCount(1);
+    await expect(page.locator('#nearby-list .quest-card[data-offer-id="wonderla-in"] .btn--directions')).toHaveCount(1);
     // The results header says why distances are missing (no stale "Looking for shops" line).
     await expect(page.locator('#results-sub')).toContainText('Shop pins for Bengaluru didn’t load');
     await expect(page.locator('#nearby-list a.btn--source').first()).toHaveAttribute('href', /^https:\/\//);
@@ -275,7 +278,7 @@ test('Online tab works without a city (country select) and Found online sends on
   expect(ext[0]?.url).toBe('https://bsq-worker.e2e.example/search?month=10&country=US');
   // No city searched: the session record holds no location at all, only month/country/tab.
   expect(await expectOnlySessionRecord(page, context, startUrl)).toEqual({
-    v: 1, city: null, lat: null, lng: null, countryCode: 'US', month: 10, radius: 5000, tab: 'found', done: [],
+    v: 2, city: null, lat: null, lng: null, countryCode: 'US', month: 10, radius: 5000, tab: 'found', done: [], verifiedOnly: false,
   });
   await expectLocationOnlyToNominatim(guard, []);
 });
