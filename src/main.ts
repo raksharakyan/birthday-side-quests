@@ -8,25 +8,30 @@ import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
 
+import { countryName, countryOptions } from './countries';
 import { GeocodeError, geocode } from './geocode';
 import { isLiveSearchEnabled, liveSearch } from './liveSearch';
-import { filterOffers, loadOffers, monthInfo } from './offers';
+import { filterOffers, loadOffers, monthInfo, onlineCounts } from './offers';
 import type { Suggestion } from './autocomplete';
 import { DEFAULT_RADIUS_M, RADIUS_OPTIONS_M, distanceM, fetchBranches, nearestByOffer } from './overpass';
 import { createCombobox } from './render/combobox';
 import { initCelebrations } from './render/confetti';
 import { el } from './render/dom';
 import type { MapView } from './render/map';
-import { renderEmpty, renderLiveList, renderNearbyList, renderQuestList } from './render/quests';
+import { doneIds, onDoneChange, renderEmpty, renderLiveList, renderNearbyList, renderQuestList, setDoneIds } from './render/quests';
+import { clearSession, loadSession, saveSession, SESSION_TABS, type SessionTab } from './session';
 import type { Branch, LiveResult, Offer, Place } from './types';
 
 /*
- * App state is in memory only. Never write to localStorage/sessionStorage/cookies/IndexedDB,
- * never put the user's location in the URL, and never use the browser geolocation API.
+ * App state lives in memory. The only thing persisted is one validated record in sessionStorage
+ * (src/session.ts, DECISIONS #18): it survives a refresh and is gone when the tab closes. Never
+ * localStorage, cookies or IndexedDB; never the user's location in the URL; never browser geolocation.
  */
 interface State {
   offers: Offer[];
   place: Place | null;
+  /** City text that produced `place` (what the input showed). Saved for this tab's session. */
+  placeText: string;
   month: number | null;
   onlineCountry: string | null;
   branches: Map<string, Branch>;
@@ -34,7 +39,17 @@ interface State {
   searchedRadiusM: number | null;
 }
 
-const state: State = { offers: [], place: null, month: null, onlineCountry: null, branches: new Map(), searchedRadiusM: null };
+const state: State = {
+  offers: [],
+  place: null,
+  placeText: '',
+  month: null,
+  onlineCountry: null,
+  branches: new Map(),
+  searchedRadiusM: null,
+};
+/** True while the saved session is being applied, so intermediate states aren't written back. */
+let restoring = false;
 /** Place picked from the autocomplete list, valid while the input still shows its label. */
 let picked: { text: string; place: Place } | null = null;
 const liveCache = new Map<string, LiveResult[]>();
@@ -60,6 +75,10 @@ const onlineList = $('online-list');
 const foundList = $('found-list');
 const mapEl = $('map');
 const submitBtn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+const clearBtn = $('clear-search') as HTMLButtonElement;
+const onlineCountEl = $('online-count');
+
+const NEARBY_START = 'Type your city and pick your birthday month to see quests near you.';
 
 type StatusKind = 'info' | 'loading' | 'error' | 'success';
 function setStatus(message: string, kind: StatusKind = 'info'): void {
@@ -68,25 +87,15 @@ function setStatus(message: string, kind: StatusKind = 'info'): void {
   document.body.classList.toggle('is-loading', kind === 'loading');
 }
 
-const regionNames = (() => {
-  try {
-    return new Intl.DisplayNames(['en'], { type: 'region' });
-  } catch {
-    return null;
-  }
-})();
-function countryName(code: string): string {
-  try {
-    return regionNames?.of(code) ?? code;
-  } catch {
-    return code;
-  }
-}
-
 // ---------- tabs (WAI-ARIA tabs pattern) ----------
 const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
 function visibleTabs(): HTMLButtonElement[] {
   return tabs.filter((t) => !t.hidden);
+}
+function currentTab(): SessionTab {
+  const t = tabs.find((x) => x.getAttribute('aria-selected') === 'true');
+  const id = t?.id.replace(/^tab-/, '') ?? 'nearby';
+  return (SESSION_TABS as readonly string[]).includes(id) ? (id as SessionTab) : 'nearby';
 }
 function selectTab(tab: HTMLButtonElement, focus = false): void {
   for (const t of tabs) {
@@ -100,6 +109,7 @@ function selectTab(tab: HTMLButtonElement, focus = false): void {
   if (focus) tab.focus();
   if (tab.id === 'tab-found') void refreshFoundOnline();
   if (tab.id === 'tab-nearby') mapView?.invalidateSize();
+  persist();
 }
 for (const t of tabs) {
   t.addEventListener('click', () => selectTab(t));
@@ -137,32 +147,62 @@ function ensureOffers(): Promise<void> {
   return offersReady;
 }
 
-function populateCountries(extra?: string): void {
-  const codes = new Set<string>();
-  for (const o of state.offers) for (const c of o.countries) if (c !== '*') codes.add(c);
-  if (extra) codes.add(extra);
-  const current = countrySelect.value;
-  const sorted = [...codes].sort((a, b) => countryName(a).localeCompare(countryName(b)));
-  countrySelect.replaceChildren(
-    el('option', { value: '' }, ['Pick your country…']),
-    ...sorted.map((c) => el('option', { value: c }, [countryName(c)])),
+/** Every country (ISO 3166-1), countries with their own online quests first, with a count. */
+function populateCountries(extra?: string | null): void {
+  const { byCountry, worldwide } = onlineCounts(state.offers);
+  const { withQuests, others } = countryOptions(byCountry, worldwide, extra);
+  const wanted = state.onlineCountry ?? countrySelect.value;
+  const groups: HTMLElement[] = [el('option', { value: '' }, ['Pick your country…'])];
+  if (withQuests.length) {
+    groups.push(
+      el('optgroup', { label: 'Countries with online quests' }, withQuests.map((c) => el('option', { value: c.code }, [`${c.name} (${c.count})`]))),
+    );
+  }
+  groups.push(
+    el('optgroup', { label: withQuests.length ? 'All other countries' : 'All countries' }, others.map((c) => el('option', { value: c.code }, [c.name]))),
   );
-  countrySelect.value = codes.has(current) ? current : '';
+  countrySelect.replaceChildren(...groups);
+  countrySelect.value = wanted;
+  if (countrySelect.value !== wanted) countrySelect.value = '';
+}
+
+function setOnlineCount(n: number | null): void {
+  if (n === null) {
+    onlineCountEl.hidden = true;
+    onlineCountEl.replaceChildren();
+    return;
+  }
+  // Visible number; screen readers hear "Online 14 quests" (the flex item gets its own word boundary).
+  onlineCountEl.replaceChildren(
+    String(n),
+    el('span', { class: 'visually-hidden' }, [n === 1 ? ' quest' : ' quests']),
+  );
+  onlineCountEl.hidden = false;
 }
 
 function renderOnline(): void {
   const list = filterOffers({ offers: state.offers, country: state.onlineCountry, channel: 'online' });
+  setOnlineCount(state.offers.length ? list.length : null);
   if (list.length === 0) {
     renderEmpty(
       onlineList,
       state.onlineCountry
-        ? 'No online birthday quests for this country yet — try another country, or check back soon 🎀'
-        : 'No worldwide online quests yet — pick your country above to see deals you can claim online 💻',
+        ? 'No online birthday quests for this country yet. Try another country, or check back soon 🎀'
+        : 'No worldwide online quests yet, so pick your country above to see deals you can claim online 💻',
       'empty',
     );
   } else {
     renderQuestList(onlineList, list, { idPrefix: 'online' });
   }
+}
+
+/** Points the Online tab (and Found online) at a country and refreshes both straight away. */
+function syncOnlineCountry(code: string | null): void {
+  state.onlineCountry = code && /^[A-Z]{2}$/.test(code) ? code : null;
+  if (state.offers.length) populateCountries(state.onlineCountry);
+  countrySelect.value = state.onlineCountry ?? '';
+  renderOnline();
+  if (foundTabSelected()) void refreshFoundOnline();
 }
 
 function renderNearby(): void {
@@ -218,7 +258,7 @@ async function refreshFoundOnline(): Promise<void> {
   }
 }
 function showLive(results: LiveResult[]): void {
-  if (results.length === 0) renderEmpty(foundList, 'Nothing new found online for this month — check back later.');
+  if (results.length === 0) renderEmpty(foundList, 'Nothing new found online for this month. Check back later.');
   else renderLiveList(foundList, results);
 }
 function foundTabSelected(): boolean {
@@ -256,13 +296,13 @@ function geocodeMessage(err: unknown): string {
   if (err instanceof GeocodeError) {
     switch (err.kind) {
       case 'NotFound':
-        return "We couldn't find that place. Try a nearby city or add the country, e.g. “Indiranagar, Bengaluru”.";
+        return "We couldn't find that place. Try just the city name, like “Pune” or “Manchester”, or add the country.";
       case 'RateLimited':
         return 'The map search is a bit busy. Please wait a few seconds and try again.';
       case 'Offline':
         return "You're offline. Reconnect to the internet and try again.";
       case 'Invalid':
-        return 'Type a city or area to find quests near you (or open the Online tab).';
+        return 'Type your city to find quests near you (or open the Online tab).';
       case 'Upstream':
         return 'The map search is having trouble right now. Please try again in a moment.';
     }
@@ -290,7 +330,8 @@ async function onSubmit(e: SubmitEvent): Promise<void> {
     ++searchSeq;
     state.month = month;
     showMonthInfo();
-    setStatus('Type a city or area to find quests near you (or open the Online tab).', 'error');
+    persist();
+    setStatus('Type your city to find quests near you (or open the Online tab).', 'error');
     cityInput.focus();
     return;
   }
@@ -307,20 +348,20 @@ async function runSearch(where: string | Place): Promise<void> {
   showMonthInfo();
   const radiusM = readRadius();
 
-  setStatus('Looking up your area…', 'loading');
+  const text = (typeof where === 'string' ? where : cityInput.value).replace(/\s+/g, ' ').trim();
+  setStatus('Looking up your city…', 'loading');
   submitBtn?.setAttribute('aria-disabled', 'true');
   try {
     const [place] = await Promise.all([typeof where === 'string' ? geocode(where) : Promise.resolve(where), ensureOffers()]);
     if (seq !== searchSeq) return;
     state.place = place;
+    state.placeText = text || place.label;
     state.branches = new Map();
     state.searchedRadiusM = null;
-    state.onlineCountry = place.countryCode;
-    populateCountries(place.countryCode);
-    countrySelect.value = place.countryCode;
-    renderOnline();
+    // Auto-sync: the Online tab (and Found online) follow the searched city's country.
+    syncOnlineCountry(place.countryCode);
     renderNearby();
-    if (foundTabSelected()) void refreshFoundOnline();
+    persist();
 
     const nearby = filterOffers({ offers: state.offers, country: place.countryCode, channel: 'nearby' });
     const map = await getMap();
@@ -329,7 +370,7 @@ async function runSearch(where: string | Place): Promise<void> {
     map.showPlace(place, radiusM);
 
     if (nearby.length === 0) {
-      setStatus(`No in-store quests near ${place.label} yet — the Online tab has treats you can claim anywhere.`, 'info');
+      setStatus(`No in-store quests near ${place.label} yet. The Online tab has treats you can claim anywhere.`, 'info');
       return;
     }
     const quests = `${nearby.length} quest${nearby.length === 1 ? '' : 's'}`;
@@ -344,12 +385,12 @@ async function runSearch(where: string | Place): Promise<void> {
       setStatus(
         branches.length > 0
           ? `Found ${quests} and ${branches.length} shop${branches.length === 1 ? '' : 's'} on the map within ${km(radiusM)} of ${place.label}.`
-          : `Found ${quests} for your area. We couldn't spot their shops within ${km(radiusM)} on the map — try a bigger search radius.`,
+          : `Found ${quests} for your city. We couldn't spot their shops within ${km(radiusM)} on the map. Try a bigger search radius.`,
         'success',
       );
     } catch {
       if (seq !== searchSeq) return;
-      setStatus(`Found ${quests}. We couldn't load shop pins right now — your quests are still listed below.`, 'info');
+      setStatus(`Found ${quests}. We couldn't load shop pins right now, but your quests are still listed below.`, 'info');
     }
   } catch (err) {
     if (seq !== searchSeq) return;
@@ -376,6 +417,7 @@ cityInput.addEventListener('input', () => {
   if (picked && picked.text !== cityInput.value) picked = null;
 });
 radiusSelect.addEventListener('change', () => {
+  persist();
   // Re-run for the place already on screen (no new geocoding; Overpass gets coordinates only).
   if (state.place && readMonth()) void runSearch(state.place);
 });
@@ -384,18 +426,90 @@ form.addEventListener('submit', (e) => void onSubmit(e));
 monthSelect.addEventListener('change', () => {
   state.month = readMonth();
   showMonthInfo();
+  persist();
   if (foundTabSelected()) void refreshFoundOnline();
 });
 countrySelect.addEventListener('change', () => {
-  const v = countrySelect.value;
-  state.onlineCountry = /^[A-Z]{2}$/.test(v) ? v : null;
-  renderOnline();
-  if (foundTabSelected()) void refreshFoundOnline();
+  syncOnlineCountry(countrySelect.value);
+  persist();
 });
 initCelebrations($('celebrate-live'));
 window.addEventListener('offline', () => setStatus("You're offline. Results already shown will stay here.", 'error'));
 
-// Online tab works without a city — load offers up front (small static file, same origin).
+// ---------- session (sessionStorage, this tab only) ----------
+/** Writes the one allowed record. Location goes only here, never into the URL. */
+function persist(): void {
+  if (restoring) return;
+  const place = state.place;
+  saveSession({
+    v: 1,
+    city: place ? state.placeText : null,
+    lat: place ? place.lat : null,
+    lng: place ? place.lng : null,
+    countryCode: place ? place.countryCode : state.onlineCountry,
+    month: readMonth(),
+    radius: readRadius(),
+    tab: currentTab(),
+    done: doneIds(),
+  });
+}
+onDoneChange(persist);
+
+/** Re-applies a saved search after a refresh: inputs, tab, done quests, then re-runs the search. */
+function restoreSession(): void {
+  const saved = loadSession();
+  if (!saved) return;
+  restoring = true;
+  try {
+    if (saved.month) monthSelect.value = String(saved.month);
+    radiusSelect.value = String(saved.radius);
+    state.month = readMonth();
+    showMonthInfo();
+    setDoneIds(saved.done);
+    const tab = tabs.find((t) => t.id === `tab-${saved.tab}` && !t.hidden) ?? tabs[0];
+    if (tab) selectTab(tab);
+    if (saved.city !== null && saved.lat !== null && saved.lng !== null && saved.countryCode) {
+      const place: Place = { lat: saved.lat, lng: saved.lng, countryCode: saved.countryCode, label: saved.city };
+      cityInput.value = saved.city;
+      // Coordinates are stored, so the re-run skips Nominatim (like a picked suggestion).
+      picked = { text: saved.city, place };
+      if (state.month) void runSearch(place);
+      else syncOnlineCountry(saved.countryCode);
+    } else if (saved.countryCode) {
+      syncOnlineCountry(saved.countryCode);
+    }
+  } finally {
+    restoring = false;
+  }
+}
+
+/** "Clear search": wipes the saved record and puts the page back to its starting state. */
+function clearSearch(): void {
+  ++searchSeq;
+  combobox.cancel();
+  clearSession();
+  restoring = true;
+  try {
+    picked = null;
+    form.reset();
+    Object.assign(state, { place: null, placeText: '', month: null, branches: new Map(), searchedRadiusM: null });
+    setDoneIds([]);
+    liveCache.clear();
+    showMonthInfo();
+    syncOnlineCountry(null);
+    renderEmpty(nearbyList, NEARBY_START);
+    mapView?.reset();
+    submitBtn?.removeAttribute('aria-disabled');
+  } finally {
+    restoring = false;
+  }
+  setStatus('Search cleared. Nothing from it is kept in this tab.', 'info');
+  cityInput.focus();
+}
+clearBtn.addEventListener('click', clearSearch);
+
+// Online tab works without a city: load offers up front (small static file, same origin).
 ensureOffers().catch(() => {
   renderEmpty(onlineList, "We couldn't load the offers list. Please refresh the page.", 'error');
 });
+restoreSession();

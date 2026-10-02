@@ -37,18 +37,19 @@ const photonFeature = (props: Record<string, unknown>, lng: number, lat: number)
   properties: { osm_key: 'place', ...props },
 });
 
-/** Photon FeatureCollection returned for any query by default (5 places). */
+/** Photon FeatureCollection (city layer) returned for any query by default (5 places). */
 export const PHOTON_BENG = {
   type: 'FeatureCollection',
   features: [
     photonFeature({ name: 'Bengaluru', county: 'Bangalore North', state: 'Karnataka', country: 'India', countrycode: 'IN', type: 'city' }, 77.5946, 12.9716),
-    photonFeature({ name: 'Koramangala', county: 'Bangalore South', state: 'Karnataka', country: 'India', countrycode: 'IN', type: 'locality' }, 77.6271, 12.9352),
-    photonFeature({ name: 'Bengkulu', country: 'Indonesia', countrycode: 'ID', type: 'state' }, 102.26, -3.8),
+    photonFeature({ name: 'Pune', county: 'Pune City', state: 'Maharashtra', country: 'India', countrycode: 'IN', type: 'city' }, 73.8567, 18.5204),
+    photonFeature({ name: 'Benguela', state: 'Benguela', country: 'Angola', countrycode: 'AO', type: 'city' }, 13.4055, -12.5763),
     photonFeature({ name: 'Benghazi', state: 'Benghazi', country: 'Libya', countrycode: 'LY', type: 'city' }, 20.07, 32.11),
     photonFeature({ name: 'Bengbu', state: 'Anhui Province', country: 'China', countrycode: 'CN', type: 'city' }, 117.38, 32.92),
   ],
 };
 export const PHOTON_FIRST_LABEL = 'Bengaluru, Bangalore North, Karnataka, India';
+export const PHOTON_PUNE_LABEL = 'Pune, Pune City, Maharashtra, India';
 
 interface SeedOffer {
   channel: string;

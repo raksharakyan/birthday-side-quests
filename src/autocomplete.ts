@@ -15,8 +15,12 @@ export const MAX_INPUT_LENGTH = 120;
 export const DEBOUNCE_MS = 300;
 export const MAX_SUGGESTIONS = 5;
 export const PHOTON_TIMEOUT_MS = 5_000;
-/** Places only (no streets, houses or POIs): the suggestion becomes the centre of a quest search. */
-export const PHOTON_LAYERS = ['city', 'district', 'locality'] as const;
+/**
+ * Cities, towns and villages only (DECISIONS #19): the suggestion becomes the centre of a quest search.
+ * Photon's "city" layer covers place=city/town/village and city-level admin boundaries. Neighbourhoods
+ * (district/locality), streets, houses and POIs are excluded.
+ */
+export const PHOTON_LAYERS = ['city'] as const;
 const CACHE_MAX = 100;
 const PART_MAX = 80;
 const LABEL_MAX = 160;
@@ -81,6 +85,8 @@ export function parsePhoton(json: unknown): Suggestion[] {
     if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) continue;
     const cc = typeof f.properties.countrycode === 'string' ? f.properties.countrycode.toUpperCase() : '';
     if (!/^[A-Z]{2}$/.test(cc)) continue;
+    // Defence in depth for the layer filter: skip anything Photon labels as not city-level.
+    if (typeof f.properties.type === 'string' && f.properties.type !== 'city') continue;
     const label = buildLabel(f.properties);
     if (!label) continue;
     const key = label.toLocaleLowerCase();

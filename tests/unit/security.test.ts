@@ -173,7 +173,6 @@ describe('source-tree privacy & sink guards', () => {
     ['new Function', /new\s+Function\b/],
     ['string timers', /set(Timeout|Interval)\(\s*['"`]/],
     ['localStorage', /localStorage/],
-    ['sessionStorage', /sessionStorage/],
     ['indexedDB', /indexedDB/],
     ['cookies', /document\.cookie/],
     ['geolocation', /geolocation/],
@@ -182,5 +181,11 @@ describe('source-tree privacy & sink guards', () => {
     ['Leaflet HTML-string popups', /bind(Popup|Tooltip)\(\s*['"`]/],
   ])('src/ has no %s', (_name, re) => {
     expect(code).not.toMatch(re);
+  });
+  it('sessionStorage is used only by src/session.ts (DECISIONS #18)', () => {
+    const users = Object.entries(sources)
+      .filter(([, src]) => /sessionStorage/.test(src.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, '')))
+      .map(([path]) => path.replace(/^.*\/src\//, 'src/'));
+    expect(users).toEqual(['src/session.ts']);
   });
 });

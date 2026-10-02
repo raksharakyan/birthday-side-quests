@@ -4,7 +4,7 @@ import type { QuestDoneDetail } from './quests';
 /*
  * Confetti burst for the 'quest-done' CustomEvent (dispatched by the done checkbox in quests.ts).
  * Pure DOM + CSS animations; per-piece values are passed as CSS custom properties through the CSSOM
- * (style.setProperty), which the CSP (style-src 'self') allows — no inline style attributes, no innerHTML.
+ * (style.setProperty), which the CSP (style-src 'self') allows. No inline style attributes, no innerHTML.
  * With prefers-reduced-motion there is no burst: the card just switches to its static "done" style.
  */
 

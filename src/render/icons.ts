@@ -2,7 +2,7 @@ import type { Category } from '../types';
 import { svg } from './dom';
 
 /*
- * Map marker icons. Static markup only (built with createElementNS via svg()) — never pass data in here.
+ * Map marker icons. Static markup only (built with createElementNS via svg()); never pass data in here.
  * Colours come from CSS (.pin__body / .pin__face / .pin__glyph), keyed off the wrapper's data-category,
  * so no inline styles are needed under the CSP.
  */
@@ -19,12 +19,12 @@ function pin(className: string, glyph: SVGElement[]): SVGElement {
   ]);
 }
 
-/** Heart pin — food & drink (cafe, dessert, restaurant). */
+/** Heart pin: food & drink (cafe, dessert, restaurant). */
 export function heartIcon(className = 'marker-heart'): SVGElement {
   return pin(className, [svg('path', { d: HEART_PATH, class: 'pin__glyph', transform: 'translate(10.8 10.6) scale(0.6)' })]);
 }
 
-/** Gift pin — beauty, fashion, retail, online. */
+/** Gift pin: beauty, fashion, retail, online. */
 export function giftIcon(className = 'marker-gift'): SVGElement {
   return pin(className, [
     svg('rect', { x: '11.5', y: '17', width: '13', height: '8.5', rx: '1.5', class: 'pin__glyph' }),
@@ -39,7 +39,7 @@ export function giftIcon(className = 'marker-gift'): SVGElement {
   ]);
 }
 
-/** Star — the user's searched location. */
+/** Star: the user's searched location. */
 export function starIcon(className = 'marker-center'): SVGElement {
   return svg('svg', { viewBox: '0 0 40 40', width: '40', height: '40', 'aria-hidden': 'true', focusable: 'false', class: `star ${className}` }, [
     svg('circle', { cx: '20', cy: '20', r: '17', class: 'star__halo' }),

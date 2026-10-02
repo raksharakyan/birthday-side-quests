@@ -74,7 +74,7 @@
 select.field__input {
   appearance: none; -webkit-appearance: none; cursor: pointer;
   padding-right: 2.75rem;
-  /* chevron drawn with gradients — no image request, CSP-friendly */
+  /* chevron drawn with gradients: no image request, CSP-friendly */
   background-image:
     linear-gradient(45deg, transparent 50%, var(--ink-berry) 50%),
     linear-gradient(135deg, var(--ink-berry) 50%, transparent 50%);
@@ -119,6 +119,10 @@ select.field__input {
   font-size: 0.92rem; font-weight: 700;
 }
 .privacy-note__icon { flex: none; }
+.session-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-2) var(--space-3); }
+.session-row .privacy-note { flex: 1 1 18rem; }
+.btn--small { min-height: 44px; padding: var(--space-1) var(--space-4); font-size: 0.9rem; }
+.session-row__clear { flex: 0 0 auto; }
 
 .status {
   margin: var(--space-3) 0 0; padding: var(--space-2) var(--space-4);
@@ -265,6 +269,12 @@ select.field__input {
 .tab[aria-selected='true'] { background: var(--color-primary); color: var(--color-primary-text); box-shadow: 0 2px 0 var(--ink-berry-deep); }
 .tab:focus-visible { outline-offset: 2px; }
 .tab__icon { font-size: 1.05em; }
+.tab__count {
+  display: inline-grid; place-items: center; min-width: 1.6em; padding: 0 0.4em;
+  border-radius: var(--radius-pill); background: var(--blush-soft); color: var(--ink-berry-deep);
+  font-size: 0.85em; line-height: 1.5;
+}
+.tab__count[hidden] { display: none; }
 @media (max-width: 479px) {
   .tab { flex: 1 1 auto; padding-inline: var(--space-2); font-size: 0.92rem; gap: 0.25em; }
 }
@@ -363,6 +373,17 @@ select.field__input {
 .quest-card__details dd { margin: 0 0 var(--space-2); overflow-wrap: anywhere; }
 .quest-card__details dd:last-child { margin-bottom: 0; }
 .quest-card__offer { font-weight: 700; }
+.quest-card__reward { margin: 0; overflow-wrap: anywhere; }
+.quest-card__steps { margin: 0; padding-left: 1.4em; }
+.quest-card__steps li + li { margin-top: var(--space-1); }
+.claim-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-2); }
+.claim-chip {
+  display: inline-flex; align-items: center; gap: 0.3em;
+  padding: 0.1rem 0.6rem; border-radius: var(--radius-pill);
+  background: var(--lavender-soft); color: var(--ink-lavender); border: 1px solid var(--lavender);
+  font-size: 0.85rem; font-weight: 700; line-height: 1.5; overflow-wrap: anywhere;
+}
+.claim-chip--free { background: var(--color-success-bg); color: var(--color-success-text); border-color: var(--ink-mint); }
 @media (min-width: 480px) {
   .quest-card__details { grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-2) var(--space-4); align-items: baseline; }
   .quest-card__details dd { margin: 0; }
@@ -378,7 +399,7 @@ select.field__input {
 .btn--source:hover { background: var(--lavender-soft); color: var(--ink-lavender); }
 .btn--source::after { content: '↗' / ''; }
 
-/* done toggle — real checkbox, custom look */
+/* done toggle: real checkbox, custom look */
 .quest-card__done {
   display: flex; align-items: center; gap: var(--space-3);
   min-height: 48px; padding: var(--space-1) var(--space-3);

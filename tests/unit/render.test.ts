@@ -82,7 +82,7 @@ describe('liveSearch validation', () => {
   it('live card renders as text', () => {
     const c = liveCard({ title: XSS, url: 'https://e.com', snippet: XSS, source: 'e.com' });
     expect(c.querySelector('img')).toBeNull();
-    expect(c.textContent).toContain('Unverified — check the link');
+    expect(c.textContent).toContain('Unverified: check the link');
   });
 });
 

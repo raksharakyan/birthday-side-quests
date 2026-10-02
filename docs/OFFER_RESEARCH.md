@@ -1,4 +1,4 @@
-# Offer Research — Birthday Side Quests
+# Offer Research: Birthday Side Quests
 
 Last research pass: **2026-10-02**. Data file: `research/offers.draft.json` (25 entries: 16 verified, 9 unverified; 9 relevant to India).
 

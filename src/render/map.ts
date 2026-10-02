@@ -11,13 +11,15 @@ import { CATEGORY_EMOJI, iconForCategory, starIcon } from './icons';
  */
 
 export const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-// Static constant (not data) — Leaflet renders attribution markup itself.
+// Static constant (not data): Leaflet renders attribution markup itself.
 export const TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 export interface MapView {
   showPlace(place: Place, radiusM?: number): void;
   showBranches(branches: readonly Branch[], offersById: ReadonlyMap<string, Offer>): void;
   clearBranches(): void;
+  /** Removes the searched place, radius ring and pins and zooms back out ("Clear search"). */
+  reset(): void;
   invalidateSize(): void;
 }
 
@@ -118,6 +120,14 @@ export function createMap(container: HTMLElement): MapView {
     },
     clearBranches() {
       branchLayer.clearLayers();
+    },
+    reset() {
+      branchLayer.clearLayers();
+      centerMarker?.remove();
+      radiusRing?.remove();
+      centerMarker = null;
+      radiusRing = null;
+      map.setView([20, 0], 2);
     },
     invalidateSize() {
       map.invalidateSize();

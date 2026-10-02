@@ -138,7 +138,7 @@ export { expect };
 // ---------------- helpers ----------------
 
 export async function search(page: Page, city: string, month = '10'): Promise<void> {
-  await page.getByLabel('Your city or area').fill(city);
+  await page.getByLabel('Your city', { exact: true }).fill(city);
   await page.getByLabel('Birthday month').selectOption(month);
   await page.getByRole('button', { name: 'Find my quests' }).click();
 }
@@ -155,24 +155,64 @@ export async function axeViolations(page: Page): Promise<string[]> {
     ),
   );
   const r = await new AxeBuilder({ page }).analyze();
-  return r.violations.map((v) => `${v.id} (${v.impact ?? 'n/a'}): ${v.help} — ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`);
+  return r.violations.map((v) => `${v.id} (${v.impact ?? 'n/a'}): ${v.help}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`);
 }
 
-/** No storage, cookies, IndexedDB, or location in the URL. */
-export async function expectNothingPersisted(page: Page, context: BrowserContext, startUrl: string): Promise<void> {
+/** The one sessionStorage key the app may use (src/session.ts, DECISIONS #18) and its exact fields. */
+export const SESSION_KEY = 'bsq-session';
+export const SESSION_FIELDS = ['city', 'countryCode', 'done', 'lat', 'lng', 'month', 'radius', 'tab', 'v'];
+
+export interface SavedSession {
+  v: number;
+  city: string | null;
+  lat: number | null;
+  lng: number | null;
+  countryCode: string | null;
+  month: number | null;
+  radius: number;
+  tab: string;
+  done: string[];
+}
+
+/** Raw web-storage snapshot of the page. */
+export async function storageSnapshot(page: Page): Promise<{
+  local: number; sessionKeys: string[]; session: string | null; cookie: string; idb: string[]; caches: string[];
+}> {
+  return page.evaluate(async (key) => ({
+    local: localStorage.length,
+    sessionKeys: Array.from({ length: sessionStorage.length }, (_, i) => sessionStorage.key(i) ?? ''),
+    session: sessionStorage.getItem(key),
+    cookie: document.cookie,
+    idb: typeof indexedDB.databases === 'function' ? (await indexedDB.databases()).map((d) => d.name ?? '') : [],
+    caches: typeof caches !== 'undefined' ? await caches.keys() : [],
+  }), SESSION_KEY);
+}
+
+/**
+ * Persistence contract (DECISIONS #18): no localStorage, cookies, IndexedDB or Cache Storage, nothing in
+ * the URL. sessionStorage is either empty or holds ONLY the one allowed key with exactly the allowed
+ * fields (no HTML in the city text). Returns the parsed record (or null).
+ */
+export async function expectOnlySessionRecord(page: Page, context: BrowserContext, startUrl: string): Promise<SavedSession | null> {
   expect(page.url()).toBe(startUrl);
   const u = new URL(page.url());
   expect(u.search).toBe('');
   expect(u.hash).toBe('');
-  const s = await page.evaluate(async () => ({
-    local: localStorage.length,
-    session: sessionStorage.length,
-    cookie: document.cookie,
-    idb: typeof indexedDB.databases === 'function' ? (await indexedDB.databases()).map((d) => d.name ?? '') : [],
-    caches: typeof caches !== 'undefined' ? await caches.keys() : [],
-  }));
-  expect(s).toEqual({ local: 0, session: 0, cookie: '', idb: [], caches: [] });
+  const s = await storageSnapshot(page);
+  expect({ local: s.local, cookie: s.cookie, idb: s.idb, caches: s.caches }).toEqual({ local: 0, cookie: '', idb: [], caches: [] });
   expect(await context.cookies()).toEqual([]);
+  if (s.sessionKeys.length === 0) return null;
+  expect(s.sessionKeys).toEqual([SESSION_KEY]);
+  const rec = JSON.parse(s.session ?? 'null') as SavedSession;
+  expect(Object.keys(rec).sort()).toEqual(SESSION_FIELDS);
+  expect(rec.v).toBe(1);
+  if (rec.city !== null) expect(rec.city).not.toMatch(/[<>]/);
+  return rec;
+}
+
+/** Nothing at all persisted (fresh page, or after "Clear search"). */
+export async function expectNothingPersisted(page: Page, context: BrowserContext, startUrl: string): Promise<void> {
+  expect(await expectOnlySessionRecord(page, context, startUrl)).toBeNull();
 }
 
 /** Hosts allowed to receive typed location text: Nominatim (on submit) and Photon (autocomplete). */
@@ -205,8 +245,12 @@ export async function expectLocationOnlyToNominatim(guard: Guard, locations: str
       expect(r.method).toBe('GET');
       expect(u.pathname).toBe('/api/');
       expect([...new Set(u.searchParams.keys())]).toEqual(['q', 'limit', 'lang', 'layer']);
+      expect(u.searchParams.getAll('layer')).toEqual(['city']); // city-only (DECISIONS #19)
       expect((u.searchParams.get('q') ?? '').length).toBeGreaterThanOrEqual(3);
       expect(r.postData).toBeNull();
+    }
+    if (u.hostname === 'nominatim.openstreetmap.org') {
+      expect(u.searchParams.get('featureType')).toBe('city'); // city-only (DECISIONS #19)
     }
     if (u.hostname === 'bsq-worker.e2e.example') {
       expect(u.pathname).toBe('/search');

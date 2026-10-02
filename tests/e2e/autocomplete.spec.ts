@@ -1,12 +1,12 @@
 import type { Page, Route } from '@playwright/test';
-import { expectedNearbyCount, OVERPASS_BENGALURU_PINS, PHOTON_FIRST_LABEL } from './fixtures';
-import { axeViolations, CORS, expect, expectLocationOnlyToNominatim, expectNothingPersisted, search, test, type Guard } from './harness';
+import { expectedNearbyCount, OVERPASS_BENGALURU_PINS, PHOTON_FIRST_LABEL, PHOTON_PUNE_LABEL } from './fixtures';
+import { axeViolations, CORS, expect, expectLocationOnlyToNominatim, expectOnlySessionRecord, search, test, type Guard } from './harness';
 
 /*
  * Location autocomplete (Photon) + search radius. All network mocked; harness guards apply.
  */
 
-const city = (page: Page) => page.getByRole('combobox', { name: 'Your city or area' });
+const city = (page: Page) => page.getByRole('combobox', { name: 'Your city' });
 const listbox = (page: Page) => page.getByRole('listbox', { name: 'Place suggestions' });
 const options = (page: Page) => listbox(page).getByRole('option');
 
@@ -76,7 +76,8 @@ test('keyboard: ArrowDown + Enter picks a suggestion and searches WITHOUT Nomina
   await expect.poll(() => overpassQuery(guard).length).toBe(2);
   expect(hostRequests(guard, 'nominatim.openstreetmap.org')).toEqual([]);
 
-  await expectNothingPersisted(page, context, startUrl);
+  const rec = await expectOnlySessionRecord(page, context, startUrl);
+  expect(rec).toMatchObject({ city: PHOTON_FIRST_LABEL, lat: 12.9716, lng: 77.5946, countryCode: 'IN', month: 10 });
   await expectLocationOnlyToNominatim(guard, ['Beng']);
 });
 
@@ -84,17 +85,17 @@ test('click / tap on a suggestion selects it', async ({ page, guard }, info) => 
   await guard.mock();
   await page.goto('./');
   await page.getByLabel('Birthday month').selectOption('10');
-  await typeSlowly(page, 'Kora');
+  await typeSlowly(page, 'Pune');
   await expect(options(page)).toHaveCount(5);
-  const target = options(page).filter({ hasText: 'Koramangala' });
+  const target = options(page).filter({ hasText: 'Pune' });
   const box = await target.boundingBox();
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(44); // large tap target
   if (info.project.name.startsWith('mobile')) await target.tap();
   else await target.click();
-  await expect(city(page)).toHaveValue('Koramangala, Bangalore South, Karnataka, India');
+  await expect(city(page)).toHaveValue(PHOTON_PUNE_LABEL);
   await expect(page.getByRole('status')).toContainText('on the map', { timeout: 15_000 });
   expect(hostRequests(guard, 'nominatim.openstreetmap.org')).toEqual([]);
-  expect(overpassQuery(guard)[0]).toContain('12.935200,77.627100');
+  expect(overpassQuery(guard)[0]).toContain('18.520400,73.856700');
 });
 
 test('picking before the month asks for the month, then Find uses the picked place', async ({ page, guard }, info) => {

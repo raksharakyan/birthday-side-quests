@@ -2,7 +2,7 @@
 /**
  * Weekly check of every offer sourceUrl in public/offers.json.
  * Hard failures (network error, 404/410, 5xx, non-https) open or update ONE GitHub issue via `gh`.
- * 401/403/429 are reported as "blocked" only — many brand sites block bots.
+ * 401/403/429 are reported as "blocked" only, because many brand sites block bots.
  * Usage: node scripts/check-links.mjs [--dry-run]
  */
 import { readFile } from 'node:fs/promises';
@@ -87,7 +87,7 @@ const body = [
   '|---|---|---|---|',
   ...failed.map(row),
   '',
-  blocked.length ? `<details><summary>${blocked.length} link(s) blocked automated checks (401/403/429) — check manually</summary>\n\n${blocked.map(row).join('\n')}\n</details>` : '',
+  blocked.length ? `<details><summary>${blocked.length} link(s) blocked automated checks (401/403/429), check manually</summary>\n\n${blocked.map(row).join('\n')}\n</details>` : '',
 ].join('\n');
 
 if (dryRun) {

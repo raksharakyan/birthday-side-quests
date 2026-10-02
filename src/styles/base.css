@@ -10,7 +10,7 @@ body {
   line-height: 1.55;
   color: var(--color-text);
   background-color: var(--color-bg);
-  /* soft pastel "blobs" — pure CSS, no images */
+  /* soft pastel "blobs": pure CSS, no images */
   background-image:
     radial-gradient(circle at 8% -4%, rgb(255 217 230 / 85%) 0, rgb(255 217 230 / 0%) 32rem),
     radial-gradient(circle at 100% 6%, rgb(233 224 255 / 90%) 0, rgb(233 224 255 / 0%) 28rem),

@@ -3,7 +3,7 @@ import type { Branch, Offer } from './types';
 
 /**
  * Overpass branch lookup. The query is built ONLY from offers.json data (validated
- * wikidata IDs / restricted-charset regexes) and finite numbers — never user text.
+ * wikidata IDs / restricted-charset regexes) and finite numbers, never user text.
  */
 
 export const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';

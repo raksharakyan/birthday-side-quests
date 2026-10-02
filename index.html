@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
-    <meta name="description" content="Birthday Side Quests: find birthday freebies near you and online. Type a city, pick your birthday month — nothing is stored." />
+    <meta name="description" content="Birthday Side Quests: find birthday freebies near you and online. Type your city and pick your birthday month. Nothing is stored on our servers." />
     <meta name="theme-color" content="#ffd9e6" />
     <title>Birthday Side Quests</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -26,10 +26,10 @@
         <h2 id="search-heading" class="visually-hidden">Find your birthday quests</h2>
         <form id="search-form" class="search-form" novalidate>
           <div class="field field--city">
-            <label for="city" class="field__label">Your city or area</label>
+            <label for="city" class="field__label">Your city</label>
             <div class="combo" id="city-combo">
               <input id="city" name="city" class="field__input" type="text" inputmode="search" autocomplete="off"
-                autocapitalize="words" spellcheck="false" maxlength="200" placeholder="e.g. Bengaluru, Indiranagar" enterkeyhint="search"
+                autocapitalize="words" spellcheck="false" maxlength="200" placeholder="e.g. Bengaluru" enterkeyhint="search"
                 role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="city-suggestions" />
             </div>
           </div>
@@ -62,7 +62,10 @@
           </div>
           <button type="submit" class="btn btn--primary search-form__submit">Find my quests <span class="btn__sparkle" aria-hidden="true">✨</span></button>
         </form>
-        <p class="privacy-note"><span class="privacy-note__icon" aria-hidden="true">🔒</span><span class="privacy-note__text">We don't store anything. Your location stays in your browser tab.</span></p>
+        <div class="session-row">
+          <p class="privacy-note"><span class="privacy-note__icon" aria-hidden="true">🔒</span><span class="privacy-note__text">We don't store anything on our servers. Your search stays in this browser tab and clears when you close it.</span></p>
+          <button type="button" id="clear-search" class="btn btn--small session-row__clear">Clear search</button>
+        </div>
         <p id="status" class="status" role="status" aria-live="polite"></p>
         <p id="month-info" class="month-info" hidden></p>
       </section>
@@ -80,7 +83,7 @@
         <h2 id="results-heading" class="visually-hidden">Your quests</h2>
         <div class="tabs" role="tablist" aria-label="Quest types">
           <button type="button" class="tab" role="tab" id="tab-nearby" aria-controls="panel-nearby" aria-selected="true" tabindex="0"><span class="tab__icon" aria-hidden="true">📍</span>Nearby</button>
-          <button type="button" class="tab" role="tab" id="tab-online" aria-controls="panel-online" aria-selected="false" tabindex="-1"><span class="tab__icon" aria-hidden="true">💻</span>Online</button>
+          <button type="button" class="tab" role="tab" id="tab-online" aria-controls="panel-online" aria-selected="false" tabindex="-1"><span class="tab__icon" aria-hidden="true">💻</span>Online<span id="online-count" class="tab__count" hidden></span></button>
           <button type="button" class="tab" role="tab" id="tab-found" aria-controls="panel-found" aria-selected="false" tabindex="-1" hidden><span class="tab__icon" aria-hidden="true">🔎</span>Found online</button>
         </div>
 
@@ -88,7 +91,7 @@
           <div id="nearby-list" class="panel-body">
             <div class="empty-state" data-kind="empty">
               <span class="empty-state__art" aria-hidden="true">🎈</span>
-              <p class="empty-state__text">Type your city or area and pick your birthday month to see quests near you.</p>
+              <p class="empty-state__text">Type your city and pick your birthday month to see quests near you.</p>
             </div>
           </div>
         </div>
@@ -104,7 +107,7 @@
         </div>
 
         <div class="tab-panel" role="tabpanel" id="panel-found" aria-labelledby="tab-found" tabindex="0" hidden>
-          <p class="disclaimer"><span class="disclaimer__icon" aria-hidden="true">🧭</span> Live web results for your birthday month and country. We haven't checked these — always read the link before you go.</p>
+          <p class="disclaimer"><span class="disclaimer__icon" aria-hidden="true">🧭</span> Live web results for your birthday month and country. We haven't checked these, so always read the link before you go.</p>
           <div id="found-list" class="panel-body">
             <div class="empty-state" data-kind="empty">
               <span class="empty-state__art" aria-hidden="true">🔭</span>
@@ -120,7 +123,7 @@
 
     <footer class="site-footer">
       <p>Map data &copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap contributors</a>. Search by <a href="https://nominatim.org/" rel="noopener noreferrer" target="_blank">Nominatim</a>, suggestions by <a href="https://photon.komoot.io/" rel="noopener noreferrer" target="_blank">Photon</a>.</p>
-      <p>Offers change — always check with the brand before you go.</p>
+      <p>Offers change, so always check with the brand before you go.</p>
       <p class="site-footer__love">Made with <span aria-hidden="true">💖</span><span class="visually-hidden">love</span> for birthday people everywhere.</p>
     </footer>
     <script type="module" src="/src/main.ts"></script>

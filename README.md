@@ -22,11 +22,11 @@ Type in your city and pick your birthday month. You get a pastel map and a list 
   - a "done" checkbox with confetti. The checkbox is kept in memory only.
 - **Online tab.** App and e-commerce birthday deals for your country. No city needed.
 - **Found online tab (optional).** Live web results for "birthday freebies + month + country" through a Cloudflare Worker. Clearly labelled *unverified*.
-- **Birthday-month awareness.** "It's your birthday month — your quests are live!" or "Your quest window opens in 3 months 🎀".
+- **Birthday-month awareness.** "It's your birthday month, and your quests are live!" or "Your quest window opens in 3 months 🎀".
 - **Accessible.** Mobile-first, WCAG AA contrast, keyboard navigable, screen-reader labels, respects `prefers-reduced-motion`.
 
 ## Privacy, briefly
-We don't store anything. Your location stays in your browser tab. There are no accounts, cookies, analytics or storage, and no geolocation prompt. See [PRIVACY.md](PRIVACY.md).
+We don't store anything on our servers. Your search stays in this browser tab and clears when you close it (one small `sessionStorage` record, removable with **Clear search**). There are no accounts, cookies, analytics, localStorage or IndexedDB, and no geolocation prompt. See [PRIVACY.md](PRIVACY.md).
 
 ## Where offers come from
 Offer facts come **only** from [`public/offers.json`](public/offers.json). Every entry was researched by reading the brand's official rewards or terms page ([research notes](docs/OFFER_RESEARCH.md)), and each one records its `sourceUrl` and `lastVerified` date. If we couldn't confirm an offer from an official page, it shows **"Check with store"**. Entries older than 6 months show a **"May be outdated"** badge. A weekly GitHub Action checks every `sourceUrl` and opens an issue when a link breaks. AI is never used as a source of offer facts.

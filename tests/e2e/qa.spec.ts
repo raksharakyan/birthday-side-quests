@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import type { Route } from '@playwright/test';
 import { expectedNearbyCount, OVERPASS_BENGALURU, OVERPASS_BENGALURU_PINS } from './fixtures';
 import {
-  axeViolations, CORS, expect, expectLocationOnlyToNominatim, expectNothingPersisted, search, test,
+  axeViolations, CORS, expect, expectLocationOnlyToNominatim, expectNothingPersisted, expectOnlySessionRecord, search, test,
 } from './harness';
 
 /*
@@ -30,7 +30,7 @@ const nominatim = (hits: unknown, status = 200) => (route: Route) =>
 // ---------------------------------------------------------------- happy path
 
 test.describe('happy path', () => {
-  test('city → map + quests; exact directions link; https verify links; done + confetti; refresh clears; nothing stored', async ({
+  test('city → map + quests; exact directions link; https verify links; done + confetti; refresh restores; Clear search wipes', async ({
     page,
     context,
     guard,
@@ -88,21 +88,46 @@ test.describe('happy path', () => {
     await expect(page.locator('#celebrate-live')).toContainText('quest complete');
     await expect(page.locator('body > .confetti')).toHaveCount(0, { timeout: 5000 }); // cleaned up
 
-    await expectNothingPersisted(page, context, startUrl);
+    // Session record: exactly the allowed fields, nothing else anywhere.
+    const doneId = (await card.getAttribute('data-offer-id')) ?? '';
+    expect(await expectOnlySessionRecord(page, context, startUrl)).toEqual({
+      v: 1, city: 'Bengaluru', lat: 12.9767936, lng: 77.590082, countryCode: 'IN', month: 10, radius: 5000, tab: 'nearby', done: [doneId],
+    });
 
-    // Refresh → in-memory done state is gone.
+    // Refresh → the search is restored from sessionStorage (inputs, results, done state), no new geocoding.
     await guard.checkpoint();
     await page.reload();
-    await expect(page.locator('#nearby-list .quest-card')).toHaveCount(0);
+    await expect(page.getByLabel('Your city', { exact: true })).toHaveValue('Bengaluru');
+    await expect(page.getByLabel('Birthday month')).toHaveValue('10');
+    await expect(page.getByRole('status')).toContainText('on the map', { timeout: 15_000 });
+    await expect(cards).toHaveCount(expectedNearbyCount('IN'));
+    await expect(page.locator(`#nearby-list .quest-card[data-offer-id="${doneId}"]`)).toHaveClass(/\bis-done\b/);
+    await expect(page.locator('.map-marker--branch')).toHaveCount(OVERPASS_BENGALURU_PINS);
+    const nominatimCalls = () => guard.externalRequests().filter((r) => r.url.startsWith('https://nominatim.openstreetmap.org/search?'));
+    expect(nominatimCalls()).toHaveLength(1);
+    expect(page.url()).toBe(startUrl);
+
+    // "Clear search" wipes the record and resets the page.
+    await page.getByRole('button', { name: 'Clear search' }).click();
+    await expectNothingPersisted(page, context, startUrl);
+    await expect(page.getByLabel('Your city', { exact: true })).toHaveValue('');
+    await expect(page.getByLabel('Birthday month')).toHaveValue('');
+    await expect(cards).toHaveCount(0);
+    await expect(page.locator('.map-marker--center')).toHaveCount(0);
+    await expect(page.getByRole('status')).toContainText('Search cleared');
+
+    // After clearing, a refresh restores nothing; a new search geocodes again and nothing is done.
+    await guard.checkpoint();
+    await page.reload();
+    await expect(page.getByLabel('Your city', { exact: true })).toHaveValue('');
+    await expect(cards).toHaveCount(0);
     await search(page, 'Bengaluru');
     await expect(page.getByRole('status')).toContainText('on the map', { timeout: 15_000 });
     await expect(page.locator('#nearby-list .quest-card.is-done')).toHaveCount(0);
     await expect(page.locator('#nearby-list .quest-card__done-input:checked')).toHaveCount(0);
+    expect(nominatimCalls()).toHaveLength(2);
 
-    await expectNothingPersisted(page, context, startUrl);
     await expectLocationOnlyToNominatim(guard, ['Bengaluru']);
-    // Nominatim was actually used (twice: cache is in-memory and the page was reloaded).
-    expect(guard.externalRequests().filter((r) => r.url.startsWith('https://nominatim.openstreetmap.org/search?'))).toHaveLength(2);
   });
 
   test.describe('reduced motion', () => {
@@ -182,11 +207,11 @@ test.describe('error states', () => {
 
   test('country with no offers → friendly empty state pointing to the Online tab', async ({ page, guard }) => {
     await guard.mock({
-      nominatim: nominatim([{ lat: '48.8566', lon: '2.3522', display_name: 'Paris, Île-de-France, France', address: { country_code: 'fr' } }]),
+      nominatim: nominatim([{ lat: '35.0116', lon: '135.7681', display_name: 'Kyoto, Kyoto Prefecture, Japan', address: { country_code: 'jp' } }]),
     });
     await page.goto('./');
-    await search(page, 'Paris');
-    await expect(page.getByRole('status')).toContainText('No in-store quests near Paris');
+    await search(page, 'Kyoto');
+    await expect(page.getByRole('status')).toContainText('No in-store quests near Kyoto');
     await expect(page.getByRole('status')).toContainText('Online tab');
     const empty = page.locator('#nearby-list .empty-state');
     await expect(empty).toBeVisible();
@@ -196,8 +221,8 @@ test.describe('error states', () => {
     // No offers → no reason to query Overpass at all.
     expect(guard.externalRequests().some((r) => r.url.includes('overpass-api.de'))).toBe(false);
 
-    await page.getByRole('tab', { name: 'Online', exact: true }).click();
-    await expect(page.locator('#country')).toHaveValue('FR');
+    await page.getByRole('tab', { name: /^Online/ }).click();
+    await expect(page.locator('#country')).toHaveValue('JP');
     await expect(page.locator('#online-list .empty-state')).toContainText('No online birthday quests for this country yet');
     expect(await axeViolations(page), 'axe: empty state').toEqual([]);
   });
@@ -209,7 +234,7 @@ test('Online tab works without a city (country select) and Found online sends on
   await guard.mock();
   await page.goto('./');
   const startUrl = page.url();
-  await page.getByRole('tab', { name: 'Online', exact: true }).click();
+  await page.getByRole('tab', { name: /^Online/ }).click();
   await expect(page.locator('#panel-online')).toBeVisible();
   await expect(page.locator('#country')).toHaveValue('');
   const worldwide = onlineOffers(null);
@@ -238,7 +263,10 @@ test('Online tab works without a city (country select) and Found online sends on
   const ext = guard.externalRequests();
   expect(ext.map((r) => new URL(r.url).hostname)).toEqual(['bsq-worker.e2e.example']);
   expect(ext[0]?.url).toBe('https://bsq-worker.e2e.example/search?month=10&country=US');
-  await expectNothingPersisted(page, context, startUrl);
+  // No city searched: the session record holds no location at all, only month/country/tab.
+  expect(await expectOnlySessionRecord(page, context, startUrl)).toEqual({
+    v: 1, city: null, lat: null, lng: null, countryCode: 'US', month: 10, radius: 5000, tab: 'found', done: [],
+  });
   await expectLocationOnlyToNominatim(guard, []);
 });
 
@@ -450,7 +478,7 @@ test('no horizontal scroll at 375px (initial, results, online tab)', async ({ pa
   await expect(page.getByRole('status')).toContainText('on the map', { timeout: 15_000 });
   expect((await overflow()).doc).toBeLessThanOrEqual(0);
   expect((await overflow()).body).toBeLessThanOrEqual(0);
-  await page.getByRole('tab', { name: 'Online', exact: true }).click();
+  await page.getByRole('tab', { name: /^Online/ }).click();
   expect((await overflow()).doc).toBeLessThanOrEqual(0);
   await page.getByRole('tab', { name: 'Found online' }).click();
   await expect(page.locator('#found-list .live-card')).toHaveCount(1);

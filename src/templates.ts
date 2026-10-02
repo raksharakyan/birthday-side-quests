@@ -5,7 +5,7 @@ export const QUEST_TEMPLATES: Record<Category, readonly string[]> = {
   cafe: [
     'Sip-quest: wander into {brand} and claim your birthday brew ☕',
     'A cosy cup at {brand} has your name on it today',
-    'Coffee-side quest unlocked — {brand} is calling ☁️',
+    'Coffee-side quest unlocked: {brand} is calling ☁️',
     'Treat yourself: one birthday sip at {brand}',
     'Your warm-drink mission, should you choose it: {brand}',
   ],
@@ -26,30 +26,30 @@ export const QUEST_TEMPLATES: Record<Category, readonly string[]> = {
   beauty: [
     'Glow-up quest: a birthday goodie at {brand} ✨',
     'Pamper power-up unlocked at {brand}',
-    'Sparkle side quest — {brand} has a gift for you',
+    'Sparkle side quest: {brand} has a gift for you',
     'Treat your skin (and soul) at {brand} this birthday',
     'Collect your shiny birthday loot from {brand} 💄',
   ],
   fashion: [
     'Style quest: a birthday reward awaits at {brand} 👗',
-    'New-fit energy — {brand} has birthday perks',
+    'New-fit energy! {brand} has birthday perks',
     'Dress-up side quest at {brand}',
     'Strut into your birthday with {brand}',
     'Wardrobe loot drop: {brand} 🎀',
   ],
   retail: [
     'Treasure hunt: birthday perks at {brand} 🎁',
-    'Shopping side quest unlocked — {brand}',
+    'Shopping side quest unlocked at {brand}',
     'A little birthday loot is waiting at {brand}',
     'Pop into {brand} for your birthday bonus',
     'Gift-to-self mission: {brand}',
   ],
   online: [
     'Couch quest: claim your birthday perk from {brand} online 💻',
-    'No shoes needed — {brand} has a birthday treat in-app',
+    'No shoes needed: {brand} has a birthday treat in-app',
     'Tap-tap-treat: {brand} birthday reward',
     'Inbox side quest: watch for {brand}’s birthday surprise 💌',
-    'Digital confetti from {brand} — go claim it',
+    'Digital confetti from {brand}, go claim it',
   ],
 };
 

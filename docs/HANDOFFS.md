@@ -464,3 +464,87 @@ Branch `feat/autocomplete-more-offers`. Nothing committed. See DECISIONS #16 and
 - **The branch cap is not distance-sorted.** At 20 km in central Bengaluru the 150 cap is nearly reached (146 pins), and Overpass output order is by OSM id. Far-off branches can therefore displace nearer ones, so "nearest" is nearest among those returned.
 - Photon results ignore `lang=en` for some local names (for example Japanese POIs). That is cosmetic.
 - `aria-controls="city-suggestions"` is in the static HTML. The listbox is created by JS at startup, and axe was clean.
+
+---
+
+## Full-Stack: city-only, all countries, session persistence, claim details (2026-10-02)
+
+Branch `feat/autocomplete-more-offers`. Nothing committed. See DECISIONS #18, #19 and #20. I didn't touch `research/`, `public/offers.json` or `docs/design/`.
+
+### What changed
+- **City-only input (#19).**
+  - The label is now "Your city", with placeholder "e.g. Bengaluru".
+  - Photon is called with `layer=city` only, and `parsePhoton` also drops any feature whose `type` isn't `city`.
+  - Nominatim free text gets `featureType=city`.
+  - Live probe results:
+    - `layer=city` gives good results for Beng, Manch, Pune and Kyo.
+    - `osm_tag=place:*` loses Manchester, UK, so it's not used.
+    - NYC's Brooklyn is `place=suburb`, so autocomplete shows the US towns called Brooklyn instead. Enter on "Brooklyn" still resolves to Brooklyn, NY through Nominatim.
+- **All countries (#20).**
+  - New `src/countries.ts` lists all 249 ISO 3166-1 alpha-2 codes, named with `Intl.DisplayNames`.
+  - The Online select puts countries with online quests first, in an optgroup with a count, e.g. "India (28)". Every other country follows. Worldwide `"*"` offers are still included for any selection.
+  - `onlineCounts()` is in `src/offers.ts`.
+  - `el()` now allows the plain-text `label` attribute, for `<optgroup>`.
+- **Auto-sync.**
+  - Picking or searching a city sets the Online country and immediately re-renders Online. Found online also refreshes when that tab is open.
+  - The Online tab shows a count pill (`#online-count`). Its accessible name is "Online 28 quests".
+- **Session persistence (#18).**
+  - New `src/session.ts` is the only module that touches storage, and a unit test enforces this.
+  - It uses one `sessionStorage` key, `bsq-session`, holding `{v, city, lat, lng, countryCode, month, radius, tab, done}`. The record is validated strictly on load and on save.
+  - A record is only written once the user does something (search, month, radius, tab, country or done).
+  - A reload restores the inputs, tab and done state, then re-runs Overpass from the stored coordinates without calling Nominatim or Photon.
+  - The **Clear search** button wipes the record and resets the page. `MapView.reset()` was added for this.
+  - Done-state API in `render/quests.ts`: `doneIds`, `setDoneIds`, `onDoneChange`.
+- **Claim details.**
+  - New optional `Offer` fields: `rewardItem`, `steps`, `purchaseRequired`, `minSpend`, `signupLeadDays`, `validFor`, `bring`.
+  - They are validated strictly. A present but invalid field rejects the whole entry.
+  - Cards show "You get: …", an `<ol>` of steps inside the "How to claim" `dd` (instead of `howToClaim`), and a chip list (`ul.claim-chips`, labelled "Before you go to <brand>").
+  - Old entries render as before.
+  - All 102 entries in the current `offers.json` validate.
+- **No em dashes.**
+  - Removed from `src/` (strings, templates and comments), `index.html`, README, SECURITY, DECISIONS, PLAN, OFFER_RESEARCH, `_headers`, `csp.config.ts`, `check-links.mjs` and the Worker header comment.
+  - Copy changes include "Unverified: check the link" and "Varies (check the terms)".
+  - Older HANDOFFS entries are left as historical.
+- **Docs.**
+  - PRIVACY has a new "Your search in this tab" section.
+  - The new UI privacy note is in index.html, PRIVACY and README.
+  - SECURITY: intro and I1 row.
+  - CONTRIBUTING: the storage rule, plus documentation for the new offer fields.
+  - DECISIONS #18 to #20.
+- **CSS.** Minimal and token-only: `.session-row`, `.btn--small`, `.tab__count`, `.quest-card__reward`, `.quest-card__steps`, `.claim-chips`.
+
+### Tests
+- **New unit tests:**
+  - `session.test.ts`: schema rejections, including HTML, bidi, extra keys and `__proto__`, plus blocked storage.
+  - `countries.test.ts`.
+  - `claim-details.test.ts`: validation, chips, rendering and XSS in every new field.
+  - `copy.test.ts`: em dash and spaced en dash in `src/` and `index.html`. It also has **"PENDING DATA CLEANUP (orchestrator): public/offers.json…"**, which currently **passes**, because offers.json is already clean.
+- **Updated unit tests:**
+  - autocomplete: city layer, and the city-type filter.
+  - geocode: `featureType`.
+  - security: `sessionStorage` is allowed only in `src/session.ts`; localStorage, IndexedDB and cookies are still banned everywhere.
+  - render: copy.
+- **E2E:**
+  - New `session.spec.ts` covers the label, picking Pune, auto-sync and count, `page.reload()` restore with no geocoder calls, Clear search, `featureType=city` plus Found online sync, the all-countries list (Japan), tampered storage being rejected, and claim details from real data.
+  - The harness has a new contract helper, `expectOnlySessionRecord`. The happy path now checks that a refresh restores and that Clear search wipes.
+  - The no-offers test moved from Paris to Kyoto, because FR now has an offer.
+  - The Photon fixtures are city-only now (Pune and Benguela replace Koramangala and Bengkulu).
+
+### Results
+- `npm run build`: OK.
+- `npm test`: 554 passed.
+- `npm run test:e2e`: 58 passed, 4 skipped (desktop-only keyboard tests). The reload tests were green with `--repeat-each 3`.
+- `npm run lhci`: assertions pass. Performance was 0.99 and a11y, best practices and SEO were all 1.00.
+- `npm audit --audit-level=high`: 0 vulnerabilities.
+
+### Manual check against the real services (`npm run preview`, built-in browser)
+- **Pick:** typing "Pune" gave 5 city suggestions. I picked Pune, Maharashtra. Online switched to IN and showed "28 quests". The search found 31 quests and 19 pins within 5 km. I ticked adidas-in.
+- **Reload:** the city, month, IN and the done tick were all restored. There were 0 Nominatim or Photon requests and 1 Overpass request, and the console was clean.
+- **Clear search:** emptied sessionStorage.
+- **Free text:** typing "Kyoto" + Enter sent a Nominatim request with `featureType=city`, set the Online country to JP and showed the no-quests status.
+
+### For Security / QA / UI-UX
+- **Security:** please review `src/session.ts`, the `label` attribute added to the `el()` allowlist, and the I1 row.
+- **UI/UX:**
+  - The Online `<select>` now has 250 options, so axe takes about 8 s on it.
+  - The new pieces are styled minimally and need the planned restyle: count pill, Clear search button, claim chips and steps list.

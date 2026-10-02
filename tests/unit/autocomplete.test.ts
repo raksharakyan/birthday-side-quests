@@ -28,12 +28,12 @@ describe('parsePhoton', () => {
   it('parses a valid FeatureCollection into labelled suggestions ([lng,lat] → lat/lng)', () => {
     const out = parsePhoton(
       fc(
-        feature({ name: 'Koramangala', city: 'Bengaluru', state: 'Karnataka', country: 'India', countrycode: 'IN', osm_key: 'place', osm_value: 'suburb', type: 'locality' }),
+        feature({ name: 'Bengaluru', county: 'Bangalore North', state: 'Karnataka', country: 'India', countrycode: 'IN', osm_key: 'place', osm_value: 'city', type: 'city' }, [77.6271, 12.9352]),
         feature({ name: 'Manchester', state: 'England', country: 'United Kingdom', countrycode: 'gb' }, [-2.2446, 53.4794]),
       ),
     );
     expect(out).toEqual([
-      { label: 'Koramangala, Bengaluru, Karnataka, India', lat: 12.9352, lng: 77.6271, countryCode: 'IN' },
+      { label: 'Bengaluru, Bangalore North, Karnataka, India', lat: 12.9352, lng: 77.6271, countryCode: 'IN' },
       { label: 'Manchester, England, United Kingdom', lat: 53.4794, lng: -2.2446, countryCode: 'GB' },
     ]);
   });
@@ -131,14 +131,27 @@ describe('query normalisation + URL', () => {
     expect(normaliseAutocompleteQuery('x'.repeat(MAX_INPUT_LENGTH))).toHaveLength(MAX_INPUT_LENGTH);
     expect(normaliseAutocompleteQuery('x'.repeat(MAX_INPUT_LENGTH + 1))).toBeNull();
   });
-  it('sends only q, limit, lang and layers — no coordinates', () => {
+  it('city-only: skips features Photon labels as anything but city (district, locality, street, house, state)', () => {
+    const out = parsePhoton(
+      fc(
+        feature({ name: 'Koramangala', county: 'Bangalore South', country: 'India', countrycode: 'IN', type: 'locality' }),
+        feature({ name: 'Brooklyn', city: 'New York', country: 'United States', countrycode: 'US', type: 'district' }),
+        feature({ name: 'MG Road', city: 'Bengaluru', countrycode: 'IN', type: 'street' }),
+        feature({ name: '12', city: 'Pune', countrycode: 'IN', type: 'house' }),
+        feature({ name: 'Bengkulu', country: 'Indonesia', countrycode: 'ID', type: 'state' }),
+        feature({ name: 'Pune', state: 'Maharashtra', country: 'India', countrycode: 'IN', type: 'city' }, [73.8567, 18.5204]),
+      ),
+    );
+    expect(out).toEqual([{ label: 'Pune, Maharashtra, India', lat: 18.5204, lng: 73.8567, countryCode: 'IN' }]);
+  });
+  it('sends only q, limit, lang and the city layer (no coordinates, no neighbourhood layers)', () => {
     const u = new URL(buildPhotonUrl('Kora & <x>'));
     expect(u.origin + u.pathname).toBe('https://photon.komoot.io/api/');
     expect([...new Set(u.searchParams.keys())]).toEqual(['q', 'limit', 'lang', 'layer']);
     expect(u.searchParams.get('q')).toBe('Kora & <x>');
     expect(u.searchParams.get('limit')).toBe('5');
     expect(u.searchParams.get('lang')).toBe('en');
-    expect(u.searchParams.getAll('layer')).toEqual(['city', 'district', 'locality']);
+    expect(u.searchParams.getAll('layer')).toEqual(['city']);
     expect(u.searchParams.has('lat') || u.searchParams.has('lon')).toBe(false);
   });
 });
