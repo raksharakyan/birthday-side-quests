@@ -36,8 +36,81 @@ We don't store anything on our servers. Your search stays in this browser tab an
 ## Where offers come from
 Offer facts come **only** from [`public/offers.json`](public/offers.json). Every entry was researched by reading the brand's official rewards or terms page ([research notes](docs/OFFER_RESEARCH.md)), and each one records its `sourceUrl` and `lastVerified` date. If we couldn't confirm an offer from an official page, it shows **"Check with store"**. Entries older than 6 months show a **"May be outdated"** badge. A weekly GitHub Action checks every `sourceUrl` and opens an issue when a link breaks. AI is never used as a source of offer facts.
 
-## Tech
-Vite + vanilla TypeScript, Leaflet + OpenStreetMap tiles, Nominatim (geocoding), Overpass API (branches), and an optional Cloudflare Worker + Tavily for "Found online". Fonts are self-hosted with Fontsource. There are only three runtime dependencies. The design system is documented in [DESIGN.md](DESIGN.md).
+## Tech stack
+
+### Frontend (runs in your browser)
+| Piece | What it does | Why |
+|---|---|---|
+| [Vite](https://vite.dev) | Bundles the app into a few small static files | Fast builds, output any free host can serve |
+| TypeScript (vanilla, no framework) | All app logic | Tiny bundle, fewer dependencies, easier to audit for XSS |
+| [Leaflet](https://leafletjs.com) | The interactive map | Free, no API key, works with OpenStreetMap |
+| [Fontsource](https://fontsource.org) (Bricolage Grotesque, Plus Jakarta Sans) | Self-hosted fonts | No third-party font requests, so no tracking |
+| Plain CSS with design tokens | The plum "Soft Premium" look | One source of truth in `src/styles/tokens.css`, see [DESIGN.md](DESIGN.md) |
+
+The app has only **three runtime dependencies**: Leaflet and two font packages.
+
+### Free data services (no API keys)
+| Service | Used for |
+|---|---|
+| [Photon](https://photon.komoot.io) by komoot | City suggestions as you type |
+| [Nominatim](https://nominatim.org) | Turning a typed city into a location (max 1 request per second) |
+| [Overpass API](https://overpass-api.de) | Finding nearby branches of brands with birthday offers |
+| OpenStreetMap tiles | The map images |
+| Google Maps links | "Get directions" is a plain URL, so it needs no key |
+
+### Offer data
+[`public/offers.json`](public/offers.json) is a hand-researched list of 102 offers across 11 countries. It uses no database. Every entry comes from the brand's official page and records:
+- `sourceUrl`, the official page it came from;
+- `lastVerified`, the date it was last checked;
+- a reward type (Free, Discount or Needs past spend);
+- step-by-step claim details.
+
+AI is never used as a source of offer facts.
+
+### Hosting, automation and testing
+| Piece | Role |
+|---|---|
+| GitHub Pages | Hosts the live site for free |
+| GitHub Actions | On every push: audit, typecheck, unit and e2e tests, Lighthouse, then deploy. A weekly job checks that every offer link still works. |
+| Dependabot, secret scanning, push protection | Supply-chain and secret safety. Every Action is pinned to a commit SHA. |
+| [Vitest](https://vitest.dev) | About 890 unit tests: data rules, filters, sorting, security checks |
+| [Playwright](https://playwright.dev) | About 130 browser tests on desktop and Pixel 7, with all network calls mocked. Any XSS, CSP violation or unexpected request fails the test. |
+| axe-core | Accessibility checks, with 0 violations required |
+| Lighthouse CI | Performance ≥ 0.9, Accessibility and Best Practices ≥ 0.95 (currently 0.99 / 1.0 / 1.0) |
+| Cloudflare Worker + Tavily (optional, not deployed yet) | Live "Found online" search. It only receives month and country. |
+
+### Privacy and security by design
+- **Strict Content Security Policy:** the page may only talk to the services listed above.
+- **Nothing stored:** no cookies, accounts, analytics, localStorage or geolocation prompt. One small `sessionStorage` record keeps your search across a refresh and clears when the tab closes.
+- **No raw HTML:** all page content is built as plain text, so injected scripts can't run.
+
+Details are in [SECURITY.md](SECURITY.md) (STRIDE threat model) and [PRIVACY.md](PRIVACY.md).
+
+## How it was built: a multi-agent team
+This project was built with [Claude Code](https://claude.com/claude-code) as a **lead orchestrator** coordinating specialist AI subagents. Each subagent is a separate Claude instance with its own brief and the same tools: files, terminal, web and a real browser.
+
+| Agent | Responsibility |
+|---|---|
+| **Orchestrator** | Plans the work, writes the briefs, reviews results, spot-checks facts, resolves conflicts, opens PRs, merges, and checks the live site |
+| **Full-Stack Developer** | Builds features: search, map, filters, sorting, session restore, the Worker, CI/CD |
+| **UI/UX Designer** | Design prototypes and the plum redesign, contrast, accessibility and motion |
+| **Offer Researchers** (India and global, in parallel) | Read official brand pages and write offer data with exact claim steps |
+| **Security Engineer** | Reviews every PR for XSS, privacy leaks and supply-chain risk, and fixes what it finds |
+| **QA Tester** | Writes unit and browser tests, hunts bugs, runs live smoke tests, and re-checks offer classifications |
+
+**Workflow for every feature**
+1. The Full-Stack agent builds it, and the UI/UX agent styles it.
+2. The Security and QA agents review it in parallel, and any fixes are applied.
+3. Once both have signed off, the PR opens and must pass CI.
+4. The PR is merged into `main`, which deploys it. The orchestrator then tests the live site.
+
+**Shared memory between agents**
+- [`docs/PLAN.md`](docs/PLAN.md): tasks and owners.
+- [`docs/DECISIONS.md`](docs/DECISIONS.md): numbered decisions with reasons.
+- [`docs/HANDOFFS.md`](docs/HANDOFFS.md): what each agent finished, plus sign-offs.
+- [`CLAUDE.md`](CLAUDE.md) and [`DESIGN.md`](DESIGN.md): the rules and the design system for future sessions.
+
+**When agents disagree:** Security wins on safety, UI/UX wins on visuals, and the orchestrator records the decision. That's how bugs like a toast blocking taps on mobile, a regex performance risk, and offers wrongly labelled "Free" were caught before release.
 
 ## Local setup
 You need Node 22 or later.
